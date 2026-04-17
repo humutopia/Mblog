@@ -1,0 +1,23 @@
+{
+  "name": "Revolutionary Story",
+  "short_name": "Ming",
+  "description": "Revolutionary Romanticism & Visual Storytelling",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#000000",
+  "theme_color": "#c8a96e",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "logo.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "logo.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

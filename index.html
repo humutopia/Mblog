@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>𝓜𝓲𝓷𝓰'𝓼 𝓑𝓵𝓸𝓰</title>
+
+<link rel="manifest" href="./manifest.json">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Ming's Blog">
+<link rel="apple-touch-icon" href="logo.png">
+
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@300;400;500&family=DM+Mono:ital@0;1&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  :root { --accent: #c8a96e; --accent2: #7eb8a4; }
+  body.dark { --bg: #000000; --surface: #0a0a0a; --border: #1a1a1a; --text: #e2ddd5; --muted: #555; --overlay-bg: rgba(0,0,0,0.9); }
+  body.light { --bg: #ffffff; --surface: #fcfcfc; --border: #eeeeee; --text: #222222; --muted: #999; --overlay-bg: rgba(255,255,255,0.9); }
+  body { background: var(--bg); color: var(--text); font-family: 'Noto Serif SC', serif; min-height: 100vh; padding-bottom: calc(120px + env(safe-area-inset-bottom)); transition: background 0.4s ease; overflow-x: hidden; }
+  
+  .sync-indicator { position: fixed; top: 0; left: 0; width: 100%; height: 2px; z-index: 2000; background: transparent; }
+  .sync-bar { width: 0%; height: 100%; background: var(--accent); transition: width 0.3s; }
+  .sync-text { position: fixed; top: env(safe-area-inset-top, 12px); left: 50%; transform: translateX(-50%); font-family: 'DM Mono', monospace; font-size: 0.5rem; color: var(--muted); letter-spacing: 0.1em; opacity: 0.6; pointer-events: none; }
+  
+  header { padding: 80px 40px 40px; max-width: 700px; margin: 0 auto; display: flex; justify-content: space-between; align-items: baseline; }
+  .site-title { font-size: 1.8rem; font-weight: 300; letter-spacing: 0.05em; color: var(--accent); }
+  .site-meta { font-family: 'DM Mono', monospace; font-size: 0.6rem; color: var(--muted); letter-spacing: 0.2em; }
+  
+  .container { max-width: 700px; margin: 0 auto; padding: 0 40px; }
+  .year-group { padding-top: 40px; }
+  .year-row { display: flex; align-items: center; gap: 14px; margin-bottom: 10px; }
+  .year-num { font-family: 'DM Mono', monospace; font-size: 0.6rem; color: var(--muted); letter-spacing: 0.18em; }
+  .year-line { flex: 1; height: 1px; background: var(--border); }
+  
+  .track { position: relative; padding-left: 32px; }
+  .track::before { content: ''; position: absolute; left: 0; top: 24px; bottom: 0; width: 1.5px; background: linear-gradient(180deg, var(--accent) 0%, var(--accent2) 60%, transparent 100%); opacity: 0.35; }
+  
+  .entry { position: relative; padding: 26px 0 26px 24px; border-bottom: 1px solid var(--border); opacity: 0; transform: translateY(10px); animation: fadeUp 0.45s ease forwards; }
+  @keyframes fadeUp { to { opacity: 1; transform: translateY(0); } }
+  .entry::before { content: ''; position: absolute; left: -4px; top: 33px; width: 7px; height: 7px; border-radius: 50%; background: var(--bg); border: 1.5px solid var(--accent); opacity: 0.65; }
+  
+  .entry-stamp { font-family: 'DM Mono', monospace; font-size: 0.62rem; color: var(--accent); margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
+  .del-btn { color: var(--muted); cursor: pointer; opacity: 0; transition: opacity 0.3s; font-size: 0.55rem; padding: 4px 8px; }
+  .entry:hover .del-btn { opacity: 1; }
+  
+  .entry-title { font-size: 0.96rem; font-weight: 500; margin-bottom: 9px; }
+  .entry-body { font-size: 0.86rem; line-height: 2.1; opacity: 0.75; white-space: pre-wrap; text-align: justify; word-break: break-word; }
+  
+  .write-btn { position: fixed; bottom: 40px; right: 40px; background: var(--accent); border: none; color: #0f0f0f; font-family: 'DM Mono', monospace; font-size: 0.65rem; padding: 11px 22px; cursor: pointer; border-radius: 2px; z-index: 10; box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
+  
+  .editor-overlay { display: none; position: fixed; inset: 0; background: var(--overlay-bg); z-index: 999; align-items: flex-end; justify-content: center; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); }
+  .editor-overlay.open { display: flex; }
+  .editor-box { background: var(--surface); width: 100%; max-width: 700px; padding: 28px 36px 60px; border-top: 1px solid var(--border); border-radius: 12px 12px 0 0; }
+  
+  .field input, .field textarea { width: 100%; background: transparent; border: none; border-bottom: 1px solid var(--border); padding: 12px 0; font-family: inherit; font-size: 0.88rem; color: var(--text); outline: none; }
+  .field textarea { min-height: 200px; line-height: 2; }
+  
+  .btn-save { background: #333; border: none; font-family: 'DM Mono', monospace; font-size: 0.65rem; color: #666; padding: 12px 28px; cursor: not-allowed; border-radius: 2px; margin-top: 20px; width: 100%; transition: 0.3s; }
+  .btn-save.active { background: var(--accent); color: #0f0f0f; cursor: pointer; }
+
+  .confirm-overlay { position: fixed; inset: 0; background: var(--overlay-bg); z-index: 1000; display: none; align-items: center; justify-content: center; backdrop-filter: blur(4px); }
+  .confirm-box { background: var(--surface); border: 1px solid var(--border); padding: 30px; width: 300px; text-align: center; border-radius: 8px; box-shadow: 0 20px 50px rgba(0,0,0,0.3); }
+  .confirm-txt { font-size: 0.85rem; margin-bottom: 20px; color: var(--text); font-weight: 300; }
+  .confirm-input { width: 100%; background: var(--bg); border: 1px solid var(--border); padding: 10px; color: var(--text); font-family: 'DM Mono', monospace; font-size: 0.7rem; text-align: center; outline: none; margin-bottom: 20px; border-radius: 4px; }
+  .confirm-btns { display: flex; justify-content: center; gap: 30px; }
+  .confirm-btns button { background: none; border: none; font-family: 'DM Mono', monospace; font-size: 0.65rem; cursor: pointer; letter-spacing: 1px; }
+  .btn-no { color: var(--muted); }
+  .btn-yes { color: var(--accent); font-weight: bold; }
+  
+  #status-toast { position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%); background: var(--surface); border: 1px solid var(--border); color: var(--text); padding: 8px 16px; font-size: 0.7rem; font-family: 'DM Mono', monospace; z-index: 2000; border-radius: 2px; display: none; }
+</style>
+</head>
+<body class="dark">
+<div class="sync-indicator"><div class="sync-bar" id="syncBar"></div></div>
+<div class="sync-text" id="syncText">GARDEN INITIALIZING</div>
+<div id="status-toast"></div>
+
+<header>
+  <h1 class="site-title">𝓜𝓲𝓷𝓰'𝓼 𝓑𝓵𝓸𝓰</h1>
+  <div class="site-meta">SINCE 2026</div>
+</header>
+
+<div class="container" id="timeline"></div>
+
+<button class="write-btn" id="writeBtnAction">＋ 写一条</button>
+
+<div class="editor-overlay" id="overlay">
+  <div class="editor-box" onclick="event.stopPropagation()">
+    <div style="display:flex;justify-content:space-between;margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid var(--border)">
+      <span style="font-family:'DM Mono',monospace;font-size:0.6rem;color:var(--muted)">NEW ENTRY</span>
+      <button id="closeEditorAction" style="background:none;border:none;color:var(--muted);font-size:1.2rem;cursor:pointer;">✕</button>
+    </div>
+    <div class="field"><input id="inp-title" placeholder="标题 (可选)"></div>
+    <div class="field"><textarea id="inp-body" placeholder="此时此刻的心情..."></textarea></div>
+    <div class="field"><input type="password" id="inp-pass" placeholder="输入口令以同步" style="font-size:0.6rem;"></div>
+    <button class="btn-save" id="btn-save-action" disabled>确认并同步</button>
+  </div>
+</div>
+
+<div class="confirm-overlay" id="confirmOverlay">
+  <div class="confirm-box">
+    <div class="confirm-txt">确定抹除这段记忆吗？</div>
+    <input type="password" id="del-pass-input" class="confirm-input" placeholder="输入口令确认">
+    <div class="confirm-btns">
+      <button class="btn-no" id="closeConfirmAction">取消</button>
+      <button class="btn-yes" id="confirmDeleteBtn">确认抹除</button>
+    </div>
+  </div>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script>
+  const firebaseConfig = { apiKey: "AIzaSyDwQIoCm17ldB3kUeNCpalpEM8o3DS1mcI", authDomain: "ming-s-blog.firebaseapp.com", projectId: "ming-s-blog", appId: "1:513661582669:web:99dad676630deb35ef8b04" };
+  const MY_PASS = "ming2026";
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.firestore();
+  let pendingDeleteId = null;
+
+  function showToast(msg) { const t = document.getElementById('status-toast'); t.innerText = msg; t.style.display = 'block'; setTimeout(() => t.style.display = 'none', 2000); }
+  function setSyncStatus(status) {
+    const bar = document.getElementById('syncBar'); const txt = document.getElementById('syncText');
+    if(status === 'syncing') { bar.style.width = '60%'; txt.innerText = 'SYNCING...'; }
+    else if(status === 'done') { bar.style.width = '100%'; txt.innerText = 'GARDEN SYNCED'; setTimeout(() => { bar.style.width = '0%'; }, 1200); }
+  }
+
+  document.getElementById('inp-pass').oninput = (e) => {
+    const btn = document.getElementById('btn-save-action');
+    if(e.target.value === MY_PASS) { btn.classList.add('active'); btn.disabled = false; }
+    else { btn.classList.remove('active'); btn.disabled = true; }
+  };
+
+  document.getElementById("writeBtnAction").onclick = () => document.getElementById('overlay').classList.add('open');
+  document.getElementById("closeEditorAction").onclick = () => document.getElementById('overlay').classList.remove('open');
+  document.getElementById("closeConfirmAction").onclick = () => { 
+    document.getElementById('confirmOverlay').style.display = 'none'; 
+    document.getElementById('del-pass-input').value = '';
+    pendingDeleteId = null; 
+  };
+
+  document.getElementById("btn-save-action").onclick = async () => {
+    const title = document.getElementById('inp-title').value.trim();
+    const body = document.getElementById('inp-body').value.trim();
+    if (!body) return;
+    setSyncStatus('syncing');
+    try {
+      await db.collection("posts").add({ title, body, date: new Date().toISOString() });
+      document.getElementById('overlay').classList.remove('open');
+      document.getElementById('inp-title').value = ''; document.getElementById('inp-body').value = ''; document.getElementById('inp-pass').value = '';
+      showToast("已存档"); setSyncStatus('done');
+    } catch(e) { showToast("保存失败"); }
+  };
+
+  window.askDelete = (id) => {
+    pendingDeleteId = id;
+    document.getElementById('confirmOverlay').style.display = 'flex';
+    document.getElementById('del-pass-input').focus();
+  };
+
+  document.getElementById('confirmDeleteBtn').onclick = async () => {
+    const inputPass = document.getElementById('del-pass-input').value;
+    if (inputPass === MY_PASS) {
+      if (pendingDeleteId) {
+        setSyncStatus('syncing');
+        try {
+          await db.collection("posts").doc(pendingDeleteId).delete();
+          document.getElementById('confirmOverlay').style.display = 'none';
+          document.getElementById('del-pass-input').value = '';
+          showToast("记忆已抹除");
+          setSyncStatus('done');
+        } catch(e) { showToast("移除失败"); }
+      }
+    } else {
+      showToast("口令错误");
+    }
+  };
+
+  db.collection("posts").orderBy("date", "desc").onSnapshot((snap) => {
+    const tl = document.getElementById('timeline'); tl.innerHTML = ''; const byYear = {};
+    snap.forEach(docSnap => {
+      const data = docSnap.data(); const y = new Date(data.date).getFullYear();
+      if (!byYear[y]) byYear[y] = []; byYear[y].push({ id: docSnap.id, ...data });
+    });
+    Object.keys(byYear).sort((a,b)=>b-a).forEach(year => {
+      const group = document.createElement('div'); group.className = 'year-group';
+      group.innerHTML = `<div class="year-row"><span class="year-num">${year}</span><div class="year-line"></div></div>`;
+      const track = document.createElement('div'); track.className = 'track';
+      byYear[year].forEach(p => {
+        const d = new Date(p.date); const timeStr = `${d.getFullYear()}.${d.getMonth()+1}.${d.getDate()} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+        const item = document.createElement('div'); item.className = 'entry';
+        item.innerHTML = `<div class="entry-stamp"><div>${timeStr}</div><div class="del-btn" onclick="askDelete('${p.id}')">DELETE</div></div>${p.title ? `<div class="entry-title">${p.title}</div>` : ''}<div class="entry-body">${p.body}</div>`;
+        track.appendChild(item);
+      });
+      group.appendChild(track); tl.appendChild(group);
+    });
+    setSyncStatus('done');
+  });
+  const updateTheme = () => { const h = new Date().getHours(); document.body.className = (h >= 6 && h < 18) ? 'light' : 'dark'; };
+  updateTheme(); setInterval(updateTheme, 60000);
+</script>
+</body>
+</html>
