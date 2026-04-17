@@ -8,22 +8,26 @@
 <link rel="manifest" href="./manifest.json">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Ming's Blog">
+<meta name="apple-mobile-web-app-title" content="Ming">
 <link rel="apple-touch-icon" href="logo.png">
 
 <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@300;400;500&family=DM+Mono:ital@0;1&display=swap" rel="stylesheet">
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
   :root { --accent: #c8a96e; --accent2: #7eb8a4; }
+  /* 确保背景色是纯净的，没有杂色 */
   body.dark { --bg: #000000; --surface: #0a0a0a; --border: #1a1a1a; --text: #e2ddd5; --muted: #555; --overlay-bg: rgba(0,0,0,0.9); }
   body.light { --bg: #ffffff; --surface: #fcfcfc; --border: #eeeeee; --text: #222222; --muted: #999; --overlay-bg: rgba(255,255,255,0.9); }
+  
   body { background: var(--bg); color: var(--text); font-family: 'Noto Serif SC', serif; min-height: 100vh; padding-bottom: calc(120px + env(safe-area-inset-bottom)); transition: background 0.4s ease; overflow-x: hidden; }
   
+  /* 状态栏文字微调 */
   .sync-indicator { position: fixed; top: 0; left: 0; width: 100%; height: 2px; z-index: 2000; background: transparent; }
   .sync-bar { width: 0%; height: 100%; background: var(--accent); transition: width 0.3s; }
   .sync-text { position: fixed; top: env(safe-area-inset-top, 12px); left: 50%; transform: translateX(-50%); font-family: 'DM Mono', monospace; font-size: 0.5rem; color: var(--muted); letter-spacing: 0.1em; opacity: 0.6; pointer-events: none; }
   
-  header { padding: calc(80px + env(safe-area-inset-top)) 40px 40px; max-width: 700px; margin: 0 auto; display: flex; justify-content: space-between; align-items: baseline; }
+  /* 调整顶部间距，确保在没有色条的情况下，内容依然优雅 */
+  header { padding: calc(60px + env(safe-area-inset-top)) 40px 40px; max-width: 700px; margin: 0 auto; display: flex; justify-content: space-between; align-items: baseline; }
   .site-title { font-size: 1.8rem; font-weight: 300; letter-spacing: 0.05em; color: var(--accent); }
   .site-meta { font-family: 'DM Mono', monospace; font-size: 0.6rem; color: var(--muted); letter-spacing: 0.2em; }
   
@@ -196,7 +200,11 @@
     });
     setSyncStatus('done');
   });
-  const updateTheme = () => { const h = new Date().getHours(); document.body.className = (h >= 6 && h < 18) ? 'light' : 'dark'; };
+  const updateTheme = () => { 
+    const h = new Date().getHours(); 
+    const isDark = (h < 6 || h >= 18);
+    document.body.className = isDark ? 'dark' : 'light'; 
+  };
   updateTheme(); setInterval(updateTheme, 60000);
 </script>
 </body>
