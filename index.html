@@ -23,14 +23,23 @@
   .sync-indicator { position: fixed; top: 0; left: 0; width: 100%; height: 2px; z-index: 2000; background: transparent; }
   .sync-bar { width: 0%; height: 100%; background: var(--accent); transition: width 0.3s; }
   
-  /* 完全还原 index.html 的顶部间距设定 */
-  header { padding: calc(60px + env(safe-area-inset-top)) 40px 40px; max-width: 700px; margin: 0 auto; display: flex; justify-content: space-between; align-items: baseline; }
+  /* 【深度优化】拓宽顶部比例，增加大量留白 */
+  header { 
+    padding: calc(120px + env(safe-area-inset-top)) 40px 20px; 
+    max-width: 700px; 
+    margin: 0 auto; 
+    display: flex; 
+    justify-content: space-between; 
+    align-items: baseline; 
+  }
   
   .site-title { font-family: 'Times New Roman', serif; font-size: 1.5rem; font-weight: 500; letter-spacing: 0.15em; color: var(--accent); text-transform: uppercase; }
   .site-meta { font-family: 'DM Mono', monospace; font-size: 0.6rem; color: var(--muted); letter-spacing: 0.2em; }
   
-  .search-trigger { cursor: pointer; display: inline-block; font-style: normal; font-size: 1.2rem; vertical-align: middle; padding: 0 4px; transition: opacity 0.2s; }
-  .search-trigger:hover { opacity: 0.7; }
+  .search-trigger { cursor: pointer; display: inline-block; font-style: normal; font-size: 1.2rem; vertical-align: middle; padding: 0 4px; }
+
+  /* 【关键拓宽】拉开标题与内容之间的距离 */
+  .header-spacer { height: 80px; }
 
   .search-area { max-width: 700px; margin: 0 auto; padding: 0 40px; height: 0; overflow: visible; opacity: 0; transition: all 0.3s ease; position: relative; pointer-events: none; }
   .search-area.active { height: 45px; opacity: 1; margin-bottom: 30px; pointer-events: auto; }
@@ -57,7 +66,10 @@
   .entry-title { font-size: 0.96rem; font-weight: 500; margin-bottom: 9px; }
   .entry-body { font-size: 0.86rem; line-height: 2.1; opacity: 0.75; white-space: pre-wrap; text-align: justify; word-break: break-word; }
   
+  /* 底部按钮保持悬浮 */
   .write-btn { position: fixed; bottom: calc(40px + env(safe-area-inset-bottom)); right: 40px; background: var(--accent); border: none; color: #0f0f0f; font-family: 'DM Mono', monospace; font-size: 0.65rem; padding: 11px 22px; cursor: pointer; border-radius: 2px; z-index: 10; box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
+  
+  /* 编辑器和弹出框样式保持不变 */
   .editor-overlay { display: none; position: fixed; inset: 0; background: var(--overlay-bg); z-index: 999; align-items: flex-end; justify-content: center; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); }
   .editor-overlay.open { display: flex; }
   .editor-box { background: var(--surface); width: 100%; max-width: 700px; padding: 28px 36px calc(60px + env(safe-area-inset-bottom)); border-top: 1px solid var(--border); border-radius: 12px 12px 0 0; }
@@ -85,6 +97,8 @@
   <h1 class="site-title">𝐌'𝐒 𝐁𝐋<span class="search-trigger" id="toggleSearch">🔎</span>Ｇ</h1>
   <div class="site-meta">SINCE 2026</div>
 </header>
+
+<div class="header-spacer"></div>
 
 <div class="search-area" id="searchArea">
   <div class="search-box-wrapper">
