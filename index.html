@@ -84,7 +84,7 @@
   
   .entry-stamp { font-family: 'DM Mono', monospace; font-size: 0.62rem; color: var(--accent); margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
   
-  .del-btn { color: var(--muted); cursor: pointer; opacity: 0; transition: all 0.3s; font-size: 0.55rem; letter-spacing: 0.1em; padding: 4px 8px; border: 1px solid transparent; border-radius: 2px; }
+  .del-btn { color: var(--muted); cursor: pointer; opacity: 0; transition: all 0.3s; font-size: 0.55rem; letter-spacing: 0.1em; padding: 4px 8px; }
   .entry:hover .del-btn { opacity: 1; }
   
   .entry-title { font-size: 0.96rem; font-weight: 500; margin-bottom: 9px; }
@@ -98,9 +98,8 @@
   
   .field input, .field textarea { width: 100%; background: transparent; border: none; border-bottom: 1px solid var(--border); padding: 12px 0; font-family: inherit; font-size: 0.88rem; color: var(--text); outline: none; }
   .field textarea { min-height: 200px; line-height: 2; }
-  .btn-save, .btn-del-confirm { background: #333; border: none; font-family: 'DM Mono', monospace; font-size: 0.65rem; color: #666; padding: 12px 28px; cursor: not-allowed; border-radius: 2px; margin-top: 20px; width: 100%; transition: 0.3s; text-align: center; }
-  .btn-save.active, .btn-del-confirm.active { background: var(--accent); color: #0f0f0f; cursor: pointer; }
-  .btn-del-confirm.active { background: #ff5f56; color: #fff; }
+  .btn-save { background: #333; border: none; font-family: 'DM Mono', monospace; font-size: 0.65rem; color: #666; padding: 12px 28px; cursor: not-allowed; border-radius: 2px; margin-top: 20px; width: 100%; transition: 0.3s; text-align: center; }
+  .btn-save.active { background: var(--accent); color: #0f0f0f; cursor: pointer; }
 
   #status-toast { position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%); background: var(--surface); border: 1px solid var(--border); color: var(--text); padding: 8px 16px; font-size: 0.7rem; font-family: 'DM Mono', monospace; z-index: 2000; border-radius: 2px; display: none; }
 </style>
@@ -133,24 +132,12 @@
   <div class="editor-box" onclick="event.stopPropagation()">
     <div style="display:flex;justify-content:space-between;margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid var(--border)">
       <span style="font-family:'DM Mono',monospace;font-size:0.6rem;color:var(--muted)">NEW ENTRY</span>
-      <button onclick="closeAllOverlays()" style="background:none;border:none;color:var(--muted);font-size:1.2rem;cursor:pointer;">✕</button>
+      <button id="closeEditorAction" style="background:none;border:none;color:var(--muted);font-size:1.2rem;cursor:pointer;">✕</button>
     </div>
     <div class="field"><input id="inp-title" placeholder="标题 (可选)"></div>
     <div class="field"><textarea id="inp-body" placeholder="此时此刻的心情..."></textarea></div>
     <div class="field"><input type="password" id="inp-pass" placeholder="输入口令以同步" style="font-size:0.6rem;"></div>
     <button class="btn-save" id="btn-save-action" disabled>确认并同步</button>
-  </div>
-</div>
-
-<div class="editor-overlay" id="del-overlay">
-  <div class="editor-box" onclick="event.stopPropagation()">
-    <div style="display:flex;justify-content:space-between;margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid var(--border)">
-      <span style="font-family:'DM Mono',monospace;font-size:0.6rem;color:#ff5f56">DELETE CONFIRMATION</span>
-      <button onclick="closeAllOverlays()" style="background:none;border:none;color:var(--muted);font-size:1.2rem;cursor:pointer;">✕</button>
-    </div>
-    <p style="font-size: 0.8rem; margin-bottom: 20px; opacity: 0.7;">此操作将永久抹除该条内容。</p>
-    <div class="field"><input type="password" id="del-inp-pass" placeholder="输入口令以确认" style="font-size:0.6rem;"></div>
-    <button class="btn-del-confirm" id="btn-del-action" disabled>确认抹除</button>
   </div>
 </div>
 
@@ -163,13 +150,6 @@
   const db = firebase.firestore();
   
   let allEntries = []; 
-  let pendingDelId = null;
-
-  function closeAllOverlays() {
-    document.querySelectorAll('.editor-overlay').forEach(o => o.classList.remove('open'));
-    pendingDelId = null;
-    document.getElementById('del-inp-pass').value = '';
-  }
 
   const toggleSearch = document.getElementById('toggleSearch');
   const searchArea = document.getElementById('searchArea');
@@ -221,13 +201,8 @@
     btn.classList.toggle('active', !btn.disabled);
   };
 
-  document.getElementById('del-inp-pass').oninput = (e) => {
-    const btn = document.getElementById('btn-del-action');
-    btn.disabled = e.target.value !== MY_PASS;
-    btn.classList.toggle('active', !btn.disabled);
-  };
-
   document.getElementById("writeBtnAction").onclick = () => document.getElementById('overlay').classList.add('open');
+  document.getElementById("closeEditorAction").onclick = () => document.getElementById('overlay').classList.remove('open');
 
   document.getElementById("btn-save-action").onclick = async () => {
     const title = document.getElementById('inp-title').value.trim();
@@ -236,27 +211,19 @@
     setSyncStatus('syncing');
     try {
       await db.collection("posts").add({ title, body, date: new Date().toISOString() });
-      closeAllOverlays();
+      document.getElementById('overlay').classList.remove('open');
       document.getElementById('inp-title').value = ''; document.getElementById('inp-body').value = ''; document.getElementById('inp-pass').value = '';
       showToast("已存档"); setSyncStatus('done');
     } catch(e) { showToast("保存失败"); }
   };
 
-  function triggerDelete(id) {
-    pendingDelId = id;
-    document.getElementById('del-overlay').classList.add('open');
-    setTimeout(() => document.getElementById('del-inp-pass').focus(), 100);
+  async function deleteEntry(id) {
+    const p = prompt("输入口令确认删除:");
+    if (p === MY_PASS) {
+      setSyncStatus('syncing');
+      try { await db.collection("posts").doc(id).delete(); showToast("已抹除"); } catch(e) { showToast("删除失败"); }
+    } else if (p !== null) { alert("口令错误"); }
   }
-
-  document.getElementById("btn-del-action").onclick = async () => {
-    if (!pendingDelId) return;
-    setSyncStatus('syncing');
-    try {
-      await db.collection("posts").doc(pendingDelId).delete();
-      closeAllOverlays();
-      showToast("已抹除"); setSyncStatus('done');
-    } catch(e) { showToast("删除失败"); }
-  };
 
   db.collection("posts").orderBy("date", "desc").onSnapshot((snap) => {
     allEntries = []; 
@@ -275,7 +242,7 @@
       byYear[year].forEach(p => {
         const d = new Date(p.date); const timeStr = `${d.getFullYear()}.${d.getMonth()+1}.${d.getDate()} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
         const item = document.createElement('div'); item.className = 'entry'; item.id = `entry-${p.id}`;
-        item.innerHTML = `<div class="entry-stamp"><div>${timeStr}</div><div class="del-btn" onclick="triggerDelete('${p.id}')">DELETE</div></div>${p.title ? `<div class="entry-title">${p.title}</div>` : ''}<div class="entry-body">${p.body}</div>`;
+        item.innerHTML = `<div class="entry-stamp"><div>${timeStr}</div><div class="del-btn" onclick="deleteEntry('${p.id}')">DELETE</div></div>${p.title ? `<div class="entry-title">${p.title}</div>` : ''}<div class="entry-body">${p.body}</div>`;
         track.appendChild(item);
       });
       group.appendChild(track); tl.appendChild(group);
