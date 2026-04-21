@@ -23,21 +23,22 @@
   .sync-indicator { position: fixed; top: 0; left: 0; width: 100%; height: 2px; z-index: 2000; background: transparent; }
   .sync-bar { width: 0%; height: 100%; background: var(--accent); transition: width 0.3s; }
   
-  /* 调整顶部排版比例：增加 padding 解决太紧凑的问题 */
-  header { padding: calc(65px + env(safe-area-inset-top)) 40px 15px; max-width: 700px; margin: 0 auto; display: flex; flex-direction: column; align-items: flex-start; }
+  /* 【核心修改：仅调整顶部排版比例，参考白色图片拉开间距】 */
+  header { padding: calc(55px + env(safe-area-inset-top)) 40px 10px; max-width: 700px; margin: 0 auto; display: flex; flex-direction: column; align-items: flex-start; }
   .header-top { width: 100%; display: flex; justify-content: space-between; align-items: baseline; }
   
-  /* 保持标题内容和 🔎 图标 */
+  /* 恢复并保留：𝐌'𝐒 𝐁𝐋𝐎𝐆 标题与 🔎 图标 */
   .site-title { font-family: 'Times New Roman', serif; font-size: 1.5rem; font-weight: 500; letter-spacing: 0.15em; color: var(--accent); text-transform: uppercase; }
   .site-meta { font-family: 'DM Mono', monospace; font-size: 0.6rem; color: var(--muted); letter-spacing: 0.2em; }
   
   .search-trigger { cursor: pointer; display: inline-block; transition: transform 0.2s ease; font-style: normal; font-size: 1.2rem; vertical-align: middle; padding: 0 4px; }
   
-  /* 增加标题与搜索区/内容的间距 */
-  .header-spacer { height: 45px; }
+  /* 调整标题与下方线条的间距比例 */
+  .header-spacer { height: 35px; }
 
+  /* 搜索区域：保持之前的逻辑不动 */
   .search-area { max-width: 700px; margin: 0 auto; padding: 0 40px; height: 0; overflow: visible; opacity: 0; transition: all 0.3s ease; position: relative; pointer-events: none; }
-  .search-area.active { height: 45px; opacity: 1; margin-bottom: 25px; pointer-events: auto; }
+  .search-area.active { height: 45px; opacity: 1; margin-bottom: 20px; pointer-events: auto; }
   .search-box-wrapper { border-bottom: 1px solid var(--border); padding-bottom: 6px; }
   #inline-search { width: 100%; background: transparent; border: none; font-family: 'Noto Serif SC', serif; font-size: 1rem; color: var(--text); outline: none; }
   
@@ -46,6 +47,7 @@
   .search-res-item { padding: 18px 20px; border-bottom: 1px solid var(--border); cursor: pointer; }
   .search-res-item:hover { background: rgba(200, 169, 110, 0.1); }
   
+  /* 容器与时间轴逻辑完全不动 */
   .container { max-width: 700px; margin: 0 auto; padding: 0 40px; }
   .year-group { padding-top: 10px; }
   .year-row { display: flex; align-items: center; gap: 14px; margin-bottom: 10px; }
@@ -65,10 +67,11 @@
   .entry-body { font-size: 0.86rem; line-height: 2.1; opacity: 0.75; white-space: pre-wrap; text-align: justify; word-break: break-word; }
   
   .write-btn { position: fixed; bottom: calc(40px + env(safe-area-inset-bottom)); right: 40px; background: var(--accent); border: none; color: #0f0f0f; font-family: 'DM Mono', monospace; font-size: 0.65rem; padding: 11px 22px; cursor: pointer; border-radius: 2px; z-index: 10; box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
+  
+  /* 编辑器与删除逻辑完全不动 */
   .editor-overlay { display: none; position: fixed; inset: 0; background: var(--overlay-bg); z-index: 999; align-items: flex-end; justify-content: center; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); }
   .editor-overlay.open { display: flex; }
   .editor-box { background: var(--surface); width: 100%; max-width: 700px; padding: 28px 36px calc(60px + env(safe-area-inset-bottom)); border-top: 1px solid var(--border); border-radius: 12px 12px 0 0; }
-  
   .field input, .field textarea { width: 100%; background: transparent; border: none; border-bottom: 1px solid var(--border); padding: 12px 0; font-family: inherit; font-size: 0.88rem; color: var(--text); outline: none; }
   .field textarea { min-height: 200px; line-height: 2; }
   .btn-save { background: #333; border: none; font-family: 'DM Mono', monospace; font-size: 0.65rem; color: #666; padding: 12px 28px; cursor: not-allowed; border-radius: 2px; margin-top: 20px; width: 100%; transition: 0.3s; text-align: center; }
