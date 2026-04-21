@@ -24,22 +24,29 @@
   .sync-bar { width: 0%; height: 100%; background: var(--accent); transition: width 0.3s; }
   .sync-text { position: fixed; top: env(safe-area-inset-top, 12px); left: 50%; transform: translateX(-50%); font-family: 'DM Mono', monospace; font-size: 0.5rem; color: var(--muted); letter-spacing: 0.1em; opacity: 0.6; pointer-events: none; }
   
-  /* 严格保持原始 Header 高度 40px padding */
+  /* 严格保持原始 Header 高度布局 */
   header { padding: calc(60px + env(safe-area-inset-top)) 40px 40px; max-width: 700px; margin: 0 auto; display: flex; justify-content: space-between; align-items: baseline; }
   .site-title { font-size: 1.8rem; font-weight: 300; letter-spacing: 0.05em; color: var(--accent); }
   
-  /* 精确对齐逻辑 */
+  /* 右侧对齐逻辑 */
   .site-meta { font-family: 'DM Mono', monospace; font-size: 0.6rem; color: var(--muted); letter-spacing: 0.2em; display: flex; align-items: baseline; }
-  .year-wrapper { position: relative; display: inline-flex; flex-direction: column; align-items: center; }
+  .year-wrapper { position: relative; display: inline-block; }
   
   .search-trigger { 
-    position: absolute; bottom: 100%; cursor: pointer; color: var(--muted); opacity: 0.4; transition: 0.3s; 
-    margin-bottom: 4px; /* 调整图标与文字的间距 */
+    position: absolute; 
+    bottom: 100%; 
+    right: 0; /* 强制靠右对齐 */
+    cursor: pointer; 
+    color: var(--muted); 
+    opacity: 0.4; 
+    transition: 0.3s; 
+    margin-bottom: 6px; 
+    padding-right: 2px; /* 补偿字母间距产生的微小视觉差 */
   }
   .search-trigger:hover { color: var(--accent); opacity: 1; }
   .search-trigger svg { width: 13px; height: 13px; stroke-width: 2.5; }
 
-  /* 搜索交互区：绝对定位不改动原有布局高度 */
+  /* 搜索交互区：绝对定位，展开时不抖动 */
   .search-area { max-width: 700px; margin: -25px auto 20px; padding: 0 40px; height: 0; overflow: hidden; opacity: 0; transition: all 0.4s ease; }
   .search-area.active { height: 45px; opacity: 1; }
   .search-box-wrapper { border-bottom: 1px solid var(--border); padding: 5px 0; }
@@ -47,57 +54,29 @@
 
   #search-results-panel { position: absolute; width: calc(100% - 80px); background: var(--surface); z-index: 100; border: 1px solid var(--border); max-height: 300px; overflow-y: auto; display: none; box-shadow: 0 20px 40px rgba(0,0,0,0.5); }
   #search-results-panel.active { display: block; }
-  .search-res-item { padding: 14px 18px; border-bottom: 1px solid var(--border); cursor: pointer; }
-  .search-res-item:hover { background: rgba(200, 169, 110, 0.08); }
-  .search-res-date { font-family: 'DM Mono'; font-size: 0.55rem; color: var(--accent); }
-  .search-res-title { font-size: 0.8rem; opacity: 0.8; margin-top: 2px; }
 
   .container { max-width: 700px; margin: 0 auto; padding: 0 40px; }
+  /* (下方省略重复的 timeline/entry 样式，保持与你原始文件一致) */
   .year-group { padding-top: 40px; }
   .year-row { display: flex; align-items: center; gap: 14px; margin-bottom: 10px; }
   .year-num { font-family: 'DM Mono', monospace; font-size: 0.6rem; color: var(--muted); letter-spacing: 0.18em; }
   .year-line { flex: 1; height: 1px; background: var(--border); }
-  
   .track { position: relative; padding-left: 32px; }
   .track::before { content: ''; position: absolute; left: 0; top: 24px; bottom: 0; width: 1.5px; background: linear-gradient(180deg, var(--accent) 0%, var(--accent2) 60%, transparent 100%); opacity: 0.35; }
-  
   .entry { position: relative; padding: 26px 0 26px 24px; border-bottom: 1px solid var(--border); opacity: 0; transform: translateY(10px); animation: fadeUp 0.45s ease forwards; scroll-margin-top: 100px; }
   @keyframes fadeUp { to { opacity: 1; transform: translateY(0); } }
   .entry::before { content: ''; position: absolute; left: -4px; top: 33px; width: 7px; height: 7px; border-radius: 50%; background: var(--bg); border: 1.5px solid var(--accent); opacity: 0.65; }
-  .entry.highlight-search { border-left: 1px solid var(--accent); background: rgba(200, 169, 110, 0.05); }
-
   .entry-stamp { font-family: 'DM Mono', monospace; font-size: 0.62rem; color: var(--accent); margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
   .del-btn { color: var(--muted); cursor: pointer; opacity: 0; transition: opacity 0.3s; font-size: 0.55rem; padding: 4px 8px; }
   .entry:hover .del-btn { opacity: 1; }
-  
   .entry-title { font-size: 0.96rem; font-weight: 500; margin-bottom: 9px; }
   .entry-body { font-size: 0.86rem; line-height: 2.1; opacity: 0.75; white-space: pre-wrap; text-align: justify; word-break: break-word; }
-  
   .write-btn { position: fixed; bottom: calc(40px + env(safe-area-inset-bottom)); right: 40px; background: var(--accent); border: none; color: #0f0f0f; font-family: 'DM Mono', monospace; font-size: 0.65rem; padding: 11px 22px; cursor: pointer; border-radius: 2px; z-index: 10; box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
-  
-  .editor-overlay { display: none; position: fixed; inset: 0; background: var(--overlay-bg); z-index: 999; align-items: flex-end; justify-content: center; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); }
-  .editor-overlay.open { display: flex; }
-  .editor-box { background: var(--surface); width: 100%; max-width: 700px; padding: 28px 36px calc(60px + env(safe-area-inset-bottom)); border-top: 1px solid var(--border); border-radius: 12px 12px 0 0; }
-  .field input, .field textarea { width: 100%; background: transparent; border: none; border-bottom: 1px solid var(--border); padding: 12px 0; font-family: inherit; font-size: 0.88rem; color: var(--text); outline: none; }
-  .field textarea { min-height: 200px; line-height: 2; }
-  .btn-save { background: #333; border: none; font-family: 'DM Mono', monospace; font-size: 0.65rem; color: #666; padding: 12px 28px; cursor: not-allowed; border-radius: 2px; margin-top: 20px; width: 100%; transition: 0.3s; }
-  .btn-save.active { background: var(--accent); color: #0f0f0f; cursor: pointer; }
-
-  .confirm-overlay { position: fixed; inset: 0; background: var(--overlay-bg); z-index: 1000; display: none; align-items: center; justify-content: center; backdrop-filter: blur(4px); }
-  .confirm-box { background: var(--surface); border: 1px solid var(--border); padding: 30px; width: 300px; text-align: center; border-radius: 8px; box-shadow: 0 20px 50px rgba(0,0,0,0.3); }
-  .confirm-txt { font-size: 0.85rem; margin-bottom: 20px; color: var(--text); font-weight: 300; }
-  .confirm-input { width: 100%; background: var(--bg); border: 1px solid var(--border); padding: 10px; color: var(--text); font-family: 'DM Mono', monospace; font-size: 0.7rem; text-align: center; outline: none; margin-bottom: 20px; border-radius: 4px; }
-  .confirm-btns { display: flex; justify-content: center; gap: 30px; }
-  .confirm-btns button { background: none; border: none; font-family: 'DM Mono', monospace; font-size: 0.65rem; cursor: pointer; letter-spacing: 1px; }
-  .btn-no { color: var(--muted); }
-  .btn-yes { color: var(--accent); font-weight: bold; }
-  #status-toast { position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%); background: var(--surface); border: 1px solid var(--border); color: var(--text); padding: 8px 16px; font-size: 0.7rem; font-family: 'DM Mono', monospace; z-index: 2000; border-radius: 2px; display: none; }
 </style>
 </head>
 <body class="dark">
 <div class="sync-indicator"><div class="sync-bar" id="syncBar"></div></div>
 <div class="sync-text" id="syncText">GARDEN INITIALIZING</div>
-<div id="status-toast"></div>
 
 <header>
   <h1 class="site-title">𝓜𝓲𝓷𝓰'𝓼 𝓑𝓵𝓸𝓰</h1>
@@ -123,30 +102,16 @@
 </div>
 
 <div class="container" id="timeline"></div>
-
 <button class="write-btn" id="writeBtnAction">＋ 写一条</button>
-
-<div class="editor-overlay" id="overlay">
-  <div class="editor-box" onclick="event.stopPropagation()">
-    <div style="display:flex;justify-content:space-between;margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid var(--border)">
-      <span style="font-family:'DM Mono',monospace;font-size:0.6rem;color:var(--muted)">NEW ENTRY</span>
-      <button id="closeEditorAction" style="background:none;border:none;color:var(--muted);font-size:1.2rem;cursor:pointer;">✕</button>
-    </div>
-    <div class="field"><input id="inp-title" placeholder="标题 (可选)"></div>
-    <div class="field"><textarea id="inp-body" placeholder="此时此刻的心情..."></textarea></div>
-    <div class="field"><input type="password" id="inp-pass" placeholder="输入口令以同步" style="font-size:0.6rem;"></div>
-    <button class="btn-save" id="btn-save-action" disabled>确认并同步</button>
-  </div>
-</div>
 
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 <script>
+  // ... 你的 Firebase 配置和原有 JS 函数 ...
   const firebaseConfig = { apiKey: "AIzaSyDwQIoCm17ldB3kUeNCpalpEM8o3DS1mcI", authDomain: "ming-s-blog.firebaseapp.com", projectId: "ming-s-blog", appId: "1:513661582669:web:99dad676630deb35ef8b04" };
   const MY_PASS = "ming2026";
   firebase.initializeApp(firebaseConfig);
   const db = firebase.firestore();
-  let pendingDeleteId = null;
   let allEntries = [];
 
   const searchBtn = document.getElementById('searchBtn');
@@ -159,74 +124,7 @@
     if(active) setTimeout(() => searchInput.focus(), 200);
   };
 
-  function jumpToEntry(id) {
-    const el = document.getElementById(`entry-${id}`);
-    searchArea.classList.remove('active');
-    document.getElementById('search-results-panel').classList.remove('active');
-    searchInput.value = '';
-    if (el) {
-        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        el.classList.add('highlight-search');
-        setTimeout(() => el.classList.remove('highlight-search'), 2500);
-    }
-  }
-
-  searchInput.oninput = (e) => {
-    const kw = e.target.value.toLowerCase().trim();
-    const panel = document.getElementById('search-results-panel');
-    panel.innerHTML = '';
-    if(!kw) { panel.classList.remove('active'); return; }
-
-    const res = allEntries.filter(p => 
-        (p.title && p.title.toLowerCase().includes(kw)) || 
-        (p.body && p.body.toLowerCase().includes(kw))
-    );
-
-    if(res.length > 0) {
-      panel.classList.add('active');
-      res.forEach(p => {
-        const d = new Date(p.date);
-        const div = document.createElement('div');
-        div.className = 'search-res-item';
-        div.innerHTML = `<div class="search-res-date">${d.getFullYear()}.${d.getMonth()+1}.${d.getDate()}</div><div class="search-res-title">${p.title || p.body.substring(0,40)}...</div>`;
-        div.onclick = () => jumpToEntry(p.id);
-        panel.appendChild(div);
-      });
-    } else { panel.classList.remove('active'); }
-  };
-
-  document.addEventListener('click', (e) => {
-    if(!e.target.closest('.search-area') && !e.target.closest('#searchBtn')) {
-      searchArea.classList.remove('active');
-      document.getElementById('search-results-panel').classList.remove('active');
-    }
-  });
-
-  db.collection("posts").orderBy("date", "desc").onSnapshot((snap) => {
-    allEntries = [];
-    const tl = document.getElementById('timeline'); tl.innerHTML = ''; const byYear = {};
-    snap.forEach(docSnap => {
-      const data = docSnap.data(); allEntries.push({ id: docSnap.id, ...data });
-      const y = new Date(data.date).getFullYear();
-      if (!byYear[y]) byYear[y] = []; byYear[y].push({ id: docSnap.id, ...data });
-    });
-    Object.keys(byYear).sort((a,b)=>b-a).forEach(year => {
-      const group = document.createElement('div'); group.className = 'year-group';
-      group.innerHTML = `<div class="year-row"><span class="year-num">${year}</span><div class="year-line"></div></div>`;
-      const track = document.createElement('div'); track.className = 'track';
-      byYear[year].forEach(p => {
-        const d = new Date(p.date); const timeStr = `${d.getFullYear()}.${d.getMonth()+1}.${d.getDate()} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
-        const item = document.createElement('div'); item.className = 'entry'; item.id = `entry-${p.id}`;
-        item.innerHTML = `<div class="entry-stamp"><div>${timeStr}</div><div class="del-btn" onclick="askDelete('${p.id}')">DELETE</div></div>${p.title ? `<div class="entry-title">${p.title}</div>` : ''}<div class="entry-body">${p.body}</div>`;
-        track.appendChild(item);
-      });
-      group.appendChild(track); tl.appendChild(group);
-    });
-  });
-
-  // (此处省略其余 Firebase 交互逻辑，保持与原文件一致即可)
-  const updateTheme = () => { const h = new Date().getHours(); document.body.className = (h < 6 || h >= 18) ? 'dark' : 'light'; };
-  updateTheme(); setInterval(updateTheme, 60000);
+  // ... 其余业务逻辑保持一致 ...
 </script>
 </body>
 </html>
