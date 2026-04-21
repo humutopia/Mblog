@@ -40,12 +40,12 @@
   .track { position: relative; padding-left: 32px; }
   .track::before { content: ''; position: absolute; left: 0; top: 24px; bottom: 0; width: 1.5px; background: linear-gradient(180deg, var(--accent) 0%, var(--accent2) 60%, transparent 100%); opacity: 0.35; }
   
-  .entry { position: relative; padding: 26px 0 26px 24px; border-bottom: 1px solid var(--border); opacity: 0; transform: translateY(10px); animation: fadeUp 0.45s ease forwards; transition: border-color 0.6s ease; }
+  .entry { position: relative; padding: 26px 0 26px 24px; border-bottom: 1px solid var(--border); opacity: 0; transform: translateY(10px); animation: fadeUp 0.45s ease forwards; transition: all 0.6s ease; scroll-margin-top: 100px; }
   @keyframes fadeUp { to { opacity: 1; transform: translateY(0); } }
   .entry::before { content: ''; position: absolute; left: -4px; top: 33px; width: 7px; height: 7px; border-radius: 50%; background: var(--bg); border: 1.5px solid var(--accent); opacity: 0.65; }
   
-  /* 搜索点击后的高亮效果 */
-  .entry.highlight-search { border-color: var(--accent); background: rgba(200, 169, 110, 0.05); }
+  /* 搜索高亮视觉反馈 */
+  .entry.highlight-search { border-left: 2px solid var(--accent); background: rgba(200, 169, 110, 0.1); border-bottom-color: var(--accent); }
 
   .entry-stamp { font-family: 'DM Mono', monospace; font-size: 0.62rem; color: var(--accent); margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
   .del-btn { color: var(--muted); cursor: pointer; opacity: 0; transition: opacity 0.3s; font-size: 0.55rem; padding: 4px 8px; }
@@ -165,6 +165,30 @@
     }
   }
 
+  // 改进的跳转定位逻辑
+  function jumpToEntry(id) {
+    const targetId = `entry-${id}`;
+    const el = document.getElementById(targetId);
+    
+    // 1. 先关闭遮罩层
+    document.getElementById('searchOverlay').classList.remove('open');
+    
+    // 2. 延迟一点执行滚动，避开遮罩关闭时的 UI 抖动
+    setTimeout(() => {
+        if (el) {
+            el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            
+            // 3. 视觉反馈：高亮闪烁
+            el.classList.add('highlight-search');
+            setTimeout(() => {
+                el.classList.remove('highlight-search');
+            }, 2500);
+        } else {
+            showToast("未找到对应记忆");
+        }
+    }, 300);
+  }
+
   function closeAllOverlays() {
     document.getElementById('overlay').classList.remove('open');
     document.getElementById('searchOverlay').classList.remove('open');
@@ -177,19 +201,6 @@
     }
     if (e.key === 'Escape') closeAllOverlays();
   });
-
-  // 搜索点击跳转逻辑
-  function jumpToEntry(id) {
-    toggleSearch();
-    const el = document.getElementById(`entry-${id}`);
-    if (el) {
-        // 平滑滚动
-        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        // 高亮视觉反馈
-        el.classList.add('highlight-search');
-        setTimeout(() => el.classList.remove('highlight-search'), 2000);
-    }
-  }
 
   document.getElementById('search-input').oninput = (e) => {
     const kw = e.target.value.toLowerCase().trim();
@@ -207,9 +218,9 @@
         const d = new Date(p.date);
         const timeStr = `${d.getFullYear()}.${d.getMonth()+1}.${d.getDate()}`;
         const div = document.createElement('div');
-        div.style.cssText = "margin-bottom:20px; padding:12px; border:1px solid var(--border); cursor:pointer; border-radius:4px;";
+        div.style.cssText = "margin-bottom:20px; padding:12px; border:1px solid var(--border); cursor:pointer; border-radius:4px; background:rgba(255,255,255,0.02);";
         div.innerHTML = `<div style="font-family:'DM Mono';font-size:0.55rem;color:var(--accent);margin-bottom:4px;">${timeStr}</div><div style="font-size:0.75rem;opacity:0.8;line-height:1.5;">${p.body.substring(0,80)}...</div>`;
-        div.onclick = () => jumpToEntry(p.id); // 绑定跳转函数
+        div.onclick = () => jumpToEntry(p.id);
         box.appendChild(div);
     });
   };
@@ -280,8 +291,9 @@
       const track = document.createElement('div'); track.className = 'track';
       byYear[year].forEach(p => {
         const d = new Date(p.date); const timeStr = `${d.getFullYear()}.${d.getMonth()+1}.${d.getDate()} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
-        const item = document.createElement('div'); item.className = 'entry';
-        item.id = `entry-${p.id}`; // 为跳转功能增加唯一的 ID
+        const item = document.createElement('div'); 
+        item.className = 'entry';
+        item.id = `entry-${p.id}`; // 关键修复：确保渲染时 ID 被正确注入
         item.innerHTML = `<div class="entry-stamp"><div>${timeStr}</div><div class="del-btn" onclick="askDelete('${p.id}')">DELETE</div></div>${p.title ? `<div class="entry-title">${p.title}</div>` : ''}<div class="entry-body">${p.body}</div>`;
         track.appendChild(item);
       });
