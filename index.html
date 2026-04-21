@@ -15,36 +15,38 @@
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
   :root { --accent: #c8a96e; --accent2: #7eb8a4; }
-  body.dark { --bg: #000000; --surface: #0a0a0a; --border: #1a1a1a; --text: #e2ddd5; --muted: #555; --overlay-bg: rgba(0,0,0,0.9); }
-  body.light { --bg: #ffffff; --surface: #fcfcfc; --border: #eeeeee; --text: #222222; --muted: #999; --overlay-bg: rgba(255,255,255,0.9); }
+  body.dark { --bg: #000000; --surface: #0a0a0a; --border: #1a1a1a; --text: #e2ddd5; --muted: #444; --overlay-bg: rgba(0,0,0,0.9); }
+  body.light { --bg: #ffffff; --surface: #fcfcfc; --border: #eeeeee; --text: #222222; --muted: #bbb; --overlay-bg: rgba(255,255,255,0.9); }
   
   body { background: var(--bg); color: var(--text); font-family: 'Noto Serif SC', serif; min-height: 100vh; padding-bottom: calc(120px + env(safe-area-inset-bottom)); transition: background 0.4s ease; overflow-x: hidden; }
   
+  /* 顶部同步进度条 */
   .sync-indicator { position: fixed; top: 0; left: 0; width: 100%; height: 2px; z-index: 2000; background: transparent; }
   .sync-bar { width: 0%; height: 100%; background: var(--accent); transition: width 0.3s; }
-  .sync-text { position: fixed; top: env(safe-area-inset-top, 12px); left: 50%; transform: translateX(-50%); font-family: 'DM Mono', monospace; font-size: 0.5rem; color: var(--muted); letter-spacing: 0.1em; opacity: 0.6; pointer-events: none; }
   
-  header { padding: calc(60px + env(safe-area-inset-top)) 40px 10px; max-width: 700px; margin: 0 auto; display: flex; justify-content: space-between; align-items: baseline; }
+  header { padding: calc(60px + env(safe-area-inset-top)) 40px 15px; max-width: 700px; margin: 0 auto; display: flex; justify-content: space-between; align-items: baseline; }
   .site-title { font-size: 1.8rem; font-weight: 300; letter-spacing: 0.05em; color: var(--accent); }
   .site-meta { font-family: 'DM Mono', monospace; font-size: 0.6rem; color: var(--muted); letter-spacing: 0.2em; }
   
-  /* 横条搜索框容器 */
-  .search-area { max-width: 700px; margin: 0 auto; padding: 0 40px 30px; position: relative; }
-  .search-input-wrapper { display: flex; align-items: center; border-bottom: 1px solid var(--border); transition: border-color 0.3s; }
-  .search-input-wrapper:focus-within { border-bottom-color: var(--accent); }
-  #inline-search { width: 100%; background: transparent; border: none; padding: 10px 0; font-family: 'Noto Serif SC', serif; font-size: 0.8rem; color: var(--text); outline: none; opacity: 0.6; transition: opacity 0.3s; }
-  #inline-search:focus { opacity: 1; }
+  /* 优化后的横条搜索框 */
+  .search-area { max-width: 700px; margin: 0 auto; padding: 0 40px 40px; position: relative; }
+  .search-input-wrapper { display: flex; align-items: center; border-bottom: 1px solid var(--border); transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); width: 150px; /* 默认较短，更显精致 */ }
+  .search-input-wrapper:focus-within { border-bottom-color: var(--accent); width: 100%; /* 点击时优雅拉长 */ }
+  
+  #inline-search { width: 100%; background: transparent; border: none; padding: 8px 0; font-family: 'DM Mono', monospace; font-size: 0.7rem; color: var(--text); outline: none; opacity: 0.4; letter-spacing: 1px; }
+  #inline-search:focus { opacity: 0.9; }
   
   /* 搜索结果下拉面板 */
-  #search-results-panel { position: absolute; top: 100%; left: 40px; right: 40px; background: var(--surface); z-index: 100; border: 1px solid var(--border); border-top: none; max-height: 400px; overflow-y: auto; display: none; box-shadow: 0 15px 30px rgba(0,0,0,0.3); border-radius: 0 0 4px 4px; }
+  #search-results-panel { position: absolute; top: 45px; left: 40px; right: 40px; background: var(--surface); z-index: 100; border: 1px solid var(--border); max-height: 400px; overflow-y: auto; display: none; box-shadow: 0 20px 40px rgba(0,0,0,0.4); border-radius: 4px; }
   #search-results-panel.active { display: block; }
-  .search-res-item { padding: 15px; border-bottom: 1px solid var(--border); cursor: pointer; transition: background 0.2s; }
-  .search-res-item:hover { background: rgba(200, 169, 110, 0.05); }
-  .search-res-date { font-family: 'DM Mono'; font-size: 0.55rem; color: var(--accent); margin-bottom: 4px; }
-  .search-res-body { font-size: 0.75rem; opacity: 0.8; line-height: 1.5; }
+  .search-res-item { padding: 18px; border-bottom: 1px solid var(--border); cursor: pointer; transition: background 0.2s; }
+  .search-res-item:last-child { border-bottom: none; }
+  .search-res-item:hover { background: rgba(200, 169, 110, 0.08); }
+  .search-res-date { font-family: 'DM Mono'; font-size: 0.55rem; color: var(--accent); margin-bottom: 6px; }
+  .search-res-body { font-size: 0.75rem; opacity: 0.7; line-height: 1.6; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
 
   .container { max-width: 700px; margin: 0 auto; padding: 0 40px; }
-  .year-group { padding-top: 40px; }
+  .year-group { padding-top: 20px; }
   .year-row { display: flex; align-items: center; gap: 14px; margin-bottom: 10px; }
   .year-num { font-family: 'DM Mono', monospace; font-size: 0.6rem; color: var(--muted); letter-spacing: 0.18em; }
   .year-line { flex: 1; height: 1px; background: var(--border); }
@@ -52,7 +54,7 @@
   .track { position: relative; padding-left: 32px; }
   .track::before { content: ''; position: absolute; left: 0; top: 24px; bottom: 0; width: 1.5px; background: linear-gradient(180deg, var(--accent) 0%, var(--accent2) 60%, transparent 100%); opacity: 0.35; }
   
-  .entry { position: relative; padding: 26px 0 26px 24px; border-bottom: 1px solid var(--border); opacity: 0; transform: translateY(10px); animation: fadeUp 0.45s ease forwards; transition: all 0.6s ease; scroll-margin-top: 120px; }
+  .entry { position: relative; padding: 26px 0 26px 24px; border-bottom: 1px solid var(--border); opacity: 0; transform: translateY(10px); animation: fadeUp 0.45s ease forwards; transition: all 0.6s ease; scroll-margin-top: 140px; }
   @keyframes fadeUp { to { opacity: 1; transform: translateY(0); } }
   .entry::before { content: ''; position: absolute; left: -4px; top: 33px; width: 7px; height: 7px; border-radius: 50%; background: var(--bg); border: 1.5px solid var(--accent); opacity: 0.65; }
   
@@ -65,8 +67,10 @@
   .entry-title { font-size: 0.96rem; font-weight: 500; margin-bottom: 9px; }
   .entry-body { font-size: 0.86rem; line-height: 2.1; opacity: 0.75; white-space: pre-wrap; text-align: justify; word-break: break-word; }
   
+  /* 写一条 按钮 */
   .write-btn { position: fixed; bottom: calc(40px + env(safe-area-inset-bottom)); right: 40px; background: var(--accent); border: none; color: #0f0f0f; font-family: 'DM Mono', monospace; font-size: 0.65rem; padding: 11px 22px; cursor: pointer; border-radius: 2px; z-index: 10; box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
   
+  /* 编辑器样式 */
   .editor-overlay { display: none; position: fixed; inset: 0; background: var(--overlay-bg); z-index: 999; align-items: flex-end; justify-content: center; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); }
   .editor-overlay.open { display: flex; }
   .editor-box { background: var(--surface); width: 100%; max-width: 700px; padding: 28px 36px calc(60px + env(safe-area-inset-bottom)); border-top: 1px solid var(--border); border-radius: 12px 12px 0 0; }
@@ -91,7 +95,6 @@
 </head>
 <body class="dark">
 <div class="sync-indicator"><div class="sync-bar" id="syncBar"></div></div>
-<div class="sync-text" id="syncText">GARDEN INITIALIZING</div>
 <div id="status-toast"></div>
 
 <header>
@@ -101,7 +104,7 @@
 
 <div class="search-area">
   <div class="search-input-wrapper">
-    <input id="inline-search" placeholder="检索记忆关键词..." autocomplete="off">
+    <input id="inline-search" placeholder="FIND..." autocomplete="off">
   </div>
   <div id="search-results-panel"></div>
 </div>
@@ -146,12 +149,11 @@
 
   function showToast(msg) { const t = document.getElementById('status-toast'); t.innerText = msg; t.style.display = 'block'; setTimeout(() => t.style.display = 'none', 2000); }
   function setSyncStatus(status) {
-    const bar = document.getElementById('syncBar'); const txt = document.getElementById('syncText');
-    if(status === 'syncing') { bar.style.width = '60%'; txt.innerText = 'SYNCING...'; }
-    else if(status === 'done') { bar.style.width = '100%'; txt.innerText = 'GARDEN SYNCED'; setTimeout(() => { bar.style.width = '0%'; }, 1200); }
+    const bar = document.getElementById('syncBar');
+    if(status === 'syncing') { bar.style.width = '60%'; }
+    else if(status === 'done') { bar.style.width = '100%'; setTimeout(() => { bar.style.width = '0%'; }, 1000); }
   }
 
-  // 搜索定位
   function jumpToEntry(id) {
     const el = document.getElementById(`entry-${id}`);
     document.getElementById('search-results-panel').classList.remove('active');
@@ -163,16 +165,11 @@
     }
   }
 
-  // 搜索逻辑
   document.getElementById('inline-search').oninput = (e) => {
     const kw = e.target.value.toLowerCase().trim();
     const panel = document.getElementById('search-results-panel');
     panel.innerHTML = '';
-    
-    if(!kw) {
-      panel.classList.remove('active');
-      return;
-    }
+    if(!kw) { panel.classList.remove('active'); return; }
 
     const res = allEntries.filter(p => 
         (p.title && p.title.toLowerCase().includes(kw)) || 
@@ -187,16 +184,13 @@
         const timeStr = `${d.getFullYear()}.${d.getMonth()+1}.${d.getDate()}`;
         const div = document.createElement('div');
         div.className = 'search-res-item';
-        div.innerHTML = `<div class="search-res-date">${timeStr}</div><div class="search-res-body">${p.body.substring(0,60)}...</div>`;
+        div.innerHTML = `<div class="search-res-date">${timeStr}</div><div class="search-res-body">${p.body.substring(0,80)}...</div>`;
         div.onclick = () => jumpToEntry(p.id);
         panel.appendChild(div);
       });
-    } else {
-      panel.classList.remove('active');
-    }
+    } else { panel.classList.remove('active'); }
   };
 
-  // 点击空白处关闭搜索结果
   document.addEventListener('click', (e) => {
     if(!e.target.closest('.search-area')) {
       document.getElementById('search-results-panel').classList.remove('active');
@@ -211,11 +205,7 @@
 
   document.getElementById("writeBtnAction").onclick = () => document.getElementById('overlay').classList.add('open');
   document.getElementById("closeEditorAction").onclick = () => document.getElementById('overlay').classList.remove('open');
-  document.getElementById("closeConfirmAction").onclick = () => { 
-    document.getElementById('confirmOverlay').style.display = 'none'; 
-    document.getElementById('del-pass-input').value = '';
-    pendingDeleteId = null; 
-  };
+  document.getElementById("closeConfirmAction").onclick = () => { document.getElementById('confirmOverlay').style.display = 'none'; pendingDeleteId = null; };
 
   document.getElementById("btn-save-action").onclick = async () => {
     const title = document.getElementById('inp-title').value.trim();
@@ -251,8 +241,7 @@
     allEntries = [];
     const tl = document.getElementById('timeline'); tl.innerHTML = ''; const byYear = {};
     snap.forEach(docSnap => {
-      const data = docSnap.data(); 
-      allEntries.push({ id: docSnap.id, ...data });
+      const data = docSnap.data(); allEntries.push({ id: docSnap.id, ...data });
       const y = new Date(data.date).getFullYear();
       if (!byYear[y]) byYear[y] = []; byYear[y].push({ id: docSnap.id, ...data });
     });
@@ -271,10 +260,7 @@
     setSyncStatus('done');
   });
 
-  const updateTheme = () => { 
-    const h = new Date().getHours(); 
-    document.body.className = (h < 6 || h >= 18) ? 'dark' : 'light'; 
-  };
+  const updateTheme = () => { const h = new Date().getHours(); document.body.className = (h < 6 || h >= 18) ? 'dark' : 'light'; };
   updateTheme(); setInterval(updateTheme, 60000);
 </script>
 </body>
