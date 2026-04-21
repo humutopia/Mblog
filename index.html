@@ -28,87 +28,76 @@
   .site-title { font-size: 1.8rem; font-weight: 300; letter-spacing: 0.05em; color: var(--accent); }
   .site-meta { font-family: 'DM Mono', monospace; font-size: 0.6rem; color: var(--muted); letter-spacing: 0.2em; }
   
-  /* 🔎 交互样式 */
-  .search-trigger { cursor: pointer; display: inline-block; transition: transform 0.2s ease; font-style: normal; font-size: 1.4rem; vertical-align: middle; position: relative; top: -2px; }
-  .search-trigger:hover { transform: scale(1.15); }
+  .search-trigger { cursor: pointer; display: inline-block; transition: transform 0.2s ease; font-style: normal; font-size: 1.2rem; vertical-align: middle; padding: 0 4px; }
+  .search-trigger:hover { transform: scale(1.2); }
 
-  /* 无缝搜索区域 */
+  /* 搜索区域容器 */
   .search-area { 
     max-width: 700px; 
     margin: 0 auto; 
     padding: 0 40px; 
     height: 0; 
-    overflow: hidden; 
+    overflow: visible; /* 必须为 visible 以便显示下拉面板 */
     opacity: 0; 
-    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); 
+    transition: all 0.4s ease; 
     position: relative;
+    pointer-events: none;
   }
-  .search-area.active { height: 60px; opacity: 1; padding-top: 15px; }
+  .search-area.active { height: 60px; opacity: 1; padding-top: 15px; pointer-events: auto; }
 
   .search-box-wrapper { 
-    display: flex; 
-    align-items: center; 
-    background: transparent; 
     border-bottom: 1px solid var(--border);
-    padding: 2px 0;
+    padding-bottom: 4px;
   }
   
   #inline-search { 
     width: 100%; 
-    background: transparent !important; 
-    border: none !important; 
-    padding: 8px 0; 
+    background: transparent; 
+    border: none; 
     font-family: 'DM Mono', monospace; 
     font-size: 0.9rem; 
     color: var(--text); 
     outline: none; 
-    letter-spacing: 1px;
   }
   
-  /* 搜索结果面板 */
+  /* 搜索结果面板 - 强化显示 */
   #search-results-panel { 
     position: absolute; 
     top: 55px; 
     left: 40px; 
     right: 40px; 
     background: var(--surface); 
-    z-index: 100; 
+    z-index: 9999; 
     border: 1px solid var(--border); 
     max-height: 350px; 
     overflow-y: auto; 
     display: none; 
-    box-shadow: 0 20px 50px rgba(0,0,0,0.6); 
+    box-shadow: 0 20px 60px rgba(0,0,0,0.8); 
     border-radius: 4px;
   }
-  #search-results-panel.active { display: block; }
-  .search-res-item { padding: 18px 20px; border-bottom: 1px solid var(--border); cursor: pointer; transition: background 0.2s; }
-  .search-res-item:last-child { border-bottom: none; }
-  .search-res-item:hover { background: rgba(200, 169, 110, 0.1); }
-  .search-res-date { font-family: 'DM Mono'; font-size: 0.55rem; color: var(--accent); margin-bottom: 4px; }
-  .search-res-body { font-size: 0.75rem; opacity: 0.8; line-height: 1.5; overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+  #search-results-panel.active { display: block !important; }
+  .search-res-item { padding: 18px 20px; border-bottom: 1px solid var(--border); cursor: pointer; }
+  .search-res-item:hover { background: rgba(200, 169, 110, 0.15); }
+  .search-res-date { font-family: 'DM Mono'; font-size: 0.55rem; color: var(--accent); margin-bottom: 5px; }
+  .search-res-body { font-size: 0.8rem; opacity: 0.9; line-height: 1.4; }
 
   .container { max-width: 700px; margin: 0 auto; padding: 0 40px; }
   .year-group { padding-top: 20px; }
   .year-row { display: flex; align-items: center; gap: 14px; margin-bottom: 10px; }
   .year-num { font-family: 'DM Mono', monospace; font-size: 0.6rem; color: var(--muted); letter-spacing: 0.18em; }
   .year-line { flex: 1; height: 1px; background: var(--border); }
-  
   .track { position: relative; padding-left: 32px; }
   .track::before { content: ''; position: absolute; left: 0; top: 24px; bottom: 0; width: 1.5px; background: linear-gradient(180deg, var(--accent) 0%, var(--accent2) 60%, transparent 100%); opacity: 0.35; }
-  
   .entry { position: relative; padding: 26px 0 26px 24px; border-bottom: 1px solid var(--border); opacity: 0; transform: translateY(10px); animation: fadeUp 0.45s ease forwards; transition: all 0.6s ease; scroll-margin-top: 140px; }
   @keyframes fadeUp { to { opacity: 1; transform: translateY(0); } }
   .entry::before { content: ''; position: absolute; left: -4px; top: 33px; width: 7px; height: 7px; border-radius: 50%; background: var(--bg); border: 1.5px solid var(--accent); opacity: 0.65; }
-  
-  .entry.highlight-search { border-left: 2px solid var(--accent); background: rgba(200, 169, 110, 0.1); }
+  .entry.highlight-search { border-left: 2px solid var(--accent); background: rgba(200, 169, 110, 0.15); }
   .entry-stamp { font-family: 'DM Mono', monospace; font-size: 0.62rem; color: var(--accent); margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
   .del-btn { color: var(--muted); cursor: pointer; opacity: 0; transition: opacity 0.3s; font-size: 0.55rem; padding: 4px 8px; }
   .entry:hover .del-btn { opacity: 1; }
   .entry-title { font-size: 0.96rem; font-weight: 500; margin-bottom: 9px; }
   .entry-body { font-size: 0.86rem; line-height: 2.1; opacity: 0.75; white-space: pre-wrap; text-align: justify; word-break: break-word; }
-  
   .write-btn { position: fixed; bottom: calc(40px + env(safe-area-inset-bottom)); right: 40px; background: var(--accent); border: none; color: #0f0f0f; font-family: 'DM Mono', monospace; font-size: 0.65rem; padding: 11px 22px; cursor: pointer; border-radius: 2px; z-index: 10; box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
-  
   .editor-overlay { display: none; position: fixed; inset: 0; background: var(--overlay-bg); z-index: 999; align-items: flex-end; justify-content: center; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); }
   .editor-overlay.open { display: flex; }
   .editor-box { background: var(--surface); width: 100%; max-width: 700px; padding: 28px 36px calc(60px + env(safe-area-inset-bottom)); border-top: 1px solid var(--border); border-radius: 12px 12px 0 0; }
@@ -116,7 +105,6 @@
   .field textarea { min-height: 200px; line-height: 2; }
   .btn-save { background: #333; border: none; font-family: 'DM Mono', monospace; font-size: 0.65rem; color: #666; padding: 12px 28px; cursor: not-allowed; border-radius: 2px; margin-top: 20px; width: 100%; transition: 0.3s; }
   .btn-save.active { background: var(--accent); color: #0f0f0f; cursor: pointer; }
-
   .confirm-overlay { position: fixed; inset: 0; background: var(--overlay-bg); z-index: 1000; display: none; align-items: center; justify-content: center; backdrop-filter: blur(4px); }
   .confirm-box { background: var(--surface); border: 1px solid var(--border); padding: 30px; width: 300px; text-align: center; border-radius: 8px; box-shadow: 0 20px 50px rgba(0,0,0,0.3); }
   .confirm-txt { font-size: 0.85rem; margin-bottom: 20px; color: var(--text); font-weight: 300; }
@@ -141,7 +129,7 @@
 
 <div class="search-area" id="searchArea">
   <div class="search-box-wrapper">
-    <input id="inline-search" autocomplete="off" spellcheck="false">
+    <input id="inline-search" autocomplete="off" spellcheck="false" placeholder="输入关键词...">
   </div>
   <div id="search-results-panel"></div>
 </div>
@@ -182,7 +170,7 @@
   firebase.initializeApp(firebaseConfig);
   const db = firebase.firestore();
   
-  let allEntries = []; // 用于本地检索的全量数据
+  let allEntries = []; 
   let pendingDeleteId = null;
 
   const toggleSearch = document.getElementById('toggleSearch');
@@ -190,11 +178,10 @@
   const searchInput = document.getElementById('inline-search');
   const resultsPanel = document.getElementById('search-results-panel');
 
-  // 搜索展开切换
   toggleSearch.onclick = (e) => {
     e.stopPropagation();
-    searchArea.classList.toggle('active');
-    if(searchArea.classList.contains('active')) {
+    const isActive = searchArea.classList.toggle('active');
+    if(isActive) {
         setTimeout(() => searchInput.focus(), 300);
     } else {
         resultsPanel.classList.remove('active');
@@ -209,30 +196,22 @@
     }
   });
 
-  function showToast(msg) { const t = document.getElementById('status-toast'); t.innerText = msg; t.style.display = 'block'; setTimeout(() => t.style.display = 'none', 2000); }
-  function setSyncStatus(status) {
-    const bar = document.getElementById('syncBar');
-    if(status === 'syncing') { bar.style.width = '60%'; }
-    else if(status === 'done') { bar.style.width = '100%'; setTimeout(() => { bar.style.width = '0%'; }, 1000); }
-  }
-
-  // 核心检索逻辑修复
   searchInput.oninput = (e) => {
     const kw = e.target.value.toLowerCase().trim();
     resultsPanel.innerHTML = '';
     
-    if(!kw || allEntries.length === 0) { 
+    if(!kw) { 
         resultsPanel.classList.remove('active'); 
         return; 
     }
 
     const res = allEntries.filter(p => 
         (p.title && p.title.toLowerCase().includes(kw)) || 
-        (p.body && p.body.toLowerCase().includes(kw)) ||
-        (p.date && p.date.includes(kw))
+        (p.body && p.body.toLowerCase().includes(kw))
     );
 
     if(res.length > 0) {
+      resultsPanel.style.display = 'block'; // 强制块显示
       resultsPanel.classList.add('active');
       res.forEach(p => {
         const d = new Date(p.date);
@@ -241,9 +220,10 @@
         div.className = 'search-res-item';
         div.innerHTML = `
             <div class="search-res-date">${timeStr}</div>
-            <div class="search-res-body">${p.body}</div>
+            <div class="search-res-body">${p.body.substring(0, 50)}...</div>
         `;
-        div.onclick = () => {
+        div.onclick = (ev) => {
+            ev.stopPropagation();
             const el = document.getElementById(`entry-${p.id}`);
             resultsPanel.classList.remove('active');
             searchInput.value = '';
@@ -260,6 +240,13 @@
         resultsPanel.classList.remove('active'); 
     }
   };
+
+  function showToast(msg) { const t = document.getElementById('status-toast'); t.innerText = msg; t.style.display = 'block'; setTimeout(() => t.style.display = 'none', 2000); }
+  function setSyncStatus(status) {
+    const bar = document.getElementById('syncBar');
+    if(status === 'syncing') { bar.style.width = '60%'; }
+    else if(status === 'done') { bar.style.width = '100%'; setTimeout(() => { bar.style.width = '0%'; }, 1000); }
+  }
 
   document.getElementById('inp-pass').oninput = (e) => {
     const btn = document.getElementById('btn-save-action');
@@ -301,7 +288,6 @@
     } else { showToast("口令错误"); }
   };
 
-  // 监听数据库变化，同时同步更新 allEntries 全量数组
   db.collection("posts").orderBy("date", "desc").onSnapshot((snap) => {
     allEntries = []; 
     const tl = document.getElementById('timeline'); tl.innerHTML = ''; const byYear = {};
@@ -309,7 +295,7 @@
     snap.forEach(docSnap => {
       const data = docSnap.data();
       const entryObj = { id: docSnap.id, ...data };
-      allEntries.push(entryObj); // 更新全量数组用于检索
+      allEntries.push(entryObj); 
       
       const y = new Date(data.date).getFullYear();
       if (!byYear[y]) byYear[y] = []; 
