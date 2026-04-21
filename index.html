@@ -86,7 +86,6 @@
   
   .del-btn { color: var(--muted); cursor: pointer; opacity: 0; transition: all 0.3s; font-size: 0.55rem; letter-spacing: 0.1em; padding: 4px 8px; border: 1px solid transparent; border-radius: 2px; }
   .entry:hover .del-btn { opacity: 1; }
-  .del-btn.confirming { color: #ff5f56; border-color: #ff5f56; opacity: 1 !important; }
   
   .entry-title { font-size: 0.96rem; font-weight: 500; margin-bottom: 9px; }
   .entry-body { font-size: 0.86rem; line-height: 2.1; opacity: 0.75; white-space: pre-wrap; text-align: justify; word-break: break-word; }
@@ -97,9 +96,6 @@
   .editor-overlay.open { display: flex; }
   .editor-box { background: var(--surface); width: 100%; max-width: 700px; padding: 28px 36px calc(60px + env(safe-area-inset-bottom)); border-top: 1px solid var(--border); border-radius: 12px 12px 0 0; }
   
-  /* 删除确认专用遮罩 */
-  #del-overlay .editor-box { padding-bottom: 60px; }
-
   .field input, .field textarea { width: 100%; background: transparent; border: none; border-bottom: 1px solid var(--border); padding: 12px 0; font-family: inherit; font-size: 0.88rem; color: var(--text); outline: none; }
   .field textarea { min-height: 200px; line-height: 2; }
   .btn-save, .btn-del-confirm { background: #333; border: none; font-family: 'DM Mono', monospace; font-size: 0.65rem; color: #666; padding: 12px 28px; cursor: not-allowed; border-radius: 2px; margin-top: 20px; width: 100%; transition: 0.3s; text-align: center; }
@@ -152,7 +148,7 @@
       <span style="font-family:'DM Mono',monospace;font-size:0.6rem;color:#ff5f56">DELETE CONFIRMATION</span>
       <button onclick="closeAllOverlays()" style="background:none;border:none;color:var(--muted);font-size:1.2rem;cursor:pointer;">✕</button>
     </div>
-    <p style="font-size: 0.8rem; margin-bottom: 20px; opacity: 0.7;">此操作将永久从云端抹除该条记忆。</p>
+    <p style="font-size: 0.8rem; margin-bottom: 20px; opacity: 0.7;">此操作将永久抹除该条内容。</p>
     <div class="field"><input type="password" id="del-inp-pass" placeholder="输入口令以确认" style="font-size:0.6rem;"></div>
     <button class="btn-del-confirm" id="btn-del-action" disabled>确认抹除</button>
   </div>
@@ -169,15 +165,16 @@
   let allEntries = []; 
   let pendingDelId = null;
 
+  function closeAllOverlays() {
+    document.querySelectorAll('.editor-overlay').forEach(o => o.classList.remove('open'));
+    pendingDelId = null;
+    document.getElementById('del-inp-pass').value = '';
+  }
+
   const toggleSearch = document.getElementById('toggleSearch');
   const searchArea = document.getElementById('searchArea');
   const searchInput = document.getElementById('inline-search');
   const resultsPanel = document.getElementById('search-results-panel');
-
-  function closeAllOverlays() {
-    document.querySelectorAll('.editor-overlay').forEach(o => o.classList.remove('open'));
-    pendingDelId = null;
-  }
 
   toggleSearch.onclick = (e) => {
     e.stopPropagation();
@@ -218,14 +215,12 @@
   function showToast(msg) { const t = document.getElementById('status-toast'); t.innerText = msg; t.style.display = 'block'; setTimeout(() => t.style.display = 'none', 2000); }
   function setSyncStatus(status) { const bar = document.getElementById('syncBar'); if(status === 'syncing') bar.style.width = '60%'; else if(status === 'done') { bar.style.width = '100%'; setTimeout(() => bar.style.width = '0%', 1000); } }
 
-  // 写作验证
   document.getElementById('inp-pass').oninput = (e) => {
     const btn = document.getElementById('btn-save-action');
     btn.disabled = e.target.value !== MY_PASS;
     btn.classList.toggle('active', !btn.disabled);
   };
 
-  // 删除验证
   document.getElementById('del-inp-pass').oninput = (e) => {
     const btn = document.getElementById('btn-del-action');
     btn.disabled = e.target.value !== MY_PASS;
@@ -247,20 +242,10 @@
     } catch(e) { showToast("保存失败"); }
   };
 
-  // 优雅删除逻辑
-  function handleDeleteClick(btn, id) {
-    if (btn.classList.contains('confirming')) {
-        pendingDelId = id;
-        document.getElementById('del-overlay').classList.add('open');
-        document.getElementById('del-inp-pass').focus();
-    } else {
-        btn.innerText = 'SURE?';
-        btn.classList.add('confirming');
-        setTimeout(() => {
-            btn.innerText = 'DELETE';
-            btn.classList.remove('confirming');
-        }, 3000);
-    }
+  function triggerDelete(id) {
+    pendingDelId = id;
+    document.getElementById('del-overlay').classList.add('open');
+    setTimeout(() => document.getElementById('del-inp-pass').focus(), 100);
   }
 
   document.getElementById("btn-del-action").onclick = async () => {
@@ -269,7 +254,6 @@
     try {
       await db.collection("posts").doc(pendingDelId).delete();
       closeAllOverlays();
-      document.getElementById('del-inp-pass').value = '';
       showToast("已抹除"); setSyncStatus('done');
     } catch(e) { showToast("删除失败"); }
   };
@@ -291,14 +275,7 @@
       byYear[year].forEach(p => {
         const d = new Date(p.date); const timeStr = `${d.getFullYear()}.${d.getMonth()+1}.${d.getDate()} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
         const item = document.createElement('div'); item.className = 'entry'; item.id = `entry-${p.id}`;
-        item.innerHTML = `
-          <div class="entry-stamp">
-            <div>${timeStr}</div>
-            <div class="del-btn" onclick="handleDeleteClick(this, '${p.id}')">DELETE</div>
-          </div>
-          ${p.title ? `<div class="entry-title">${p.title}</div>` : ''}
-          <div class="entry-body">${p.body}</div>
-        `;
+        item.innerHTML = `<div class="entry-stamp"><div>${timeStr}</div><div class="del-btn" onclick="triggerDelete('${p.id}')">DELETE</div></div>${p.title ? `<div class="entry-title">${p.title}</div>` : ''}<div class="entry-body">${p.body}</div>`;
         track.appendChild(item);
       });
       group.appendChild(track); tl.appendChild(group);
