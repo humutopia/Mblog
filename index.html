@@ -82,22 +82,30 @@
   .entry::before { content: ''; position: absolute; left: -4px; top: 33px; width: 7px; height: 7px; border-radius: 50%; background: var(--bg); border: 1.5px solid var(--accent); opacity: 0.65; }
   .entry.highlight-search { border-left: 2px solid var(--accent); background: rgba(200, 169, 110, 0.15); }
   
-  /* 删除按钮回归与优化 */
   .entry-stamp { font-family: 'DM Mono', monospace; font-size: 0.62rem; color: var(--accent); margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
-  .del-btn { color: var(--muted); cursor: pointer; opacity: 0; transition: opacity 0.3s; font-size: 0.55rem; letter-spacing: 0.1em; padding: 4px 8px; }
+  
+  .del-btn { color: var(--muted); cursor: pointer; opacity: 0; transition: all 0.3s; font-size: 0.55rem; letter-spacing: 0.1em; padding: 4px 8px; border: 1px solid transparent; border-radius: 2px; }
   .entry:hover .del-btn { opacity: 1; }
+  .del-btn.confirming { color: #ff5f56; border-color: #ff5f56; opacity: 1 !important; }
   
   .entry-title { font-size: 0.96rem; font-weight: 500; margin-bottom: 9px; }
   .entry-body { font-size: 0.86rem; line-height: 2.1; opacity: 0.75; white-space: pre-wrap; text-align: justify; word-break: break-word; }
   
   .write-btn { position: fixed; bottom: calc(40px + env(safe-area-inset-bottom)); right: 40px; background: var(--accent); border: none; color: #0f0f0f; font-family: 'DM Mono', monospace; font-size: 0.65rem; padding: 11px 22px; cursor: pointer; border-radius: 2px; z-index: 10; box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
+  
   .editor-overlay { display: none; position: fixed; inset: 0; background: var(--overlay-bg); z-index: 999; align-items: flex-end; justify-content: center; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); }
   .editor-overlay.open { display: flex; }
   .editor-box { background: var(--surface); width: 100%; max-width: 700px; padding: 28px 36px calc(60px + env(safe-area-inset-bottom)); border-top: 1px solid var(--border); border-radius: 12px 12px 0 0; }
+  
+  /* 删除确认专用遮罩 */
+  #del-overlay .editor-box { padding-bottom: 60px; }
+
   .field input, .field textarea { width: 100%; background: transparent; border: none; border-bottom: 1px solid var(--border); padding: 12px 0; font-family: inherit; font-size: 0.88rem; color: var(--text); outline: none; }
   .field textarea { min-height: 200px; line-height: 2; }
-  .btn-save { background: #333; border: none; font-family: 'DM Mono', monospace; font-size: 0.65rem; color: #666; padding: 12px 28px; cursor: not-allowed; border-radius: 2px; margin-top: 20px; width: 100%; transition: 0.3s; }
-  .btn-save.active { background: var(--accent); color: #0f0f0f; cursor: pointer; }
+  .btn-save, .btn-del-confirm { background: #333; border: none; font-family: 'DM Mono', monospace; font-size: 0.65rem; color: #666; padding: 12px 28px; cursor: not-allowed; border-radius: 2px; margin-top: 20px; width: 100%; transition: 0.3s; text-align: center; }
+  .btn-save.active, .btn-del-confirm.active { background: var(--accent); color: #0f0f0f; cursor: pointer; }
+  .btn-del-confirm.active { background: #ff5f56; color: #fff; }
+
   #status-toast { position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%); background: var(--surface); border: 1px solid var(--border); color: var(--text); padding: 8px 16px; font-size: 0.7rem; font-family: 'DM Mono', monospace; z-index: 2000; border-radius: 2px; display: none; }
 </style>
 </head>
@@ -129,12 +137,24 @@
   <div class="editor-box" onclick="event.stopPropagation()">
     <div style="display:flex;justify-content:space-between;margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid var(--border)">
       <span style="font-family:'DM Mono',monospace;font-size:0.6rem;color:var(--muted)">NEW ENTRY</span>
-      <button id="closeEditorAction" style="background:none;border:none;color:var(--muted);font-size:1.2rem;cursor:pointer;">✕</button>
+      <button onclick="closeAllOverlays()" style="background:none;border:none;color:var(--muted);font-size:1.2rem;cursor:pointer;">✕</button>
     </div>
     <div class="field"><input id="inp-title" placeholder="标题 (可选)"></div>
     <div class="field"><textarea id="inp-body" placeholder="此时此刻的心情..."></textarea></div>
     <div class="field"><input type="password" id="inp-pass" placeholder="输入口令以同步" style="font-size:0.6rem;"></div>
     <button class="btn-save" id="btn-save-action" disabled>确认并同步</button>
+  </div>
+</div>
+
+<div class="editor-overlay" id="del-overlay">
+  <div class="editor-box" onclick="event.stopPropagation()">
+    <div style="display:flex;justify-content:space-between;margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid var(--border)">
+      <span style="font-family:'DM Mono',monospace;font-size:0.6rem;color:#ff5f56">DELETE CONFIRMATION</span>
+      <button onclick="closeAllOverlays()" style="background:none;border:none;color:var(--muted);font-size:1.2rem;cursor:pointer;">✕</button>
+    </div>
+    <p style="font-size: 0.8rem; margin-bottom: 20px; opacity: 0.7;">此操作将永久从云端抹除该条记忆。</p>
+    <div class="field"><input type="password" id="del-inp-pass" placeholder="输入口令以确认" style="font-size:0.6rem;"></div>
+    <button class="btn-del-confirm" id="btn-del-action" disabled>确认抹除</button>
   </div>
 </div>
 
@@ -147,26 +167,28 @@
   const db = firebase.firestore();
   
   let allEntries = []; 
+  let pendingDelId = null;
+
   const toggleSearch = document.getElementById('toggleSearch');
   const searchArea = document.getElementById('searchArea');
   const searchInput = document.getElementById('inline-search');
   const resultsPanel = document.getElementById('search-results-panel');
 
+  function closeAllOverlays() {
+    document.querySelectorAll('.editor-overlay').forEach(o => o.classList.remove('open'));
+    pendingDelId = null;
+  }
+
   toggleSearch.onclick = (e) => {
     e.stopPropagation();
     const isActive = searchArea.classList.toggle('active');
-    if(isActive) {
-        setTimeout(() => searchInput.focus(), 300);
-    } else {
-        resultsPanel.classList.remove('active');
-        searchInput.value = '';
-    }
+    if(isActive) setTimeout(() => searchInput.focus(), 300);
+    else { resultsPanel.classList.remove('active'); searchInput.value = ''; }
   };
 
   document.addEventListener('click', (e) => {
     if(!e.target.closest('#searchArea') && !e.target.closest('#toggleSearch')) {
-      searchArea.classList.remove('active');
-      resultsPanel.classList.remove('active');
+      searchArea.classList.remove('active'); resultsPanel.classList.remove('active');
     }
   });
 
@@ -196,14 +218,21 @@
   function showToast(msg) { const t = document.getElementById('status-toast'); t.innerText = msg; t.style.display = 'block'; setTimeout(() => t.style.display = 'none', 2000); }
   function setSyncStatus(status) { const bar = document.getElementById('syncBar'); if(status === 'syncing') bar.style.width = '60%'; else if(status === 'done') { bar.style.width = '100%'; setTimeout(() => bar.style.width = '0%', 1000); } }
 
+  // 写作验证
   document.getElementById('inp-pass').oninput = (e) => {
     const btn = document.getElementById('btn-save-action');
     btn.disabled = e.target.value !== MY_PASS;
     btn.classList.toggle('active', !btn.disabled);
   };
 
+  // 删除验证
+  document.getElementById('del-inp-pass').oninput = (e) => {
+    const btn = document.getElementById('btn-del-action');
+    btn.disabled = e.target.value !== MY_PASS;
+    btn.classList.toggle('active', !btn.disabled);
+  };
+
   document.getElementById("writeBtnAction").onclick = () => document.getElementById('overlay').classList.add('open');
-  document.getElementById("closeEditorAction").onclick = () => document.getElementById('overlay').classList.remove('open');
 
   document.getElementById("btn-save-action").onclick = async () => {
     const title = document.getElementById('inp-title').value.trim();
@@ -212,19 +241,38 @@
     setSyncStatus('syncing');
     try {
       await db.collection("posts").add({ title, body, date: new Date().toISOString() });
-      document.getElementById('overlay').classList.remove('open');
+      closeAllOverlays();
       document.getElementById('inp-title').value = ''; document.getElementById('inp-body').value = ''; document.getElementById('inp-pass').value = '';
       showToast("已存档"); setSyncStatus('done');
     } catch(e) { showToast("保存失败"); }
   };
 
-  async function deleteEntry(id) {
-    const p = prompt("输入口令确认删除:");
-    if (p === MY_PASS) {
-      setSyncStatus('syncing');
-      try { await db.collection("posts").doc(id).delete(); showToast("已抹除"); } catch(e) { showToast("删除失败"); }
-    } else if (p !== null) { alert("口令错误"); }
+  // 优雅删除逻辑
+  function handleDeleteClick(btn, id) {
+    if (btn.classList.contains('confirming')) {
+        pendingDelId = id;
+        document.getElementById('del-overlay').classList.add('open');
+        document.getElementById('del-inp-pass').focus();
+    } else {
+        btn.innerText = 'SURE?';
+        btn.classList.add('confirming');
+        setTimeout(() => {
+            btn.innerText = 'DELETE';
+            btn.classList.remove('confirming');
+        }, 3000);
+    }
   }
+
+  document.getElementById("btn-del-action").onclick = async () => {
+    if (!pendingDelId) return;
+    setSyncStatus('syncing');
+    try {
+      await db.collection("posts").doc(pendingDelId).delete();
+      closeAllOverlays();
+      document.getElementById('del-inp-pass').value = '';
+      showToast("已抹除"); setSyncStatus('done');
+    } catch(e) { showToast("删除失败"); }
+  };
 
   db.collection("posts").orderBy("date", "desc").onSnapshot((snap) => {
     allEntries = []; 
@@ -246,7 +294,7 @@
         item.innerHTML = `
           <div class="entry-stamp">
             <div>${timeStr}</div>
-            <div class="del-btn" onclick="deleteEntry('${p.id}')">DELETE</div>
+            <div class="del-btn" onclick="handleDeleteClick(this, '${p.id}')">DELETE</div>
           </div>
           ${p.title ? `<div class="entry-title">${p.title}</div>` : ''}
           <div class="entry-body">${p.body}</div>
