@@ -16,7 +16,6 @@
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
   :root { --accent: #c8a96e; --accent2: #7eb8a4; }
   
-  /* 深色模式变量 - 准备磨砂玻璃效果 */
   body.dark { 
     --bg: #000000; 
     --surface: #0a0a0a; 
@@ -24,11 +23,9 @@
     --text: #e2ddd5; 
     --muted: #444; 
     --overlay-bg: rgba(0,0,0,0.9);
-    /* 磨砂玻璃背景 */
     --search-panel-bg: rgba(10, 10, 10, 0.75); 
   }
   
-  /* 浅色模式变量 - 保持现状 */
   body.light { 
     --bg: #ffffff; 
     --surface: #fcfcfc; 
@@ -47,14 +44,7 @@
   header { padding: calc(60px + env(safe-area-inset-top)) 40px 0; max-width: 700px; margin: 0 auto; display: flex; flex-direction: column; align-items: flex-start; }
   .header-top { width: 100%; display: flex; justify-content: space-between; align-items: baseline; }
   
-  .site-title { 
-    font-family: 'Noto Serif SC', serif; 
-    font-size: 1.5rem; 
-    font-weight: 500; 
-    letter-spacing: 0.15em; 
-    color: var(--accent);
-    text-transform: uppercase;
-  }
+  .site-title { font-family: 'Noto Serif SC', serif; font-size: 1.5rem; font-weight: 500; letter-spacing: 0.15em; color: var(--accent); text-transform: uppercase; }
   .site-meta { font-family: 'DM Mono', monospace; font-size: 0.6rem; color: var(--muted); letter-spacing: 0.2em; }
   
   .search-trigger { cursor: pointer; display: inline-block; transition: transform 0.2s ease; font-style: normal; font-size: 1.2rem; vertical-align: middle; padding: 0 4px; }
@@ -62,65 +52,18 @@
 
   .header-spacer { height: 40px; }
 
-  .search-area { 
-    max-width: 700px; 
-    margin: 0 auto; 
-    padding: 0 40px; 
-    height: 0; 
-    overflow: visible; 
-    opacity: 0; 
-    transition: all 0.3s ease; 
-    position: relative;
-    pointer-events: none;
-  }
+  .search-area { max-width: 700px; margin: 0 auto; padding: 0 40px; height: 0; overflow: visible; opacity: 0; transition: all 0.3s ease; position: relative; pointer-events: none; }
   .search-area.active { height: 45px; opacity: 1; margin-bottom: 20px; pointer-events: auto; }
 
-  .search-box-wrapper { 
-    border-bottom: 1px solid var(--border);
-    padding-bottom: 6px;
-  }
+  .search-box-wrapper { border-bottom: 1px solid var(--border); padding-bottom: 6px; }
+  #inline-search { width: 100%; background: transparent; border: none; font-family: 'Noto Serif SC', serif; font-size: 1rem; color: var(--text); outline: none; }
   
-  #inline-search { 
-    width: 100%; 
-    background: transparent; 
-    border: none; 
-    font-family: 'Noto Serif SC', serif; 
-    font-size: 1rem; 
-    color: var(--text); 
-    outline: none; 
-  }
-  
-  /* 建议 2: 磨砂玻璃搜索结果面板 (深色模式下激活) */
-  #search-results-panel { 
-    position: absolute; 
-    top: 50px; 
-    left: 40px; 
-    right: 40px; 
-    background: var(--search-panel-bg); /* 使用新的变量 */
-    z-index: 9999; 
-    border: 1px solid var(--border); 
-    max-height: 350px; 
-    overflow-y: auto; 
-    display: none; 
-    box-shadow: 0 20px 60px rgba(0,0,0,0.8); 
-    border-radius: 4px;
-    /* 磨砂玻璃效果 */
-    -webkit-backdrop-filter: blur(12px);
-    backdrop-filter: blur(12px);
-  }
+  #search-results-panel { position: absolute; top: 50px; left: 40px; right: 40px; background: var(--search-panel-bg); z-index: 9999; border: 1px solid var(--border); max-height: 350px; overflow-y: auto; display: none; box-shadow: 0 20px 60px rgba(0,0,0,0.8); border-radius: 4px; -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px); }
   #search-results-panel.active { display: block !important; }
-  
-  .search-res-item { 
-    padding: 18px 20px; 
-    border-bottom: 1px solid var(--border); 
-    cursor: pointer; 
-    transition: background 0.2s, transform 0.1s ease; /* 增加点击反馈动画 */
-  }
+  .search-res-item { padding: 18px 20px; border-bottom: 1px solid var(--border); cursor: pointer; transition: background 0.2s, transform 0.1s ease; }
   .search-res-item:last-child { border-bottom: none; }
   .search-res-item:hover { background: rgba(200, 169, 110, 0.1); }
-  /* 点击时的微小缩放反馈 */
   .search-res-item:active { transform: scale(0.98); }
-
   .search-res-date { font-family: 'DM Mono'; font-size: 0.55rem; color: var(--accent); margin-bottom: 5px; }
   .search-res-body { font-size: 0.85rem; opacity: 0.9; line-height: 1.4; }
 
@@ -133,32 +76,17 @@
   .track { position: relative; padding-left: 32px; }
   .track::before { content: ''; position: absolute; left: 0; top: 24px; bottom: 0; width: 1.5px; background: linear-gradient(180deg, var(--accent) 0%, var(--accent2) 60%, transparent 100%); opacity: 0.35; }
   
-  /* 建议 1: 博文项优雅渐显动画 */
-  .entry { 
-    position: relative; 
-    padding: 26px 0 26px 24px; 
-    border-bottom: 1px solid var(--border); 
-    
-    /* 动画初始状态 */
-    opacity: 0; 
-    transform: translateY(10px); /* 轻微向上位移 */
-    
-    /* 动画定义 */
-    animation: entryFadeUp 0.45s cubic-bezier(0.4, 0, 0.2, 1) forwards; 
-    transition: all 0.6s ease; 
-    scroll-margin-top: 140px; 
-  }
-  
-  @keyframes entryFadeUp { 
-    to { 
-      opacity: 1; 
-      transform: translateY(0); 
-    } 
-  }
+  .entry { position: relative; padding: 26px 0 26px 24px; border-bottom: 1px solid var(--border); opacity: 0; transform: translateY(10px); animation: entryFadeUp 0.45s cubic-bezier(0.4, 0, 0.2, 1) forwards; transition: all 0.6s ease; scroll-margin-top: 140px; }
+  @keyframes entryFadeUp { to { opacity: 1; transform: translateY(0); } }
   
   .entry::before { content: ''; position: absolute; left: -4px; top: 33px; width: 7px; height: 7px; border-radius: 50%; background: var(--bg); border: 1.5px solid var(--accent); opacity: 0.65; }
   .entry.highlight-search { border-left: 2px solid var(--accent); background: rgba(200, 169, 110, 0.15); }
+  
+  /* 删除按钮回归与优化 */
   .entry-stamp { font-family: 'DM Mono', monospace; font-size: 0.62rem; color: var(--accent); margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
+  .del-btn { color: var(--muted); cursor: pointer; opacity: 0; transition: opacity 0.3s; font-size: 0.55rem; letter-spacing: 0.1em; padding: 4px 8px; }
+  .entry:hover .del-btn { opacity: 1; }
+  
   .entry-title { font-size: 0.96rem; font-weight: 500; margin-bottom: 9px; }
   .entry-body { font-size: 0.86rem; line-height: 2.1; opacity: 0.75; white-space: pre-wrap; text-align: justify; word-break: break-word; }
   
@@ -246,31 +174,19 @@
     const kw = e.target.value.toLowerCase().trim();
     resultsPanel.innerHTML = '';
     if(!kw) { resultsPanel.classList.remove('active'); return; }
-
-    const res = allEntries.filter(p => 
-        (p.title && p.title.toLowerCase().includes(kw)) || 
-        (p.body && p.body.toLowerCase().includes(kw))
-    );
-
+    const res = allEntries.filter(p => (p.title && p.title.toLowerCase().includes(kw)) || (p.body && p.body.toLowerCase().includes(kw)));
     if(res.length > 0) {
       resultsPanel.classList.add('active');
       res.forEach(p => {
         const d = new Date(p.date);
-        const timeStr = `${d.getFullYear()}.${d.getMonth()+1}.${d.getDate()}`;
         const div = document.createElement('div');
         div.className = 'search-res-item';
-        div.innerHTML = `<div class="search-res-date">${timeStr}</div><div class="search-res-body">${p.body.substring(0, 50)}...</div>`;
+        div.innerHTML = `<div class="search-res-date">${d.getFullYear()}.${d.getMonth()+1}.${d.getDate()}</div><div class="search-res-body">${p.body.substring(0, 50)}...</div>`;
         div.onclick = (ev) => {
             ev.stopPropagation();
             const el = document.getElementById(`entry-${p.id}`);
-            resultsPanel.classList.remove('active');
-            searchInput.value = '';
-            searchArea.classList.remove('active');
-            if (el) {
-                el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                el.classList.add('highlight-search');
-                setTimeout(() => el.classList.remove('highlight-search'), 2500);
-            }
+            resultsPanel.classList.remove('active'); searchInput.value = ''; searchArea.classList.remove('active');
+            if (el) { el.scrollIntoView({ behavior: 'smooth', block: 'center' }); el.classList.add('highlight-search'); setTimeout(() => el.classList.remove('highlight-search'), 2500); }
         };
         resultsPanel.appendChild(div);
       });
@@ -278,11 +194,7 @@
   };
 
   function showToast(msg) { const t = document.getElementById('status-toast'); t.innerText = msg; t.style.display = 'block'; setTimeout(() => t.style.display = 'none', 2000); }
-  function setSyncStatus(status) {
-    const bar = document.getElementById('syncBar');
-    if(status === 'syncing') bar.style.width = '60%';
-    else if(status === 'done') { bar.style.width = '100%'; setTimeout(() => bar.style.width = '0%', 1000); }
-  }
+  function setSyncStatus(status) { const bar = document.getElementById('syncBar'); if(status === 'syncing') bar.style.width = '60%'; else if(status === 'done') { bar.style.width = '100%'; setTimeout(() => bar.style.width = '0%', 1000); } }
 
   document.getElementById('inp-pass').oninput = (e) => {
     const btn = document.getElementById('btn-save-action');
@@ -306,6 +218,14 @@
     } catch(e) { showToast("保存失败"); }
   };
 
+  async function deleteEntry(id) {
+    const p = prompt("输入口令确认删除:");
+    if (p === MY_PASS) {
+      setSyncStatus('syncing');
+      try { await db.collection("posts").doc(id).delete(); showToast("已抹除"); } catch(e) { showToast("删除失败"); }
+    } else if (p !== null) { alert("口令错误"); }
+  }
+
   db.collection("posts").orderBy("date", "desc").onSnapshot((snap) => {
     allEntries = []; 
     const tl = document.getElementById('timeline'); tl.innerHTML = ''; const byYear = {};
@@ -323,7 +243,14 @@
       byYear[year].forEach(p => {
         const d = new Date(p.date); const timeStr = `${d.getFullYear()}.${d.getMonth()+1}.${d.getDate()} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
         const item = document.createElement('div'); item.className = 'entry'; item.id = `entry-${p.id}`;
-        item.innerHTML = `<div class="entry-stamp"><div>${timeStr}</div></div>${p.title ? `<div class="entry-title">${p.title}</div>` : ''}<div class="entry-body">${p.body}</div>`;
+        item.innerHTML = `
+          <div class="entry-stamp">
+            <div>${timeStr}</div>
+            <div class="del-btn" onclick="deleteEntry('${p.id}')">DELETE</div>
+          </div>
+          ${p.title ? `<div class="entry-title">${p.title}</div>` : ''}
+          <div class="entry-body">${p.body}</div>
+        `;
         track.appendChild(item);
       });
       group.appendChild(track); tl.appendChild(group);
