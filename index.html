@@ -27,7 +27,7 @@
   header { padding: calc(60px + env(safe-area-inset-top)) 40px 40px; max-width: 700px; margin: 0 auto; display: flex; justify-content: space-between; align-items: baseline; }
   .site-title { font-size: 1.8rem; font-weight: 300; letter-spacing: 0.05em; color: var(--accent); }
   
-  /* 放大镜精准靠右对齐逻辑 */
+  /* 修正后的右对齐逻辑 */
   .site-meta { font-family: 'DM Mono', monospace; font-size: 0.6rem; color: var(--muted); letter-spacing: 0.2em; display: flex; align-items: baseline; }
   .year-wrapper { position: relative; display: inline-block; }
   .search-trigger { 
@@ -37,12 +37,13 @@
   .search-trigger:hover { color: var(--accent); opacity: 1; }
   .search-trigger svg { width: 13px; height: 13px; stroke-width: 2.5; }
 
-  /* 搜索框 */
+  /* 搜索框区域 */
   .search-area { max-width: 700px; margin: -20px auto 20px; padding: 0 40px; height: 0; overflow: hidden; opacity: 0; transition: all 0.4s ease; }
   .search-area.active { height: 45px; opacity: 1; }
   .search-box-wrapper { border-bottom: 1px solid var(--border); padding: 5px 0; }
   #inline-search { width: 100%; background: transparent; border: none; font-family: inherit; font-size: 0.85rem; color: var(--text); outline: none; }
 
+  /* 以下保持你原始页面的所有样式 */
   .container { max-width: 700px; margin: 0 auto; padding: 0 40px; }
   .year-group { padding-top: 40px; }
   .year-row { display: flex; align-items: center; gap: 14px; margin-bottom: 10px; }
@@ -137,6 +138,7 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 <script>
+  // 核心 Firebase 配置及原始逻辑
   const firebaseConfig = { apiKey: "AIzaSyDwQIoCm17ldB3kUeNCpalpEM8o3DS1mcI", authDomain: "ming-s-blog.firebaseapp.com", projectId: "ming-s-blog", appId: "1:513661582669:web:99dad676630deb35ef8b04" };
   const MY_PASS = "ming2026";
   firebase.initializeApp(firebaseConfig);
@@ -157,6 +159,7 @@
     if(active) setTimeout(() => document.getElementById('inline-search').focus(), 200);
   };
 
+  // 保持原始的编辑器逻辑
   document.getElementById('inp-pass').oninput = (e) => {
     const btn = document.getElementById('btn-save-action');
     if(e.target.value === MY_PASS) { btn.classList.add('active'); btn.disabled = false; }
@@ -204,7 +207,7 @@
     } else { showToast("口令错误"); }
   };
 
-  // 找回最核心的数据渲染逻辑
+  // 恢复最核心的数据监听逻辑，确保内容显示！
   db.collection("posts").orderBy("date", "desc").onSnapshot((snap) => {
     const tl = document.getElementById('timeline'); tl.innerHTML = ''; const byYear = {};
     snap.forEach(docSnap => {
