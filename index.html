@@ -24,63 +24,43 @@
   .sync-bar { width: 0%; height: 100%; background: var(--accent); transition: width 0.3s; }
   .sync-text { position: fixed; top: env(safe-area-inset-top, 12px); left: 50%; transform: translateX(-50%); font-family: 'DM Mono', monospace; font-size: 0.5rem; color: var(--muted); letter-spacing: 0.1em; opacity: 0.6; pointer-events: none; }
   
-  header { padding: calc(60px + env(safe-area-inset-top)) 40px 20px; max-width: 700px; margin: 0 auto; display: flex; justify-content: space-between; align-items: baseline; }
+  header { padding: calc(60px + env(safe-area-inset-top)) 40px 40px; max-width: 700px; margin: 0 auto; display: flex; justify-content: space-between; align-items: baseline; }
   .site-title { font-size: 1.8rem; font-weight: 300; letter-spacing: 0.05em; color: var(--accent); }
   
-  /* 右侧元数据与搜索图标容器 */
-  .meta-container { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+  /* 调整 meta 容器以放置放大镜 */
+  .site-meta-box { position: relative; display: flex; flex-direction: column; align-items: center; }
   .site-meta { font-family: 'DM Mono', monospace; font-size: 0.6rem; color: var(--muted); letter-spacing: 0.2em; }
   
   .search-trigger { 
-    cursor: pointer; 
-    color: var(--muted); 
-    transition: all 0.3s ease; 
-    display: flex; 
-    align-items: center; 
-    opacity: 0.5;
+    position: absolute; top: -18px; cursor: pointer; color: var(--muted); opacity: 0.4; transition: 0.3s; 
+    display: flex; align-items: center; justify-content: center;
   }
-  .search-trigger:hover { color: var(--accent); opacity: 1; transform: scale(1.1); }
-  .search-trigger svg { width: 14px; height: 14px; stroke-width: 2.5; }
+  .search-trigger:hover { color: var(--accent); opacity: 1; }
+  .search-trigger svg { width: 13px; height: 13px; stroke-width: 2.5; }
 
-  /* 搜索区域逻辑 */
+  /* 搜索区域：绝对定位在 header 下方，不占空间 */
   .search-area { 
-    max-width: 700px; 
-    margin: 0 auto; 
-    padding: 0 40px; 
-    height: 0; 
-    overflow: hidden; 
-    opacity: 0; 
-    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); 
+    max-width: 700px; margin: -20px auto 20px; padding: 0 40px; 
+    height: 0; overflow: hidden; opacity: 0; transition: all 0.4s ease;
   }
-  .search-area.active { 
-    height: 50px; 
-    opacity: 1; 
-    margin-bottom: 20px;
-    overflow: visible;
-  }
-  .search-box-wrapper { border-bottom: 1px solid var(--border); padding: 8px 0; }
+  .search-area.active { height: 45px; opacity: 1; }
+  .search-box-wrapper { border-bottom: 1px solid var(--border); padding: 5px 0; }
   #inline-search { 
-    width: 100%; background: transparent; border: none; 
-    font-family: 'Noto Serif SC', serif; font-size: 0.9rem; 
-    color: var(--text); outline: none; 
+    width: 100%; background: transparent; border: none; font-family: inherit; font-size: 0.85rem; color: var(--text); outline: none; 
   }
 
-  /* 搜索结果 */
   #search-results-panel { 
-    position: absolute; width: calc(100% - 80px); 
-    background: var(--surface); z-index: 100; 
-    border: 1px solid var(--border); max-height: 350px; 
-    overflow-y: auto; display: none; 
-    box-shadow: 0 20px 40px rgba(0,0,0,0.5); border-radius: 4px;
+    position: absolute; width: calc(100% - 80px); background: var(--surface); z-index: 100; border: 1px solid var(--border); 
+    max-height: 300px; overflow-y: auto; display: none; box-shadow: 0 20px 40px rgba(0,0,0,0.5); 
   }
   #search-results-panel.active { display: block; }
-  .search-res-item { padding: 16px 20px; border-bottom: 1px solid var(--border); cursor: pointer; }
+  .search-res-item { padding: 14px 18px; border-bottom: 1px solid var(--border); cursor: pointer; }
   .search-res-item:hover { background: rgba(200, 169, 110, 0.08); }
-  .search-res-date { font-family: 'DM Mono'; font-size: 0.55rem; color: var(--accent); margin-bottom: 4px; }
-  .search-res-body { font-size: 0.75rem; opacity: 0.7; line-height: 1.5; }
+  .search-res-date { font-family: 'DM Mono'; font-size: 0.55rem; color: var(--accent); }
+  .search-res-title { font-size: 0.8rem; opacity: 0.8; margin-top: 2px; }
 
   .container { max-width: 700px; margin: 0 auto; padding: 0 40px; }
-  .year-group { padding-top: 20px; }
+  .year-group { padding-top: 40px; }
   .year-row { display: flex; align-items: center; gap: 14px; margin-bottom: 10px; }
   .year-num { font-family: 'DM Mono', monospace; font-size: 0.6rem; color: var(--muted); letter-spacing: 0.18em; }
   .year-line { flex: 1; height: 1px; background: var(--border); }
@@ -88,11 +68,11 @@
   .track { position: relative; padding-left: 32px; }
   .track::before { content: ''; position: absolute; left: 0; top: 24px; bottom: 0; width: 1.5px; background: linear-gradient(180deg, var(--accent) 0%, var(--accent2) 60%, transparent 100%); opacity: 0.35; }
   
-  .entry { position: relative; padding: 26px 0 26px 24px; border-bottom: 1px solid var(--border); opacity: 0; transform: translateY(10px); animation: fadeUp 0.45s ease forwards; transition: all 0.6s ease; scroll-margin-top: 140px; }
+  .entry { position: relative; padding: 26px 0 26px 24px; border-bottom: 1px solid var(--border); opacity: 0; transform: translateY(10px); animation: fadeUp 0.45s ease forwards; scroll-margin-top: 100px; }
   @keyframes fadeUp { to { opacity: 1; transform: translateY(0); } }
   .entry::before { content: ''; position: absolute; left: -4px; top: 33px; width: 7px; height: 7px; border-radius: 50%; background: var(--bg); border: 1.5px solid var(--accent); opacity: 0.65; }
-  
-  .entry.highlight-search { border-left: 2px solid var(--accent); background: rgba(200, 169, 110, 0.1); }
+  .entry.highlight-search { border-left: 1px solid var(--accent); background: rgba(200, 169, 110, 0.05); }
+
   .entry-stamp { font-family: 'DM Mono', monospace; font-size: 0.62rem; color: var(--accent); margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
   .del-btn { color: var(--muted); cursor: pointer; opacity: 0; transition: opacity 0.3s; font-size: 0.55rem; padding: 4px 8px; }
   .entry:hover .del-btn { opacity: 1; }
@@ -128,8 +108,8 @@
 
 <header>
   <h1 class="site-title">𝓜𝓲𝓷𝓰'𝓼 𝓑𝓵𝓸𝓰</h1>
-  <div class="meta-container">
-    <div class="search-trigger" id="searchTrigger">
+  <div class="site-meta-box">
+    <div class="search-trigger" id="searchBtn">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
         <circle cx="11" cy="11" r="8"></circle>
         <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
@@ -140,12 +120,10 @@
 </header>
 
 <div class="search-area" id="searchArea">
-  <div class="container" style="position:relative; padding:0;">
-    <div class="search-box-wrapper">
-      <input id="inline-search" autocomplete="off" spellcheck="false" placeholder="检索历史记忆...">
-    </div>
-    <div id="search-results-panel"></div>
+  <div class="search-box-wrapper">
+    <input id="inline-search" autocomplete="off" spellcheck="false" placeholder="检索历史内容...">
   </div>
+  <div id="search-results-panel"></div>
 </div>
 
 <div class="container" id="timeline"></div>
@@ -186,10 +164,6 @@
   let pendingDeleteId = null;
   let allEntries = [];
 
-  const searchTrigger = document.getElementById('searchTrigger');
-  const searchArea = document.getElementById('searchArea');
-  const searchInput = document.getElementById('inline-search');
-
   function showToast(msg) { const t = document.getElementById('status-toast'); t.innerText = msg; t.style.display = 'block'; setTimeout(() => t.style.display = 'none', 2000); }
   function setSyncStatus(status) {
     const bar = document.getElementById('syncBar'); const txt = document.getElementById('syncText');
@@ -197,21 +171,22 @@
     else if(status === 'done') { bar.style.width = '100%'; txt.innerText = 'GARDEN SYNCED'; setTimeout(() => { bar.style.width = '0%'; }, 1200); }
   }
 
-  searchTrigger.onclick = (e) => {
-    e.stopPropagation();
-    const isActive = searchArea.classList.toggle('active');
-    if (isActive) setTimeout(() => searchInput.focus(), 200);
-  };
+  // 搜索展开交互
+  const searchBtn = document.getElementById('searchBtn');
+  const searchArea = document.getElementById('searchArea');
+  const searchInput = document.getElementById('inline-search');
 
-  function closeSearch() {
-    searchArea.classList.remove('active');
-    document.getElementById('search-results-panel').classList.remove('active');
-    searchInput.value = '';
-  }
+  searchBtn.onclick = (e) => {
+    e.stopPropagation();
+    const active = searchArea.classList.toggle('active');
+    if(active) setTimeout(() => searchInput.focus(), 200);
+  };
 
   function jumpToEntry(id) {
     const el = document.getElementById(`entry-${id}`);
-    closeSearch();
+    searchArea.classList.remove('active');
+    document.getElementById('search-results-panel').classList.remove('active');
+    searchInput.value = '';
     if (el) {
         el.scrollIntoView({ behavior: 'smooth', block: 'center' });
         el.classList.add('highlight-search');
@@ -236,7 +211,7 @@
         const d = new Date(p.date);
         const div = document.createElement('div');
         div.className = 'search-res-item';
-        div.innerHTML = `<div class="search-res-date">${d.getFullYear()}.${d.getMonth()+1}.${d.getDate()}</div><div class="search-res-body">${p.title || p.body.substring(0,60)}...</div>`;
+        div.innerHTML = `<div class="search-res-date">${d.getFullYear()}.${d.getMonth()+1}.${d.getDate()}</div><div class="search-res-title">${p.title || p.body.substring(0,40)}...</div>`;
         div.onclick = () => jumpToEntry(p.id);
         panel.appendChild(div);
       });
@@ -244,7 +219,10 @@
   };
 
   document.addEventListener('click', (e) => {
-    if(!e.target.closest('.search-area') && !e.target.closest('#searchTrigger')) closeSearch();
+    if(!e.target.closest('.search-area') && !e.target.closest('#searchBtn')) {
+      searchArea.classList.remove('active');
+      document.getElementById('search-results-panel').classList.remove('active');
+    }
   });
 
   document.getElementById('inp-pass').oninput = (e) => {
@@ -282,13 +260,15 @@
 
   document.getElementById('confirmDeleteBtn').onclick = async () => {
     if (document.getElementById('del-pass-input').value === MY_PASS) {
-      setSyncStatus('syncing');
-      try {
-        await db.collection("posts").doc(pendingDeleteId).delete();
-        document.getElementById('confirmOverlay').style.display = 'none';
-        document.getElementById('del-pass-input').value = '';
-        showToast("记忆已抹除"); setSyncStatus('done');
-      } catch(e) { showToast("移除失败"); }
+      if (pendingDeleteId) {
+        setSyncStatus('syncing');
+        try {
+          await db.collection("posts").doc(pendingDeleteId).delete();
+          document.getElementById('confirmOverlay').style.display = 'none';
+          document.getElementById('del-pass-input').value = '';
+          showToast("记忆已抹除"); setSyncStatus('done');
+        } catch(e) { showToast("移除失败"); }
+      }
     } else { showToast("口令错误"); }
   };
 
@@ -296,7 +276,8 @@
     allEntries = [];
     const tl = document.getElementById('timeline'); tl.innerHTML = ''; const byYear = {};
     snap.forEach(docSnap => {
-      const data = docSnap.data(); allEntries.push({ id: docSnap.id, ...data });
+      const data = docSnap.data(); 
+      allEntries.push({ id: docSnap.id, ...data });
       const y = new Date(data.date).getFullYear();
       if (!byYear[y]) byYear[y] = []; byYear[y].push({ id: docSnap.id, ...data });
     });
@@ -315,7 +296,10 @@
     setSyncStatus('done');
   });
 
-  const updateTheme = () => { const h = new Date().getHours(); document.body.className = (h < 6 || h >= 18) ? 'dark' : 'light'; };
+  const updateTheme = () => { 
+    const h = new Date().getHours(); 
+    document.body.className = (h < 6 || h >= 18) ? 'dark' : 'light'; 
+  };
   updateTheme(); setInterval(updateTheme, 60000);
 </script>
 </body>
