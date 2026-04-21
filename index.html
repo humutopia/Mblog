@@ -15,50 +15,59 @@
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
   :root { --accent: #c8a96e; --accent2: #7eb8a4; }
-  body.dark { --bg: #000000; --surface: #0f0f0f; --border: #1a1a1a; --text: #e2ddd5; --muted: #555; --search-bg: #111; --overlay-bg: rgba(0,0,0,0.9); }
-  body.light { --bg: #ffffff; --surface: #f7f7f7; --border: #eeeeee; --text: #222222; --muted: #999; --search-bg: #f0f0f0; --overlay-bg: rgba(255,255,255,0.9); }
+  body.dark { --bg: #000000; --surface: #0f0f0f; --border: #1a1a1a; --text: #e2ddd5; --muted: #555; --search-bg: rgba(255,255,255,0.05); --overlay-bg: rgba(0,0,0,0.9); }
+  body.light { --bg: #ffffff; --surface: #f7f7f7; --border: #eeeeee; --text: #222222; --muted: #999; --search-bg: rgba(0,0,0,0.03); --overlay-bg: rgba(255,255,255,0.9); }
   
   body { background: var(--bg); color: var(--text); font-family: 'Noto Serif SC', serif; min-height: 100vh; padding-bottom: calc(120px + env(safe-area-inset-bottom)); transition: background 0.4s ease; overflow-x: hidden; }
   
   .sync-indicator { position: fixed; top: 0; left: 0; width: 100%; height: 2px; z-index: 2000; background: transparent; }
   .sync-bar { width: 0%; height: 100%; background: var(--accent); transition: width 0.3s; }
   
-  header { padding: calc(60px + env(safe-area-inset-top)) 40px 20px; max-width: 700px; margin: 0 auto; display: flex; justify-content: space-between; align-items: baseline; }
+  header { padding: calc(60px + env(safe-area-inset-top)) 40px 12px; max-width: 700px; margin: 0 auto; display: flex; justify-content: space-between; align-items: baseline; }
   .site-title { font-size: 1.8rem; font-weight: 300; letter-spacing: 0.05em; color: var(--accent); }
   .site-meta { font-family: 'DM Mono', monospace; font-size: 0.6rem; color: var(--muted); letter-spacing: 0.2em; }
   
-  /* 浏览器风格搜索框 */
-  .search-area { max-width: 700px; margin: 0 auto; padding: 0 40px 30px; position: relative; }
+  /* 现代浏览器风格搜索区域 */
+  .search-area { max-width: 700px; margin: 0 auto; padding: 0 40px 35px; position: relative; }
   .search-box-wrapper { 
     display: flex; 
     align-items: center; 
     background: var(--search-bg); 
     border: 1px solid var(--border);
-    border-radius: 8px; /* 类似浏览器搜索框的圆角 */
-    padding: 0 15px;
-    transition: all 0.3s ease;
+    border-radius: 24px; /* 更柔和的圆角 */
+    padding: 0 16px;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: inset 0 1px 2px rgba(0,0,0,0.1);
   }
   .search-box-wrapper:focus-within { 
     border-color: var(--accent); 
-    box-shadow: 0 0 0 3px rgba(200, 169, 110, 0.1);
     background: var(--bg);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15), inset 0 1px 1px rgba(0,0,0,0.05);
   }
   
   #inline-search { 
-    width: 100%; 
+    flex: 1;
     background: transparent; 
     border: none; 
-    padding: 12px 0; 
+    padding: 10px 0; 
     font-family: inherit; 
     font-size: 0.85rem; 
     color: var(--text); 
     outline: none; 
   }
+  .search-icon { 
+    width: 16px; 
+    height: 16px; 
+    color: var(--muted); 
+    margin-left: 10px;
+    transition: color 0.3s;
+  }
+  .search-box-wrapper:focus-within .search-icon { color: var(--accent); }
   
   /* 搜索结果面板 */
   #search-results-panel { 
     position: absolute; 
-    top: 55px; 
+    top: 50px; 
     left: 40px; 
     right: 40px; 
     background: var(--surface); 
@@ -67,17 +76,19 @@
     max-height: 400px; 
     overflow-y: auto; 
     display: none; 
-    box-shadow: 0 15px 30px rgba(0,0,0,0.3); 
-    border-radius: 8px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.4); 
+    border-radius: 12px;
+    margin-top: 5px;
   }
   #search-results-panel.active { display: block; }
-  .search-res-item { padding: 15px; border-bottom: 1px solid var(--border); cursor: pointer; }
-  .search-res-item:hover { background: rgba(200, 169, 110, 0.05); }
+  .search-res-item { padding: 16px 20px; border-bottom: 1px solid var(--border); cursor: pointer; transition: background 0.2s; }
+  .search-res-item:last-child { border-bottom: none; }
+  .search-res-item:hover { background: rgba(200, 169, 110, 0.08); }
   .search-res-date { font-family: 'DM Mono'; font-size: 0.55rem; color: var(--accent); margin-bottom: 4px; }
   .search-res-body { font-size: 0.75rem; opacity: 0.8; line-height: 1.5; }
 
   .container { max-width: 700px; margin: 0 auto; padding: 0 40px; }
-  .year-group { padding-top: 40px; }
+  .year-group { padding-top: 30px; }
   .year-row { display: flex; align-items: center; gap: 14px; margin-bottom: 10px; }
   .year-num { font-family: 'DM Mono', monospace; font-size: 0.6rem; color: var(--muted); letter-spacing: 0.18em; }
   .year-line { flex: 1; height: 1px; background: var(--border); }
@@ -133,7 +144,11 @@
 
 <div class="search-area">
   <div class="search-box-wrapper">
-    <input id="inline-search" placeholder="搜索记忆..." autocomplete="off">
+    <input id="inline-search" placeholder="搜索关键词..." autocomplete="off">
+    <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="11" cy="11" r="8"></circle>
+      <line x1="21" y2="16.65" y2="16.65"></line>
+    </svg>
   </div>
   <div id="search-results-panel"></div>
 </div>
