@@ -26,66 +26,20 @@
   header { padding: calc(60px + env(safe-area-inset-top)) 40px 0; max-width: 700px; margin: 0 auto; display: flex; flex-direction: column; align-items: flex-start; }
   .header-top { width: 100%; display: flex; justify-content: space-between; align-items: baseline; }
   
-  /* 标题字体修改：去艺术化，与内容一致 */
-  .site-title { 
-    font-family: 'Noto Serif SC', serif; 
-    font-size: 1.5rem; 
-    font-weight: 500; 
-    letter-spacing: 0.15em; 
-    color: var(--accent);
-    text-transform: uppercase;
-  }
+  .site-title { font-family: 'Noto Serif SC', serif; font-size: 1.5rem; font-weight: 500; letter-spacing: 0.15em; color: var(--accent); text-transform: uppercase; }
   .site-meta { font-family: 'DM Mono', monospace; font-size: 0.6rem; color: var(--muted); letter-spacing: 0.2em; }
   
   .search-trigger { cursor: pointer; display: inline-block; transition: transform 0.2s ease; font-style: normal; font-size: 1.2rem; vertical-align: middle; padding: 0 4px; }
   .search-trigger:hover { transform: scale(1.1); }
 
-  /* 固定间距占位符：确保标题与内容高度恒定 */
   .header-spacer { height: 40px; }
 
-  /* 搜索区域 */
-  .search-area { 
-    max-width: 700px; 
-    margin: 0 auto; 
-    padding: 0 40px; 
-    height: 0; 
-    overflow: visible; 
-    opacity: 0; 
-    transition: all 0.3s ease; 
-    position: relative;
-    pointer-events: none;
-  }
+  .search-area { max-width: 700px; margin: 0 auto; padding: 0 40px; height: 0; overflow: visible; opacity: 0; transition: all 0.3s ease; position: relative; pointer-events: none; }
   .search-area.active { height: 45px; opacity: 1; margin-bottom: 20px; pointer-events: auto; }
-
-  .search-box-wrapper { 
-    border-bottom: 1px solid var(--border);
-    padding-bottom: 6px;
-  }
+  .search-box-wrapper { border-bottom: 1px solid var(--border); padding-bottom: 6px; }
+  #inline-search { width: 100%; background: transparent; border: none; font-family: 'Noto Serif SC', serif; font-size: 1rem; color: var(--text); outline: none; }
   
-  #inline-search { 
-    width: 100%; 
-    background: transparent; 
-    border: none; 
-    font-family: 'Noto Serif SC', serif; 
-    font-size: 1rem; 
-    color: var(--text); 
-    outline: none; 
-  }
-  
-  #search-results-panel { 
-    position: absolute; 
-    top: 50px; 
-    left: 40px; 
-    right: 40px; 
-    background: var(--surface); 
-    z-index: 9999; 
-    border: 1px solid var(--border); 
-    max-height: 350px; 
-    overflow-y: auto; 
-    display: none; 
-    box-shadow: 0 20px 60px rgba(0,0,0,0.8); 
-    border-radius: 4px;
-  }
+  #search-results-panel { position: absolute; top: 50px; left: 40px; right: 40px; background: var(--surface); z-index: 9999; border: 1px solid var(--border); max-height: 350px; overflow-y: auto; display: none; box-shadow: 0 20px 60px rgba(0,0,0,0.8); border-radius: 4px; }
   #search-results-panel.active { display: block !important; }
   .search-res-item { padding: 18px 20px; border-bottom: 1px solid var(--border); cursor: pointer; }
   .search-res-item:hover { background: rgba(200, 169, 110, 0.1); }
@@ -104,6 +58,11 @@
   .entry::before { content: ''; position: absolute; left: -4px; top: 33px; width: 7px; height: 7px; border-radius: 50%; background: var(--bg); border: 1.5px solid var(--accent); opacity: 0.65; }
   .entry.highlight-search { border-left: 2px solid var(--accent); background: rgba(200, 169, 110, 0.15); }
   .entry-stamp { font-family: 'DM Mono', monospace; font-size: 0.62rem; color: var(--accent); margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
+  
+  /* 恢复删除按钮悬停显现 */
+  .del-btn { color: var(--muted); cursor: pointer; opacity: 0; transition: opacity 0.3s; font-size: 0.55rem; padding: 4px 8px; }
+  .entry:hover .del-btn { opacity: 1; }
+  
   .entry-title { font-size: 0.96rem; font-weight: 500; margin-bottom: 9px; }
   .entry-body { font-size: 0.86rem; line-height: 2.1; opacity: 0.75; white-space: pre-wrap; text-align: justify; word-break: break-word; }
   
@@ -113,8 +72,19 @@
   .editor-box { background: var(--surface); width: 100%; max-width: 700px; padding: 28px 36px calc(60px + env(safe-area-inset-bottom)); border-top: 1px solid var(--border); border-radius: 12px 12px 0 0; }
   .field input, .field textarea { width: 100%; background: transparent; border: none; border-bottom: 1px solid var(--border); padding: 12px 0; font-family: inherit; font-size: 0.88rem; color: var(--text); outline: none; }
   .field textarea { min-height: 200px; line-height: 2; }
-  .btn-save { background: #333; border: none; font-family: 'DM Mono', monospace; font-size: 0.65rem; color: #666; padding: 12px 28px; cursor: not-allowed; border-radius: 2px; margin-top: 20px; width: 100%; transition: 0.3s; }
+  .btn-save { background: #333; border: none; font-family: 'DM Mono', monospace; font-size: 0.65rem; color: #666; padding: 12px 28px; cursor: not-allowed; border-radius: 2px; margin-top: 20px; width: 100%; transition: 0.3s; text-align: center; }
   .btn-save.active { background: var(--accent); color: #0f0f0f; cursor: pointer; }
+
+  /* 核心恢复：原版删除确认框样式 */
+  .confirm-overlay { position: fixed; inset: 0; background: var(--overlay-bg); z-index: 1000; display: none; align-items: center; justify-content: center; backdrop-filter: blur(4px); }
+  .confirm-box { background: var(--surface); border: 1px solid var(--border); padding: 30px; width: 300px; text-align: center; border-radius: 8px; box-shadow: 0 20px 50px rgba(0,0,0,0.3); }
+  .confirm-txt { font-size: 0.85rem; margin-bottom: 20px; color: var(--text); font-weight: 300; }
+  .confirm-input { width: 100%; background: var(--bg); border: 1px solid var(--border); padding: 10px; color: var(--text); font-family: 'DM Mono', monospace; font-size: 0.7rem; text-align: center; outline: none; margin-bottom: 20px; border-radius: 4px; }
+  .confirm-btns { display: flex; justify-content: center; gap: 30px; }
+  .confirm-btns button { background: none; border: none; font-family: 'DM Mono', monospace; font-size: 0.65rem; cursor: pointer; letter-spacing: 1px; }
+  .btn-no { color: var(--muted); }
+  .btn-yes { color: var(--accent); font-weight: bold; }
+  
   #status-toast { position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%); background: var(--surface); border: 1px solid var(--border); color: var(--text); padding: 8px 16px; font-size: 0.7rem; font-family: 'DM Mono', monospace; z-index: 2000; border-radius: 2px; display: none; }
 </style>
 </head>
@@ -133,7 +103,7 @@
 
 <div class="search-area" id="searchArea">
   <div class="search-box-wrapper">
-    <input id="inline-search" autocomplete="off" spellcheck="false">
+    <input id="inline-search" autocomplete="off" spellcheck="false" placeholder="SEARCH...">
   </div>
   <div id="search-results-panel"></div>
 </div>
@@ -155,6 +125,17 @@
   </div>
 </div>
 
+<div class="confirm-overlay" id="confirmOverlay">
+  <div class="confirm-box">
+    <div class="confirm-txt">确定抹除这段记忆吗？</div>
+    <input type="password" id="del-pass-input" class="confirm-input" placeholder="输入口令确认">
+    <div class="confirm-btns">
+      <button class="btn-no" id="closeConfirmAction">取消</button>
+      <button class="btn-yes" id="confirmDeleteBtn">确认抹除</button>
+    </div>
+  </div>
+</div>
+
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 <script>
@@ -164,6 +145,9 @@
   const db = firebase.firestore();
   
   let allEntries = []; 
+  let pendingDeleteId = null;
+
+  // 搜索功能
   const toggleSearch = document.getElementById('toggleSearch');
   const searchArea = document.getElementById('searchArea');
   const searchInput = document.getElementById('inline-search');
@@ -172,18 +156,13 @@
   toggleSearch.onclick = (e) => {
     e.stopPropagation();
     const isActive = searchArea.classList.toggle('active');
-    if(isActive) {
-        setTimeout(() => searchInput.focus(), 300);
-    } else {
-        resultsPanel.classList.remove('active');
-        searchInput.value = '';
-    }
+    if(isActive) setTimeout(() => searchInput.focus(), 300);
+    else { resultsPanel.classList.remove('active'); searchInput.value = ''; }
   };
 
   document.addEventListener('click', (e) => {
     if(!e.target.closest('#searchArea') && !e.target.closest('#toggleSearch')) {
-      searchArea.classList.remove('active');
-      resultsPanel.classList.remove('active');
+      searchArea.classList.remove('active'); resultsPanel.classList.remove('active');
     }
   });
 
@@ -191,31 +170,19 @@
     const kw = e.target.value.toLowerCase().trim();
     resultsPanel.innerHTML = '';
     if(!kw) { resultsPanel.classList.remove('active'); return; }
-
-    const res = allEntries.filter(p => 
-        (p.title && p.title.toLowerCase().includes(kw)) || 
-        (p.body && p.body.toLowerCase().includes(kw))
-    );
-
+    const res = allEntries.filter(p => (p.title && p.title.toLowerCase().includes(kw)) || (p.body && p.body.toLowerCase().includes(kw)));
     if(res.length > 0) {
       resultsPanel.classList.add('active');
       res.forEach(p => {
         const d = new Date(p.date);
-        const timeStr = `${d.getFullYear()}.${d.getMonth()+1}.${d.getDate()}`;
         const div = document.createElement('div');
         div.className = 'search-res-item';
-        div.innerHTML = `<div class="search-res-date">${timeStr}</div><div class="search-res-body">${p.body.substring(0, 50)}...</div>`;
+        div.innerHTML = `<div class="search-res-date">${d.getFullYear()}.${d.getMonth()+1}.${d.getDate()}</div><div class="search-res-body">${p.body.substring(0, 50)}...</div>`;
         div.onclick = (ev) => {
             ev.stopPropagation();
             const el = document.getElementById(`entry-${p.id}`);
-            resultsPanel.classList.remove('active');
-            searchInput.value = '';
-            searchArea.classList.remove('active');
-            if (el) {
-                el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                el.classList.add('highlight-search');
-                setTimeout(() => el.classList.remove('highlight-search'), 2500);
-            }
+            resultsPanel.classList.remove('active'); searchInput.value = ''; searchArea.classList.remove('active');
+            if (el) { el.scrollIntoView({ behavior: 'smooth', block: 'center' }); el.classList.add('highlight-search'); setTimeout(() => el.classList.remove('highlight-search'), 2500); }
         };
         resultsPanel.appendChild(div);
       });
@@ -229,6 +196,7 @@
     else if(status === 'done') { bar.style.width = '100%'; setTimeout(() => bar.style.width = '0%', 1000); }
   }
 
+  // 编辑器保存校验
   document.getElementById('inp-pass').oninput = (e) => {
     const btn = document.getElementById('btn-save-action');
     btn.disabled = e.target.value !== MY_PASS;
@@ -237,6 +205,32 @@
 
   document.getElementById("writeBtnAction").onclick = () => document.getElementById('overlay').classList.add('open');
   document.getElementById("closeEditorAction").onclick = () => document.getElementById('overlay').classList.remove('open');
+
+  // 核心恢复：删除逻辑
+  window.askDelete = (id) => {
+    pendingDeleteId = id;
+    document.getElementById('confirmOverlay').style.display = 'flex';
+    document.getElementById('del-pass-input').focus();
+  };
+
+  document.getElementById("closeConfirmAction").onclick = () => { 
+    document.getElementById('confirmOverlay').style.display = 'none'; 
+    document.getElementById('del-pass-input').value = '';
+    pendingDeleteId = null; 
+  };
+
+  document.getElementById('confirmDeleteBtn').onclick = async () => {
+    const inputPass = document.getElementById('del-pass-input').value;
+    if (inputPass === MY_PASS) {
+      setSyncStatus('syncing');
+      try {
+        await db.collection("posts").doc(pendingDeleteId).delete();
+        document.getElementById('confirmOverlay').style.display = 'none';
+        document.getElementById('del-pass-input').value = '';
+        showToast("已抹除"); setSyncStatus('done');
+      } catch(e) { showToast("删除失败"); }
+    } else { showToast("口令错误"); }
+  };
 
   document.getElementById("btn-save-action").onclick = async () => {
     const title = document.getElementById('inp-title').value.trim();
@@ -268,7 +262,7 @@
       byYear[year].forEach(p => {
         const d = new Date(p.date); const timeStr = `${d.getFullYear()}.${d.getMonth()+1}.${d.getDate()} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
         const item = document.createElement('div'); item.className = 'entry'; item.id = `entry-${p.id}`;
-        item.innerHTML = `<div class="entry-stamp"><div>${timeStr}</div></div>${p.title ? `<div class="entry-title">${p.title}</div>` : ''}<div class="entry-body">${p.body}</div>`;
+        item.innerHTML = `<div class="entry-stamp"><div>${timeStr}</div><div class="del-btn" onclick="askDelete('${p.id}')">DELETE</div></div>${p.title ? `<div class="entry-title">${p.title}</div>` : ''}<div class="entry-body">${p.body}</div>`;
         track.appendChild(item);
       });
       group.appendChild(track); tl.appendChild(group);
