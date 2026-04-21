@@ -23,13 +23,23 @@
   .sync-indicator { position: fixed; top: 0; left: 0; width: 100%; height: 2px; z-index: 2000; background: transparent; }
   .sync-bar { width: 0%; height: 100%; background: var(--accent); transition: width 0.3s; }
   
-  /* 拓宽顶部比例 */
-  header { padding: calc(110px + env(safe-area-inset-top)) 40px 10px; max-width: 700px; margin: 0 auto; display: flex; justify-content: space-between; align-items: baseline; }
-  .site-title { font-family: 'Times New Roman', serif; font-size: 1.5rem; font-weight: 500; letter-spacing: 0.15em; color: var(--accent); text-transform: uppercase; }
+  /* 顶部数值替换：恢复 60px 基础留白与 40px 底部间距 */
+  header { 
+    padding: calc(60px + env(safe-area-inset-top)) 40px 40px; 
+    max-width: 700px; 
+    margin: 0 auto; 
+    display: flex; 
+    justify-content: space-between; 
+    align-items: baseline; 
+  }
+  /* 标题字号同步为 1.8rem */
+  .site-title { font-family: 'Times New Roman', serif; font-size: 1.8rem; font-weight: 300; letter-spacing: 0.05em; color: var(--accent); text-transform: uppercase; }
   .site-meta { font-family: 'DM Mono', monospace; font-size: 0.6rem; color: var(--muted); letter-spacing: 0.2em; }
   
   .search-trigger { cursor: pointer; display: inline-block; font-style: normal; font-size: 1.2rem; vertical-align: middle; padding: 0 4px; }
-  .header-spacer { height: 70px; }
+  
+  /* 间距层同步调整 */
+  .header-spacer { height: 40px; }
 
   /* 搜索区域 */
   .search-area { max-width: 700px; margin: 0 auto; padding: 0 40px; height: 0; overflow: visible; opacity: 0; transition: all 0.3s ease; position: relative; pointer-events: none; }
@@ -42,11 +52,11 @@
   .search-res-item { padding: 18px 20px; border-bottom: 1px solid var(--border); cursor: pointer; }
   .search-res-item:hover { background: rgba(200, 169, 110, 0.05); }
 
-  /* 【修复】跳转后的高亮显示样式 */
+  /* 跳转后的高亮显示样式 */
   .entry.highlight-search { 
     background: rgba(200, 169, 110, 0.12); 
     border-left: 2px solid var(--accent);
-    padding-left: 22px; /* 补偿边框宽度 */
+    padding-left: 22px; 
     transition: background 0.5s ease;
   }
 
@@ -174,7 +184,6 @@
         div.className = 'search-res-item';
         div.innerHTML = `<div style="font-family:'DM Mono';font-size:0.55rem;color:var(--accent);margin-bottom:5px;">${d.getFullYear()}.${d.getMonth()+1}.${d.getDate()}</div><div style="font-size:0.85rem;opacity:0.9;">${p.body.substring(0, 50)}...</div>`;
         
-        // 【修复】处理搜索点击逻辑
         div.onclick = (ev) => {
             ev.stopPropagation();
             const el = document.getElementById(`entry-${p.id}`);
