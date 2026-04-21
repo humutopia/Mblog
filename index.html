@@ -23,16 +23,17 @@
   .sync-indicator { position: fixed; top: 0; left: 0; width: 100%; height: 2px; z-index: 2000; background: transparent; }
   .sync-bar { width: 0%; height: 100%; background: var(--accent); transition: width 0.3s; }
   
-  /* 仅修正此处的数值，拉开顶部距离，拒绝紧凑 */
-  header { padding: calc(70px + env(safe-area-inset-top)) 40px 15px; max-width: 700px; margin: 0 auto; display: flex; flex-direction: column; align-items: flex-start; }
+  /* 【还原】完全对照 index.html 原文件的顶部间距 */
+  header { padding: calc(60px + env(safe-area-inset-top)) 40px 40px; max-width: 700px; margin: 0 auto; display: flex; flex-direction: column; align-items: flex-start; }
   .header-top { width: 100%; display: flex; justify-content: space-between; align-items: baseline; }
   
   .site-title { font-family: 'Times New Roman', serif; font-size: 1.5rem; font-weight: 500; letter-spacing: 0.15em; color: var(--accent); text-transform: uppercase; }
   .site-meta { font-family: 'DM Mono', monospace; font-size: 0.6rem; color: var(--muted); letter-spacing: 0.2em; }
-  .search-trigger { cursor: pointer; display: inline-block; transition: transform 0.2s ease; font-style: normal; font-size: 1.2rem; vertical-align: middle; padding: 0 4px; }
   
-  /* 增加标题与内容之间的呼吸感 */
-  .header-spacer { height: 50px; }
+  .search-trigger { cursor: pointer; display: inline-block; font-style: normal; font-size: 1.2rem; vertical-align: middle; padding: 0 4px; }
+
+  /* 【还原】将此间距取消或保持与原文件一致的节奏 */
+  .header-spacer { height: 0px; }
 
   .search-area { max-width: 700px; margin: 0 auto; padding: 0 40px; height: 0; overflow: visible; opacity: 0; transition: all 0.3s ease; position: relative; pointer-events: none; }
   .search-area.active { height: 45px; opacity: 1; margin-bottom: 25px; pointer-events: auto; }
