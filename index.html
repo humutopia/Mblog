@@ -23,7 +23,6 @@
   .sync-indicator { position: fixed; top: 0; left: 0; width: 100%; height: 2px; z-index: 2000; background: transparent; }
   .sync-bar { width: 0%; height: 100%; background: var(--accent); transition: width 0.3s; }
   
-  /* 头部间距调整 */
   header { padding: calc(60px + env(safe-area-inset-top)) 40px 0; max-width: 700px; margin: 0 auto; display: flex; flex-direction: column; align-items: flex-start; }
   .header-top { width: 100%; display: flex; justify-content: space-between; align-items: baseline; }
   .site-title { font-size: 1.8rem; font-weight: 300; letter-spacing: 0.05em; color: var(--accent); }
@@ -32,19 +31,19 @@
   .search-trigger { cursor: pointer; display: inline-block; transition: transform 0.2s ease; font-style: normal; font-size: 1.2rem; vertical-align: middle; padding: 0 4px; }
   .search-trigger:hover { transform: scale(1.2); }
 
-  /* 搜索区域 - 增加 margin 保证内容高度 */
+  /* 搜索区域 - 移除提示词，优化间距 */
   .search-area { 
     max-width: 700px; 
-    margin: 20px auto 30px; /* 增加上下边距，恢复视觉高度 */
+    margin: 0 auto; 
     padding: 0 40px; 
     height: 0; 
     overflow: visible; 
     opacity: 0; 
-    transition: all 0.4s ease; 
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); 
     position: relative;
     pointer-events: none;
   }
-  .search-area.active { height: 50px; opacity: 1; pointer-events: auto; }
+  .search-area.active { height: 60px; opacity: 1; margin-top: 25px; margin-bottom: 25px; pointer-events: auto; }
 
   .search-box-wrapper { 
     border-bottom: 1px solid var(--border);
@@ -55,7 +54,7 @@
     width: 100%; 
     background: transparent; 
     border: none; 
-    font-family: 'Noto Serif SC', serif; /* 字体与内容保持一致 */
+    font-family: 'Noto Serif SC', serif; 
     font-size: 1rem; 
     color: var(--text); 
     outline: none; 
@@ -82,7 +81,6 @@
   .search-res-date { font-family: 'DM Mono'; font-size: 0.55rem; color: var(--accent); margin-bottom: 5px; }
   .search-res-body { font-size: 0.85rem; opacity: 0.9; line-height: 1.4; }
 
-  /* 内容容器 */
   .container { max-width: 700px; margin: 0 auto; padding: 0 40px; }
   .year-group { padding-top: 10px; }
   .year-row { display: flex; align-items: center; gap: 14px; margin-bottom: 10px; }
@@ -95,8 +93,6 @@
   .entry::before { content: ''; position: absolute; left: -4px; top: 33px; width: 7px; height: 7px; border-radius: 50%; background: var(--bg); border: 1.5px solid var(--accent); opacity: 0.65; }
   .entry.highlight-search { border-left: 2px solid var(--accent); background: rgba(200, 169, 110, 0.15); }
   .entry-stamp { font-family: 'DM Mono', monospace; font-size: 0.62rem; color: var(--accent); margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
-  .del-btn { color: var(--muted); cursor: pointer; opacity: 0; transition: opacity 0.3s; font-size: 0.55rem; padding: 4px 8px; }
-  .entry:hover .del-btn { opacity: 1; }
   .entry-title { font-size: 0.96rem; font-weight: 500; margin-bottom: 9px; }
   .entry-body { font-size: 0.86rem; line-height: 2.1; opacity: 0.75; white-space: pre-wrap; text-align: justify; word-break: break-word; }
   
@@ -124,7 +120,7 @@
 
 <div class="search-area" id="searchArea">
   <div class="search-box-wrapper">
-    <input id="inline-search" autocomplete="off" spellcheck="false" placeholder="在此检索记忆...">
+    <input id="inline-search" autocomplete="off" spellcheck="false">
   </div>
   <div id="search-results-panel"></div>
 </div>
