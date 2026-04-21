@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>Ming's Blog</title>
+<title>𝓜𝓲𝓷𝓰'𝓼 𝓑𝓵𝓸𝓰</title>
 
 <link rel="manifest" href="./manifest.json">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -15,73 +15,52 @@
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
   :root { --accent: #c8a96e; --accent2: #7eb8a4; }
-  body.dark { --bg: #000000; --surface: #0a0a0a; --border: #1a1a1a; --text: #e2ddd5; --muted: #444; --overlay-bg: rgba(0,0,0,0.9); }
-  body.light { --bg: #ffffff; --surface: #fcfcfc; --border: #eeeeee; --text: #222222; --muted: #bbb; --overlay-bg: rgba(255,255,255,0.9); }
+  /* 确保背景色是纯净的，没有杂色 */
+  body.dark { --bg: #000000; --surface: #0a0a0a; --border: #1a1a1a; --text: #e2ddd5; --muted: #555; --overlay-bg: rgba(0,0,0,0.9); }
+  body.light { --bg: #ffffff; --surface: #fcfcfc; --border: #eeeeee; --text: #222222; --muted: #999; --overlay-bg: rgba(255,255,255,0.9); }
   
   body { background: var(--bg); color: var(--text); font-family: 'Noto Serif SC', serif; min-height: 100vh; padding-bottom: calc(120px + env(safe-area-inset-bottom)); transition: background 0.4s ease; overflow-x: hidden; }
   
+  /* 状态栏文字微调 */
   .sync-indicator { position: fixed; top: 0; left: 0; width: 100%; height: 2px; z-index: 2000; background: transparent; }
   .sync-bar { width: 0%; height: 100%; background: var(--accent); transition: width 0.3s; }
+  .sync-text { position: fixed; top: env(safe-area-inset-top, 12px); left: 50%; transform: translateX(-50%); font-family: 'DM Mono', monospace; font-size: 0.5rem; color: var(--muted); letter-spacing: 0.1em; opacity: 0.6; pointer-events: none; }
   
-  /* 顶部数值替换：恢复 60px 基础留白与 40px 底部间距 */
-  header { 
-    padding: calc(60px + env(safe-area-inset-top)) 40px 40px; 
-    max-width: 700px; 
-    margin: 0 auto; 
-    display: flex; 
-    justify-content: space-between; 
-    align-items: baseline; 
-  }
-  /* 标题字号同步为 1.8rem */
-  .site-title { font-family: 'Times New Roman', serif; font-size: 1.8rem; font-weight: 300; letter-spacing: 0.05em; color: var(--accent); text-transform: uppercase; }
+  /* 调整顶部间距，确保在没有色条的情况下，内容依然优雅 */
+  header { padding: calc(60px + env(safe-area-inset-top)) 40px 40px; max-width: 700px; margin: 0 auto; display: flex; justify-content: space-between; align-items: baseline; }
+  .site-title { font-size: 1.8rem; font-weight: 300; letter-spacing: 0.05em; color: var(--accent); }
   .site-meta { font-family: 'DM Mono', monospace; font-size: 0.6rem; color: var(--muted); letter-spacing: 0.2em; }
   
-  .search-trigger { cursor: pointer; display: inline-block; font-style: normal; font-size: 1.2rem; vertical-align: middle; padding: 0 4px; }
-  
-  /* 间距层同步调整 */
-  .header-spacer { height: 40px; }
-
-  /* 搜索区域 */
-  .search-area { max-width: 700px; margin: 0 auto; padding: 0 40px; height: 0; overflow: visible; opacity: 0; transition: all 0.3s ease; position: relative; pointer-events: none; }
-  .search-area.active { height: 45px; opacity: 1; margin-bottom: 30px; pointer-events: auto; }
-  .search-box-wrapper { border-bottom: 1px solid var(--border); padding-bottom: 6px; }
-  #inline-search { width: 100%; background: transparent; border: none; font-family: 'Noto Serif SC', serif; font-size: 1rem; color: var(--text); outline: none; }
-  
-  #search-results-panel { position: absolute; top: 50px; left: 40px; right: 40px; background: var(--surface); z-index: 9999; border: 1px solid var(--border); max-height: 350px; overflow-y: auto; display: none; box-shadow: 0 20px 60px rgba(0,0,0,0.8); border-radius: 4px; }
-  #search-results-panel.active { display: block !important; }
-  .search-res-item { padding: 18px 20px; border-bottom: 1px solid var(--border); cursor: pointer; }
-  .search-res-item:hover { background: rgba(200, 169, 110, 0.05); }
-
-  /* 跳转后的高亮显示样式 */
-  .entry.highlight-search { 
-    background: rgba(200, 169, 110, 0.12); 
-    border-left: 2px solid var(--accent);
-    padding-left: 22px; 
-    transition: background 0.5s ease;
-  }
-
   .container { max-width: 700px; margin: 0 auto; padding: 0 40px; }
-  .year-group { padding-top: 10px; }
+  .year-group { padding-top: 40px; }
   .year-row { display: flex; align-items: center; gap: 14px; margin-bottom: 10px; }
   .year-num { font-family: 'DM Mono', monospace; font-size: 0.6rem; color: var(--muted); letter-spacing: 0.18em; }
   .year-line { flex: 1; height: 1px; background: var(--border); }
+  
   .track { position: relative; padding-left: 32px; }
   .track::before { content: ''; position: absolute; left: 0; top: 24px; bottom: 0; width: 1.5px; background: linear-gradient(180deg, var(--accent) 0%, var(--accent2) 60%, transparent 100%); opacity: 0.35; }
-  .entry { position: relative; padding: 26px 0 26px 24px; border-bottom: 1px solid var(--border); opacity: 0; transform: translateY(10px); animation: fadeUp 0.45s ease forwards; transition: all 0.4s ease; scroll-margin-top: 150px; }
+  
+  .entry { position: relative; padding: 26px 0 26px 24px; border-bottom: 1px solid var(--border); opacity: 0; transform: translateY(10px); animation: fadeUp 0.45s ease forwards; }
   @keyframes fadeUp { to { opacity: 1; transform: translateY(0); } }
   .entry::before { content: ''; position: absolute; left: -4px; top: 33px; width: 7px; height: 7px; border-radius: 50%; background: var(--bg); border: 1.5px solid var(--accent); opacity: 0.65; }
+  
   .entry-stamp { font-family: 'DM Mono', monospace; font-size: 0.62rem; color: var(--accent); margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
   .del-btn { color: var(--muted); cursor: pointer; opacity: 0; transition: opacity 0.3s; font-size: 0.55rem; padding: 4px 8px; }
   .entry:hover .del-btn { opacity: 1; }
+  
   .entry-title { font-size: 0.96rem; font-weight: 500; margin-bottom: 9px; }
   .entry-body { font-size: 0.86rem; line-height: 2.1; opacity: 0.75; white-space: pre-wrap; text-align: justify; word-break: break-word; }
   
   .write-btn { position: fixed; bottom: calc(40px + env(safe-area-inset-bottom)); right: 40px; background: var(--accent); border: none; color: #0f0f0f; font-family: 'DM Mono', monospace; font-size: 0.65rem; padding: 11px 22px; cursor: pointer; border-radius: 2px; z-index: 10; box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
+  
   .editor-overlay { display: none; position: fixed; inset: 0; background: var(--overlay-bg); z-index: 999; align-items: flex-end; justify-content: center; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); }
   .editor-overlay.open { display: flex; }
   .editor-box { background: var(--surface); width: 100%; max-width: 700px; padding: 28px 36px calc(60px + env(safe-area-inset-bottom)); border-top: 1px solid var(--border); border-radius: 12px 12px 0 0; }
+  
   .field input, .field textarea { width: 100%; background: transparent; border: none; border-bottom: 1px solid var(--border); padding: 12px 0; font-family: inherit; font-size: 0.88rem; color: var(--text); outline: none; }
-  .btn-save { background: #333; border: none; font-family: 'DM Mono', monospace; font-size: 0.65rem; color: #666; padding: 12px 28px; cursor: not-allowed; border-radius: 2px; margin-top: 20px; width: 100%; text-align: center; }
+  .field textarea { min-height: 200px; line-height: 2; }
+  
+  .btn-save { background: #333; border: none; font-family: 'DM Mono', monospace; font-size: 0.65rem; color: #666; padding: 12px 28px; cursor: not-allowed; border-radius: 2px; margin-top: 20px; width: 100%; transition: 0.3s; }
   .btn-save.active { background: var(--accent); color: #0f0f0f; cursor: pointer; }
 
   .confirm-overlay { position: fixed; inset: 0; background: var(--overlay-bg); z-index: 1000; display: none; align-items: center; justify-content: center; backdrop-filter: blur(4px); }
@@ -98,21 +77,13 @@
 </head>
 <body class="dark">
 <div class="sync-indicator"><div class="sync-bar" id="syncBar"></div></div>
+<div class="sync-text" id="syncText">GARDEN INITIALIZING</div>
 <div id="status-toast"></div>
 
 <header>
-  <h1 class="site-title">𝐌'𝐒 𝐁𝐋<span class="search-trigger" id="toggleSearch">🔎</span>Ｇ</h1>
+  <h1 class="site-title">𝓜𝓲𝓷𝓰'𝓼 𝓑𝓵𝓸𝓰</h1>
   <div class="site-meta">SINCE 2026</div>
 </header>
-
-<div class="header-spacer"></div>
-
-<div class="search-area" id="searchArea">
-  <div class="search-box-wrapper">
-    <input id="inline-search" autocomplete="off" spellcheck="false" placeholder="搜索记忆...">
-  </div>
-  <div id="search-results-panel"></div>
-</div>
 
 <div class="container" id="timeline"></div>
 
@@ -149,95 +120,27 @@
   const MY_PASS = "ming2026";
   firebase.initializeApp(firebaseConfig);
   const db = firebase.firestore();
-  
-  let allEntries = []; 
   let pendingDeleteId = null;
-
-  const toggleSearch = document.getElementById('toggleSearch');
-  const searchArea = document.getElementById('searchArea');
-  const searchInput = document.getElementById('inline-search');
-  const resultsPanel = document.getElementById('search-results-panel');
-
-  toggleSearch.onclick = (e) => {
-    e.stopPropagation();
-    const isActive = searchArea.classList.toggle('active');
-    if(isActive) setTimeout(() => searchInput.focus(), 300);
-    else { resultsPanel.classList.remove('active'); searchInput.value = ''; }
-  };
-
-  document.addEventListener('click', (e) => {
-    if(!e.target.closest('#searchArea') && !e.target.closest('#toggleSearch')) {
-      searchArea.classList.remove('active'); resultsPanel.classList.remove('active');
-    }
-  });
-
-  searchInput.oninput = (e) => {
-    const kw = e.target.value.toLowerCase().trim();
-    resultsPanel.innerHTML = '';
-    if(!kw) { resultsPanel.classList.remove('active'); return; }
-    const res = allEntries.filter(p => (p.title && p.title.toLowerCase().includes(kw)) || (p.body && p.body.toLowerCase().includes(kw)));
-    if(res.length > 0) {
-      resultsPanel.classList.add('active');
-      res.forEach(p => {
-        const d = new Date(p.date);
-        const div = document.createElement('div');
-        div.className = 'search-res-item';
-        div.innerHTML = `<div style="font-family:'DM Mono';font-size:0.55rem;color:var(--accent);margin-bottom:5px;">${d.getFullYear()}.${d.getMonth()+1}.${d.getDate()}</div><div style="font-size:0.85rem;opacity:0.9;">${p.body.substring(0, 50)}...</div>`;
-        
-        div.onclick = (ev) => {
-            ev.stopPropagation();
-            const el = document.getElementById(`entry-${p.id}`);
-            resultsPanel.classList.remove('active'); searchInput.value = ''; searchArea.classList.remove('active');
-            if (el) {
-                el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                el.classList.add('highlight-search');
-                setTimeout(() => el.classList.remove('highlight-search'), 2500);
-            }
-        };
-        resultsPanel.appendChild(div);
-      });
-    } else { resultsPanel.classList.remove('active'); }
-  };
 
   function showToast(msg) { const t = document.getElementById('status-toast'); t.innerText = msg; t.style.display = 'block'; setTimeout(() => t.style.display = 'none', 2000); }
   function setSyncStatus(status) {
-    const bar = document.getElementById('syncBar');
-    if(status === 'syncing') bar.style.width = '60%';
-    else if(status === 'done') { bar.style.width = '100%'; setTimeout(() => bar.style.width = '0%', 1000); }
+    const bar = document.getElementById('syncBar'); const txt = document.getElementById('syncText');
+    if(status === 'syncing') { bar.style.width = '60%'; txt.innerText = 'SYNCING...'; }
+    else if(status === 'done') { bar.style.width = '100%'; txt.innerText = 'GARDEN SYNCED'; setTimeout(() => { bar.style.width = '0%'; }, 1200); }
   }
 
   document.getElementById('inp-pass').oninput = (e) => {
     const btn = document.getElementById('btn-save-action');
-    btn.disabled = e.target.value !== MY_PASS;
-    btn.classList.toggle('active', !btn.disabled);
+    if(e.target.value === MY_PASS) { btn.classList.add('active'); btn.disabled = false; }
+    else { btn.classList.remove('active'); btn.disabled = true; }
   };
 
   document.getElementById("writeBtnAction").onclick = () => document.getElementById('overlay').classList.add('open');
   document.getElementById("closeEditorAction").onclick = () => document.getElementById('overlay').classList.remove('open');
-
-  window.askDelete = (id) => {
-    pendingDeleteId = id;
-    document.getElementById('confirmOverlay').style.display = 'flex';
-    document.getElementById('del-pass-input').focus();
-  };
-
   document.getElementById("closeConfirmAction").onclick = () => { 
     document.getElementById('confirmOverlay').style.display = 'none'; 
     document.getElementById('del-pass-input').value = '';
     pendingDeleteId = null; 
-  };
-
-  document.getElementById('confirmDeleteBtn').onclick = async () => {
-    const inputPass = document.getElementById('del-pass-input').value;
-    if (inputPass === MY_PASS) {
-      setSyncStatus('syncing');
-      try {
-        await db.collection("posts").doc(pendingDeleteId).delete();
-        document.getElementById('confirmOverlay').style.display = 'none';
-        document.getElementById('del-pass-input').value = '';
-        showToast("已抹除"); setSyncStatus('done');
-      } catch(e) { showToast("删除失败"); }
-    } else { showToast("口令错误"); }
   };
 
   document.getElementById("btn-save-action").onclick = async () => {
@@ -253,31 +156,55 @@
     } catch(e) { showToast("保存失败"); }
   };
 
+  window.askDelete = (id) => {
+    pendingDeleteId = id;
+    document.getElementById('confirmOverlay').style.display = 'flex';
+    document.getElementById('del-pass-input').focus();
+  };
+
+  document.getElementById('confirmDeleteBtn').onclick = async () => {
+    const inputPass = document.getElementById('del-pass-input').value;
+    if (inputPass === MY_PASS) {
+      if (pendingDeleteId) {
+        setSyncStatus('syncing');
+        try {
+          await db.collection("posts").doc(pendingDeleteId).delete();
+          document.getElementById('confirmOverlay').style.display = 'none';
+          document.getElementById('del-pass-input').value = '';
+          showToast("记忆已抹除");
+          setSyncStatus('done');
+        } catch(e) { showToast("移除失败"); }
+      }
+    } else {
+      showToast("口令错误");
+    }
+  };
+
   db.collection("posts").orderBy("date", "desc").onSnapshot((snap) => {
-    allEntries = []; 
     const tl = document.getElementById('timeline'); tl.innerHTML = ''; const byYear = {};
     snap.forEach(docSnap => {
-      const data = docSnap.data(); const entryObj = { id: docSnap.id, ...data };
-      allEntries.push(entryObj);
-      const y = new Date(data.date).getFullYear();
-      if (!byYear[y]) byYear[y] = []; byYear[y].push(entryObj);
+      const data = docSnap.data(); const y = new Date(data.date).getFullYear();
+      if (!byYear[y]) byYear[y] = []; byYear[y].push({ id: docSnap.id, ...data });
     });
     Object.keys(byYear).sort((a,b)=>b-a).forEach(year => {
       const group = document.createElement('div'); group.className = 'year-group';
-      group.innerHTML = `<div class=\"year-row\"><span class=\"year-num\">${year}</span><div class=\"year-line\"></div></div><div class=\"track\"></div>`;
-      const track = group.querySelector('.track');
+      group.innerHTML = `<div class="year-row"><span class="year-num">${year}</span><div class="year-line"></div></div>`;
+      const track = document.createElement('div'); track.className = 'track';
       byYear[year].forEach(p => {
         const d = new Date(p.date); const timeStr = `${d.getFullYear()}.${d.getMonth()+1}.${d.getDate()} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
-        const item = document.createElement('div'); item.className = 'entry'; item.id = `entry-${p.id}`;
-        item.innerHTML = `<div class=\"entry-stamp\"><div>${timeStr}</div><div class=\"del-btn\" onclick=\"askDelete('${p.id}')\">DELETE</div></div>${p.title ? `<div class=\"entry-title\">${p.title}</div>` : ''}<div class=\"entry-body\">${p.body}</div>`;
+        const item = document.createElement('div'); item.className = 'entry';
+        item.innerHTML = `<div class="entry-stamp"><div>${timeStr}</div><div class="del-btn" onclick="askDelete('${p.id}')">DELETE</div></div>${p.title ? `<div class="entry-title">${p.title}</div>` : ''}<div class="entry-body">${p.body}</div>`;
         track.appendChild(item);
       });
-      tl.appendChild(group);
+      group.appendChild(track); tl.appendChild(group);
     });
     setSyncStatus('done');
   });
-
-  const updateTheme = () => { const h = new Date().getHours(); document.body.className = (h < 6 || h >= 18) ? 'dark' : 'light'; };
+  const updateTheme = () => { 
+    const h = new Date().getHours(); 
+    const isDark = (h < 6 || h >= 18);
+    document.body.className = isDark ? 'dark' : 'light'; 
+  };
   updateTheme(); setInterval(updateTheme, 60000);
 </script>
 </body>
