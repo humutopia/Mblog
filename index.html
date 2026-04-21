@@ -27,7 +27,7 @@
   header { padding: calc(60px + env(safe-area-inset-top)) 40px 40px; max-width: 700px; margin: 0 auto; display: flex; justify-content: space-between; align-items: baseline; }
   .site-title { font-size: 1.8rem; font-weight: 300; letter-spacing: 0.05em; color: var(--accent); }
   
-  /* 修正后的右对齐逻辑 */
+  /* 放大镜对齐逻辑 */
   .site-meta { font-family: 'DM Mono', monospace; font-size: 0.6rem; color: var(--muted); letter-spacing: 0.2em; display: flex; align-items: baseline; }
   .year-wrapper { position: relative; display: inline-block; }
   .search-trigger { 
@@ -37,13 +37,19 @@
   .search-trigger:hover { color: var(--accent); opacity: 1; }
   .search-trigger svg { width: 13px; height: 13px; stroke-width: 2.5; }
 
-  /* 搜索框区域 */
-  .search-area { max-width: 700px; margin: -20px auto 20px; padding: 0 40px; height: 0; overflow: hidden; opacity: 0; transition: all 0.4s ease; }
-  .search-area.active { height: 45px; opacity: 1; }
+  /* 搜索交互区 */
+  .search-area { max-width: 700px; margin: -20px auto 20px; padding: 0 40px; height: 0; overflow: hidden; opacity: 0; transition: all 0.4s ease; position: relative; }
+  .search-area.active { height: auto; min-height: 45px; opacity: 1; overflow: visible; }
   .search-box-wrapper { border-bottom: 1px solid var(--border); padding: 5px 0; }
   #inline-search { width: 100%; background: transparent; border: none; font-family: inherit; font-size: 0.85rem; color: var(--text); outline: none; }
 
-  /* 以下保持你原始页面的所有样式 */
+  #search-results-panel { position: absolute; left: 40px; right: 40px; background: var(--surface); z-index: 100; border: 1px solid var(--border); max-height: 300px; overflow-y: auto; display: none; box-shadow: 0 20px 40px rgba(0,0,0,0.5); border-radius: 4px; }
+  #search-results-panel.active { display: block; }
+  .search-res-item { padding: 12px 15px; border-bottom: 1px solid var(--border); cursor: pointer; }
+  .search-res-item:hover { background: rgba(200, 169, 110, 0.1); }
+  .search-res-date { font-family: 'DM Mono'; font-size: 0.55rem; color: var(--accent); }
+  .search-res-title { font-size: 0.8rem; opacity: 0.8; margin-top: 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
   .container { max-width: 700px; margin: 0 auto; padding: 0 40px; }
   .year-group { padding-top: 40px; }
   .year-row { display: flex; align-items: center; gap: 14px; margin-bottom: 10px; }
@@ -51,9 +57,12 @@
   .year-line { flex: 1; height: 1px; background: var(--border); }
   .track { position: relative; padding-left: 32px; }
   .track::before { content: ''; position: absolute; left: 0; top: 24px; bottom: 0; width: 1.5px; background: linear-gradient(180deg, var(--accent) 0%, var(--accent2) 60%, transparent 100%); opacity: 0.35; }
-  .entry { position: relative; padding: 26px 0 26px 24px; border-bottom: 1px solid var(--border); opacity: 0; transform: translateY(10px); animation: fadeUp 0.45s ease forwards; }
+  
+  .entry { position: relative; padding: 26px 0 26px 24px; border-bottom: 1px solid var(--border); opacity: 0; transform: translateY(10px); animation: fadeUp 0.45s ease forwards; scroll-margin-top: 100px; transition: background 0.6s; }
   @keyframes fadeUp { to { opacity: 1; transform: translateY(0); } }
   .entry::before { content: ''; position: absolute; left: -4px; top: 33px; width: 7px; height: 7px; border-radius: 50%; background: var(--bg); border: 1.5px solid var(--accent); opacity: 0.65; }
+  .entry.highlight-flash { background: rgba(200, 169, 110, 0.2); }
+
   .entry-stamp { font-family: 'DM Mono', monospace; font-size: 0.62rem; color: var(--accent); margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
   .del-btn { color: var(--muted); cursor: pointer; opacity: 0; transition: opacity 0.3s; font-size: 0.55rem; padding: 4px 8px; }
   .entry:hover .del-btn { opacity: 1; }
@@ -93,7 +102,7 @@
       <div class="search-trigger" id="searchBtn">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
           <circle cx="11" cy="11" r="8"></circle>
-          <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+          <line x1="21" x2="16.65" y2="16.65"></line>
         </svg>
       </div>
       2026
@@ -103,8 +112,9 @@
 
 <div class="search-area" id="searchArea">
   <div class="search-box-wrapper">
-    <input id="inline-search" autocomplete="off" spellcheck="false" placeholder="检索内容...">
+    <input id="inline-search" autocomplete="off" spellcheck="false" placeholder="检索记忆...">
   </div>
+  <div id="search-results-panel"></div>
 </div>
 
 <div class="container" id="timeline"></div>
@@ -138,12 +148,12 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 <script>
-  // 核心 Firebase 配置及原始逻辑
   const firebaseConfig = { apiKey: "AIzaSyDwQIoCm17ldB3kUeNCpalpEM8o3DS1mcI", authDomain: "ming-s-blog.firebaseapp.com", projectId: "ming-s-blog", appId: "1:513661582669:web:99dad676630deb35ef8b04" };
   const MY_PASS = "ming2026";
   firebase.initializeApp(firebaseConfig);
   const db = firebase.firestore();
   let pendingDeleteId = null;
+  let allEntries = []; // 用于搜索的索引数组
 
   function showToast(msg) { const t = document.getElementById('status-toast'); t.innerText = msg; t.style.display = 'block'; setTimeout(() => t.style.display = 'none', 2000); }
   function setSyncStatus(status) {
@@ -152,27 +162,51 @@
     else if(status === 'done') { bar.style.width = '100%'; txt.innerText = 'GARDEN SYNCED'; setTimeout(() => { bar.style.width = '0%'; }, 1200); }
   }
 
-  // 搜索触发
+  // 搜索逻辑
+  const searchInput = document.getElementById('inline-search');
+  const searchPanel = document.getElementById('search-results-panel');
   document.getElementById('searchBtn').onclick = (e) => {
     e.stopPropagation();
     const active = document.getElementById('searchArea').classList.toggle('active');
-    if(active) setTimeout(() => document.getElementById('inline-search').focus(), 200);
+    if(active) setTimeout(() => searchInput.focus(), 200);
   };
 
-  // 保持原始的编辑器逻辑
+  searchInput.oninput = (e) => {
+    const kw = e.target.value.trim().toLowerCase();
+    searchPanel.innerHTML = '';
+    if(!kw) { searchPanel.classList.remove('active'); return; }
+    const res = allEntries.filter(p => (p.title && p.title.toLowerCase().includes(kw)) || p.body.toLowerCase().includes(kw));
+    if(res.length > 0) {
+      searchPanel.classList.add('active');
+      res.forEach(p => {
+        const item = document.createElement('div');
+        item.className = 'search-res-item';
+        item.innerHTML = `<div class="search-res-date">${new Date(p.date).toLocaleDateString()}</div><div class="search-res-title">${p.title || p.body.substring(0,25)}</div>`;
+        item.onclick = () => {
+          const target = document.getElementById(`entry-${p.id}`);
+          if(target) {
+            target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            target.classList.add('highlight-flash');
+            setTimeout(() => target.classList.remove('highlight-flash'), 2000);
+          }
+          searchPanel.classList.remove('active');
+          document.getElementById('searchArea').classList.remove('active');
+          searchInput.value = '';
+        };
+        searchPanel.appendChild(item);
+      });
+    } else { searchPanel.classList.remove('active'); }
+  };
+
+  // 原始业务逻辑
   document.getElementById('inp-pass').oninput = (e) => {
     const btn = document.getElementById('btn-save-action');
     if(e.target.value === MY_PASS) { btn.classList.add('active'); btn.disabled = false; }
     else { btn.classList.remove('active'); btn.disabled = true; }
   };
-
   document.getElementById("writeBtnAction").onclick = () => document.getElementById('overlay').classList.add('open');
   document.getElementById("closeEditorAction").onclick = () => document.getElementById('overlay').classList.remove('open');
-  document.getElementById("closeConfirmAction").onclick = () => { 
-    document.getElementById('confirmOverlay').style.display = 'none'; 
-    document.getElementById('del-pass-input').value = '';
-    pendingDeleteId = null; 
-  };
+  document.getElementById("closeConfirmAction").onclick = () => { document.getElementById('confirmOverlay').style.display = 'none'; pendingDeleteId = null; };
 
   document.getElementById("btn-save-action").onclick = async () => {
     const title = document.getElementById('inp-title').value.trim();
@@ -184,35 +218,28 @@
       document.getElementById('overlay').classList.remove('open');
       document.getElementById('inp-title').value = ''; document.getElementById('inp-body').value = ''; document.getElementById('inp-pass').value = '';
       showToast("已存档"); setSyncStatus('done');
-    } catch(e) { showToast("保存失败"); }
+    } catch(e) { showToast("失败"); }
   };
 
-  window.askDelete = (id) => {
-    pendingDeleteId = id;
-    document.getElementById('confirmOverlay').style.display = 'flex';
-    document.getElementById('del-pass-input').focus();
-  };
-
+  window.askDelete = (id) => { pendingDeleteId = id; document.getElementById('confirmOverlay').style.display = 'flex'; };
   document.getElementById('confirmDeleteBtn').onclick = async () => {
     if (document.getElementById('del-pass-input').value === MY_PASS) {
-      if (pendingDeleteId) {
-        setSyncStatus('syncing');
-        try {
-          await db.collection("posts").doc(pendingDeleteId).delete();
-          document.getElementById('confirmOverlay').style.display = 'none';
-          document.getElementById('del-pass-input').value = '';
-          showToast("记忆已抹除"); setSyncStatus('done');
-        } catch(e) { showToast("移除失败"); }
-      }
+      await db.collection("posts").doc(pendingDeleteId).delete();
+      document.getElementById('confirmOverlay').style.display = 'none';
+      document.getElementById('del-pass-input').value = '';
+      showToast("抹除成功");
     } else { showToast("口令错误"); }
   };
 
-  // 恢复最核心的数据监听逻辑，确保内容显示！
+  // 数据渲染逻辑 (找回了你丢失的内容！)
   db.collection("posts").orderBy("date", "desc").onSnapshot((snap) => {
+    allEntries = []; // 重置索引
     const tl = document.getElementById('timeline'); tl.innerHTML = ''; const byYear = {};
     snap.forEach(docSnap => {
-      const data = docSnap.data(); const y = new Date(data.date).getFullYear();
-      if (!byYear[y]) byYear[y] = []; byYear[y].push({ id: docSnap.id, ...data });
+      const p = { id: docSnap.id, ...docSnap.data() };
+      allEntries.push(p);
+      const y = new Date(p.date).getFullYear();
+      if (!byYear[y]) byYear[y] = []; byYear[y].push(p);
     });
     Object.keys(byYear).sort((a,b)=>b-a).forEach(year => {
       const group = document.createElement('div'); group.className = 'year-group';
@@ -220,7 +247,7 @@
       const track = document.createElement('div'); track.className = 'track';
       byYear[year].forEach(p => {
         const d = new Date(p.date); const timeStr = `${d.getFullYear()}.${d.getMonth()+1}.${d.getDate()} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
-        const item = document.createElement('div'); item.className = 'entry';
+        const item = document.createElement('div'); item.className = 'entry'; item.id = `entry-${p.id}`;
         item.innerHTML = `<div class="entry-stamp"><div>${timeStr}</div><div class="del-btn" onclick="askDelete('${p.id}')">DELETE</div></div>${p.title ? `<div class="entry-title">${p.title}</div>` : ''}<div class="entry-body">${p.body}</div>`;
         track.appendChild(item);
       });
