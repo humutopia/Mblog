@@ -23,20 +23,21 @@
   .sync-indicator { position: fixed; top: 0; left: 0; width: 100%; height: 2px; z-index: 2000; background: transparent; }
   .sync-bar { width: 0%; height: 100%; background: var(--accent); transition: width 0.3s; }
   
-  /* 【仅修改这里】根据白色图片调整顶部比例：更窄的间距 */
-  header { padding: calc(30px + env(safe-area-inset-top)) 40px 10px; max-width: 700px; margin: 0 auto; display: flex; flex-direction: column; align-items: flex-start; }
+  /* 调整顶部排版比例：增加 padding 解决太紧凑的问题 */
+  header { padding: calc(65px + env(safe-area-inset-top)) 40px 15px; max-width: 700px; margin: 0 auto; display: flex; flex-direction: column; align-items: flex-start; }
   .header-top { width: 100%; display: flex; justify-content: space-between; align-items: baseline; }
   
-  /* 保持之前的标题和字体 */
+  /* 保持标题内容和 🔎 图标 */
   .site-title { font-family: 'Times New Roman', serif; font-size: 1.5rem; font-weight: 500; letter-spacing: 0.15em; color: var(--accent); text-transform: uppercase; }
   .site-meta { font-family: 'DM Mono', monospace; font-size: 0.6rem; color: var(--muted); letter-spacing: 0.2em; }
   
   .search-trigger { cursor: pointer; display: inline-block; transition: transform 0.2s ease; font-style: normal; font-size: 1.2rem; vertical-align: middle; padding: 0 4px; }
   
-  .header-spacer { height: 20px; } /* 缩小间距 */
+  /* 增加标题与搜索区/内容的间距 */
+  .header-spacer { height: 45px; }
 
   .search-area { max-width: 700px; margin: 0 auto; padding: 0 40px; height: 0; overflow: visible; opacity: 0; transition: all 0.3s ease; position: relative; pointer-events: none; }
-  .search-area.active { height: 45px; opacity: 1; margin-bottom: 20px; pointer-events: auto; }
+  .search-area.active { height: 45px; opacity: 1; margin-bottom: 25px; pointer-events: auto; }
   .search-box-wrapper { border-bottom: 1px solid var(--border); padding-bottom: 6px; }
   #inline-search { width: 100%; background: transparent; border: none; font-family: 'Noto Serif SC', serif; font-size: 1rem; color: var(--text); outline: none; }
   
@@ -100,7 +101,7 @@
 
 <div class="search-area" id="searchArea">
   <div class="search-box-wrapper">
-    <input id="inline-search" autocomplete="off" spellcheck="false">
+    <input id="inline-search" autocomplete="off" spellcheck="false" placeholder="搜索记忆...">
   </div>
   <div id="search-results-panel"></div>
 </div>
