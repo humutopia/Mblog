@@ -24,35 +24,29 @@
   .sync-bar { width: 0%; height: 100%; background: var(--accent); transition: width 0.3s; }
   .sync-text { position: fixed; top: env(safe-area-inset-top, 12px); left: 50%; transform: translateX(-50%); font-family: 'DM Mono', monospace; font-size: 0.5rem; color: var(--muted); letter-spacing: 0.1em; opacity: 0.6; pointer-events: none; }
   
+  /* 严格保持原始高度布局 */
   header { padding: calc(60px + env(safe-area-inset-top)) 40px 40px; max-width: 700px; margin: 0 auto; display: flex; justify-content: space-between; align-items: baseline; }
   .site-title { font-size: 1.8rem; font-weight: 300; letter-spacing: 0.05em; color: var(--accent); }
   
-  /* 调整 meta 容器以放置放大镜 */
-  .site-meta-box { position: relative; display: flex; flex-direction: column; align-items: center; }
-  .site-meta { font-family: 'DM Mono', monospace; font-size: 0.6rem; color: var(--muted); letter-spacing: 0.2em; }
+  /* 精确对齐逻辑：将 2026 包裹起来作为锚点 */
+  .site-meta { font-family: 'DM Mono', monospace; font-size: 0.6rem; color: var(--muted); letter-spacing: 0.2em; position: relative; }
+  .meta-year { position: relative; display: inline-block; }
   
   .search-trigger { 
-    position: absolute; top: -18px; cursor: pointer; color: var(--muted); opacity: 0.4; transition: 0.3s; 
+    position: absolute; bottom: 100%; left: 50%; transform: translateX(-50%); 
+    margin-bottom: 6px; cursor: pointer; color: var(--muted); opacity: 0.4; transition: 0.3s; 
     display: flex; align-items: center; justify-content: center;
   }
   .search-trigger:hover { color: var(--accent); opacity: 1; }
   .search-trigger svg { width: 13px; height: 13px; stroke-width: 2.5; }
 
-  /* 搜索区域：绝对定位在 header 下方，不占空间 */
-  .search-area { 
-    max-width: 700px; margin: -20px auto 20px; padding: 0 40px; 
-    height: 0; overflow: hidden; opacity: 0; transition: all 0.4s ease;
-  }
+  /* 搜索交互区：绝对定位不撑开 header */
+  .search-area { max-width: 700px; margin: -20px auto 20px; padding: 0 40px; height: 0; overflow: hidden; opacity: 0; transition: all 0.4s ease; }
   .search-area.active { height: 45px; opacity: 1; }
   .search-box-wrapper { border-bottom: 1px solid var(--border); padding: 5px 0; }
-  #inline-search { 
-    width: 100%; background: transparent; border: none; font-family: inherit; font-size: 0.85rem; color: var(--text); outline: none; 
-  }
+  #inline-search { width: 100%; background: transparent; border: none; font-family: inherit; font-size: 0.85rem; color: var(--text); outline: none; }
 
-  #search-results-panel { 
-    position: absolute; width: calc(100% - 80px); background: var(--surface); z-index: 100; border: 1px solid var(--border); 
-    max-height: 300px; overflow-y: auto; display: none; box-shadow: 0 20px 40px rgba(0,0,0,0.5); 
-  }
+  #search-results-panel { position: absolute; width: calc(100% - 80px); background: var(--surface); z-index: 100; border: 1px solid var(--border); max-height: 300px; overflow-y: auto; display: none; box-shadow: 0 20px 40px rgba(0,0,0,0.5); }
   #search-results-panel.active { display: block; }
   .search-res-item { padding: 14px 18px; border-bottom: 1px solid var(--border); cursor: pointer; }
   .search-res-item:hover { background: rgba(200, 169, 110, 0.08); }
@@ -108,14 +102,15 @@
 
 <header>
   <h1 class="site-title">𝓜𝓲𝓷𝓰'𝓼 𝓑𝓵𝓸𝓰</h1>
-  <div class="site-meta-box">
-    <div class="search-trigger" id="searchBtn">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
-        <circle cx="11" cy="11" r="8"></circle>
-        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-      </svg>
-    </div>
-    <div class="site-meta">SINCE 2026</div>
+  <div class="site-meta">
+    SINCE <span class="meta-year">2026
+      <div class="search-trigger" id="searchBtn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="11" cy="11" r="8"></circle>
+          <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+        </svg>
+      </div>
+    </span>
   </div>
 </header>
 
@@ -171,7 +166,6 @@
     else if(status === 'done') { bar.style.width = '100%'; txt.innerText = 'GARDEN SYNCED'; setTimeout(() => { bar.style.width = '0%'; }, 1200); }
   }
 
-  // 搜索展开交互
   const searchBtn = document.getElementById('searchBtn');
   const searchArea = document.getElementById('searchArea');
   const searchInput = document.getElementById('inline-search');
@@ -276,19 +270,18 @@
     allEntries = [];
     const tl = document.getElementById('timeline'); tl.innerHTML = ''; const byYear = {};
     snap.forEach(docSnap => {
-      const data = docSnap.data(); 
-      allEntries.push({ id: docSnap.id, ...data });
+      const data = docSnap.data(); allEntries.push({ id: docSnap.id, ...data });
       const y = new Date(data.date).getFullYear();
       if (!byYear[y]) byYear[y] = []; byYear[y].push({ id: docSnap.id, ...data });
     });
     Object.keys(byYear).sort((a,b)=>b-a).forEach(year => {
       const group = document.createElement('div'); group.className = 'year-group';
-      group.innerHTML = `<div class="year-row"><span class="year-num">${year}</span><div class="year-line"></div></div>`;
+      group.innerHTML = `<div class=\"year-row\"><span class=\"year-num\">${year}</span><div class=\"year-line\"></div></div>`;
       const track = document.createElement('div'); track.className = 'track';
       byYear[year].forEach(p => {
         const d = new Date(p.date); const timeStr = `${d.getFullYear()}.${d.getMonth()+1}.${d.getDate()} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
         const item = document.createElement('div'); item.className = 'entry'; item.id = `entry-${p.id}`;
-        item.innerHTML = `<div class="entry-stamp"><div>${timeStr}</div><div class="del-btn" onclick="askDelete('${p.id}')">DELETE</div></div>${p.title ? `<div class="entry-title">${p.title}</div>` : ''}<div class="entry-body">${p.body}</div>`;
+        item.innerHTML = `<div class=\"entry-stamp\"><div>${timeStr}</div><div class=\"del-btn\" onclick=\"askDelete('${p.id}')\">DELETE</div></div>${p.title ? `<div class=\"entry-title\">${p.title}</div>` : ''}<div class=\"entry-body\">${p.body}</div>`;
         track.appendChild(item);
       });
       group.appendChild(track); tl.appendChild(group);
@@ -296,10 +289,7 @@
     setSyncStatus('done');
   });
 
-  const updateTheme = () => { 
-    const h = new Date().getHours(); 
-    document.body.className = (h < 6 || h >= 18) ? 'dark' : 'light'; 
-  };
+  const updateTheme = () => { const h = new Date().getHours(); document.body.className = (h < 6 || h >= 18) ? 'dark' : 'light'; };
   updateTheme(); setInterval(updateTheme, 60000);
 </script>
 </body>
