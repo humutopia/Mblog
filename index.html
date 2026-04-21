@@ -24,12 +24,24 @@
   .sync-bar { width: 0%; height: 100%; background: var(--accent); transition: width 0.3s; }
   .sync-text { position: fixed; top: env(safe-area-inset-top, 12px); left: 50%; transform: translateX(-50%); font-family: 'DM Mono', monospace; font-size: 0.5rem; color: var(--muted); letter-spacing: 0.1em; opacity: 0.6; pointer-events: none; }
   
-  header { padding: calc(60px + env(safe-area-inset-top)) 40px 40px; max-width: 700px; margin: 0 auto; display: flex; justify-content: space-between; align-items: baseline; }
+  header { padding: calc(60px + env(safe-area-inset-top)) 40px 10px; max-width: 700px; margin: 0 auto; display: flex; justify-content: space-between; align-items: baseline; }
   .site-title { font-size: 1.8rem; font-weight: 300; letter-spacing: 0.05em; color: var(--accent); }
-  .site-meta { font-family: 'DM Mono', monospace; font-size: 0.6rem; color: var(--muted); letter-spacing: 0.2em; display: flex; align-items: center; gap: 12px; }
+  .site-meta { font-family: 'DM Mono', monospace; font-size: 0.6rem; color: var(--muted); letter-spacing: 0.2em; }
   
-  #search-trigger { cursor: pointer; opacity: 0.6; transition: 0.3s; margin-bottom: -1px; }
-  #search-trigger:hover { opacity: 1; color: var(--accent); }
+  /* 横条搜索框容器 */
+  .search-area { max-width: 700px; margin: 0 auto; padding: 0 40px 30px; position: relative; }
+  .search-input-wrapper { display: flex; align-items: center; border-bottom: 1px solid var(--border); transition: border-color 0.3s; }
+  .search-input-wrapper:focus-within { border-bottom-color: var(--accent); }
+  #inline-search { width: 100%; background: transparent; border: none; padding: 10px 0; font-family: 'Noto Serif SC', serif; font-size: 0.8rem; color: var(--text); outline: none; opacity: 0.6; transition: opacity 0.3s; }
+  #inline-search:focus { opacity: 1; }
+  
+  /* 搜索结果下拉面板 */
+  #search-results-panel { position: absolute; top: 100%; left: 40px; right: 40px; background: var(--surface); z-index: 100; border: 1px solid var(--border); border-top: none; max-height: 400px; overflow-y: auto; display: none; box-shadow: 0 15px 30px rgba(0,0,0,0.3); border-radius: 0 0 4px 4px; }
+  #search-results-panel.active { display: block; }
+  .search-res-item { padding: 15px; border-bottom: 1px solid var(--border); cursor: pointer; transition: background 0.2s; }
+  .search-res-item:hover { background: rgba(200, 169, 110, 0.05); }
+  .search-res-date { font-family: 'DM Mono'; font-size: 0.55rem; color: var(--accent); margin-bottom: 4px; }
+  .search-res-body { font-size: 0.75rem; opacity: 0.8; line-height: 1.5; }
 
   .container { max-width: 700px; margin: 0 auto; padding: 0 40px; }
   .year-group { padding-top: 40px; }
@@ -40,12 +52,11 @@
   .track { position: relative; padding-left: 32px; }
   .track::before { content: ''; position: absolute; left: 0; top: 24px; bottom: 0; width: 1.5px; background: linear-gradient(180deg, var(--accent) 0%, var(--accent2) 60%, transparent 100%); opacity: 0.35; }
   
-  .entry { position: relative; padding: 26px 0 26px 24px; border-bottom: 1px solid var(--border); opacity: 0; transform: translateY(10px); animation: fadeUp 0.45s ease forwards; transition: all 0.6s ease; scroll-margin-top: 100px; }
+  .entry { position: relative; padding: 26px 0 26px 24px; border-bottom: 1px solid var(--border); opacity: 0; transform: translateY(10px); animation: fadeUp 0.45s ease forwards; transition: all 0.6s ease; scroll-margin-top: 120px; }
   @keyframes fadeUp { to { opacity: 1; transform: translateY(0); } }
   .entry::before { content: ''; position: absolute; left: -4px; top: 33px; width: 7px; height: 7px; border-radius: 50%; background: var(--bg); border: 1.5px solid var(--accent); opacity: 0.65; }
   
-  /* 搜索高亮视觉反馈 */
-  .entry.highlight-search { border-left: 2px solid var(--accent); background: rgba(200, 169, 110, 0.1); border-bottom-color: var(--accent); }
+  .entry.highlight-search { border-left: 2px solid var(--accent); background: rgba(200, 169, 110, 0.1); }
 
   .entry-stamp { font-family: 'DM Mono', monospace; font-size: 0.62rem; color: var(--accent); margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
   .del-btn { color: var(--muted); cursor: pointer; opacity: 0; transition: opacity 0.3s; font-size: 0.55rem; padding: 4px 8px; }
@@ -66,10 +77,6 @@
   .btn-save { background: #333; border: none; font-family: 'DM Mono', monospace; font-size: 0.65rem; color: #666; padding: 12px 28px; cursor: not-allowed; border-radius: 2px; margin-top: 20px; width: 100%; transition: 0.3s; }
   .btn-save.active { background: var(--accent); color: #0f0f0f; cursor: pointer; }
 
-  #search-results-box { margin-top: 20px; max-height: 40vh; overflow-y: auto; padding-right: 10px; }
-  #search-results-box::-webkit-scrollbar { width: 3px; }
-  #search-results-box::-webkit-scrollbar-thumb { background: var(--border); }
-
   .confirm-overlay { position: fixed; inset: 0; background: var(--overlay-bg); z-index: 1000; display: none; align-items: center; justify-content: center; backdrop-filter: blur(4px); }
   .confirm-box { background: var(--surface); border: 1px solid var(--border); padding: 30px; width: 300px; text-align: center; border-radius: 8px; box-shadow: 0 20px 50px rgba(0,0,0,0.3); }
   .confirm-txt { font-size: 0.85rem; margin-bottom: 20px; color: var(--text); font-weight: 300; }
@@ -89,14 +96,15 @@
 
 <header>
   <h1 class="site-title">𝓜𝓲𝓷𝓰'𝓼 𝓑𝓵𝓸𝓰</h1>
-  <div class="site-meta">
-    <svg id="search-trigger" onclick="toggleSearch()" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-      <circle cx="11" cy="11" r="8"></circle>
-      <line x1="21" x2="16.65" y2="16.65"></line>
-    </svg>
-    <span>SINCE 2026</span>
-  </div>
+  <div class="site-meta">SINCE 2026</div>
 </header>
+
+<div class="search-area">
+  <div class="search-input-wrapper">
+    <input id="inline-search" placeholder="检索记忆关键词..." autocomplete="off">
+  </div>
+  <div id="search-results-panel"></div>
+</div>
 
 <div class="container" id="timeline"></div>
 
@@ -112,17 +120,6 @@
     <div class="field"><textarea id="inp-body" placeholder="此时此刻的心情..."></textarea></div>
     <div class="field"><input type="password" id="inp-pass" placeholder="输入口令以同步" style="font-size:0.6rem;"></div>
     <button class="btn-save" id="btn-save-action" disabled>确认并同步</button>
-  </div>
-</div>
-
-<div class="editor-overlay" id="searchOverlay">
-  <div class="editor-box" style="align-self: flex-start; margin-top: 10vh; border-radius: 12px;" onclick="event.stopPropagation()">
-    <div style="display:flex;justify-content:space-between;margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid var(--border)">
-      <span style="font-family:'DM Mono',monospace;font-size:0.6rem;color:var(--muted)">SEARCH MEMORIES</span>
-      <button onclick="toggleSearch()" style="background:none;border:none;color:var(--muted);font-size:1.2rem;cursor:pointer;">✕</button>
-    </div>
-    <div class="field"><input id="search-input" placeholder="输入关键词检索..." autocomplete="off"></div>
-    <div id="search-results-box"></div>
   </div>
 </div>
 
@@ -154,59 +151,28 @@
     else if(status === 'done') { bar.style.width = '100%'; txt.innerText = 'GARDEN SYNCED'; setTimeout(() => { bar.style.width = '0%'; }, 1200); }
   }
 
-  function toggleSearch() {
-    const s = document.getElementById('searchOverlay');
-    s.classList.toggle('open');
-    if(s.classList.contains('open')) {
-        document.getElementById('search-input').focus();
-    } else {
-        document.getElementById('search-input').value = '';
-        document.getElementById('search-results-box').innerHTML = '';
-    }
-  }
-
-  // 改进的跳转定位逻辑
+  // 搜索定位
   function jumpToEntry(id) {
-    const targetId = `entry-${id}`;
-    const el = document.getElementById(targetId);
-    
-    // 1. 先关闭遮罩层
-    document.getElementById('searchOverlay').classList.remove('open');
-    
-    // 2. 延迟一点执行滚动，避开遮罩关闭时的 UI 抖动
-    setTimeout(() => {
-        if (el) {
-            el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            
-            // 3. 视觉反馈：高亮闪烁
-            el.classList.add('highlight-search');
-            setTimeout(() => {
-                el.classList.remove('highlight-search');
-            }, 2500);
-        } else {
-            showToast("未找到对应记忆");
-        }
-    }, 300);
-  }
-
-  function closeAllOverlays() {
-    document.getElementById('overlay').classList.remove('open');
-    document.getElementById('searchOverlay').classList.remove('open');
-  }
-
-  document.addEventListener('keydown', (e) => {
-    if (e.key === '/' && !document.querySelector('input:focus') && !document.querySelector('textarea:focus')) {
-        e.preventDefault();
-        toggleSearch();
+    const el = document.getElementById(`entry-${id}`);
+    document.getElementById('search-results-panel').classList.remove('active');
+    document.getElementById('inline-search').value = '';
+    if (el) {
+        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        el.classList.add('highlight-search');
+        setTimeout(() => el.classList.remove('highlight-search'), 2500);
     }
-    if (e.key === 'Escape') closeAllOverlays();
-  });
+  }
 
-  document.getElementById('search-input').oninput = (e) => {
+  // 搜索逻辑
+  document.getElementById('inline-search').oninput = (e) => {
     const kw = e.target.value.toLowerCase().trim();
-    const box = document.getElementById('search-results-box');
-    box.innerHTML = '';
-    if(!kw) return;
+    const panel = document.getElementById('search-results-panel');
+    panel.innerHTML = '';
+    
+    if(!kw) {
+      panel.classList.remove('active');
+      return;
+    }
 
     const res = allEntries.filter(p => 
         (p.title && p.title.toLowerCase().includes(kw)) || 
@@ -214,16 +180,28 @@
         p.date.includes(kw)
     );
 
-    res.forEach(p => {
+    if(res.length > 0) {
+      panel.classList.add('active');
+      res.forEach(p => {
         const d = new Date(p.date);
         const timeStr = `${d.getFullYear()}.${d.getMonth()+1}.${d.getDate()}`;
         const div = document.createElement('div');
-        div.style.cssText = "margin-bottom:20px; padding:12px; border:1px solid var(--border); cursor:pointer; border-radius:4px; background:rgba(255,255,255,0.02);";
-        div.innerHTML = `<div style="font-family:'DM Mono';font-size:0.55rem;color:var(--accent);margin-bottom:4px;">${timeStr}</div><div style="font-size:0.75rem;opacity:0.8;line-height:1.5;">${p.body.substring(0,80)}...</div>`;
+        div.className = 'search-res-item';
+        div.innerHTML = `<div class="search-res-date">${timeStr}</div><div class="search-res-body">${p.body.substring(0,60)}...</div>`;
         div.onclick = () => jumpToEntry(p.id);
-        box.appendChild(div);
-    });
+        panel.appendChild(div);
+      });
+    } else {
+      panel.classList.remove('active');
+    }
   };
+
+  // 点击空白处关闭搜索结果
+  document.addEventListener('click', (e) => {
+    if(!e.target.closest('.search-area')) {
+      document.getElementById('search-results-panel').classList.remove('active');
+    }
+  });
 
   document.getElementById('inp-pass').oninput = (e) => {
     const btn = document.getElementById('btn-save-action');
@@ -246,7 +224,7 @@
     setSyncStatus('syncing');
     try {
       await db.collection("posts").add({ title, body, date: new Date().toISOString() });
-      closeAllOverlays();
+      document.getElementById('overlay').classList.remove('open');
       document.getElementById('inp-title').value = ''; document.getElementById('inp-body').value = ''; document.getElementById('inp-pass').value = '';
       showToast("已存档"); setSyncStatus('done');
     } catch(e) { showToast("保存失败"); }
@@ -255,25 +233,18 @@
   window.askDelete = (id) => {
     pendingDeleteId = id;
     document.getElementById('confirmOverlay').style.display = 'flex';
-    document.getElementById('del-pass-input').focus();
   };
 
   document.getElementById('confirmDeleteBtn').onclick = async () => {
-    const inputPass = document.getElementById('del-pass-input').value;
-    if (inputPass === MY_PASS) {
-      if (pendingDeleteId) {
-        setSyncStatus('syncing');
-        try {
-          await db.collection("posts").doc(pendingDeleteId).delete();
-          document.getElementById('confirmOverlay').style.display = 'none';
-          document.getElementById('del-pass-input').value = '';
-          showToast("记忆已抹除");
-          setSyncStatus('done');
-        } catch(e) { showToast("移除失败"); }
-      }
-    } else {
-      showToast("口令错误");
-    }
+    if (document.getElementById('del-pass-input').value === MY_PASS) {
+      setSyncStatus('syncing');
+      try {
+        await db.collection("posts").doc(pendingDeleteId).delete();
+        document.getElementById('confirmOverlay').style.display = 'none';
+        document.getElementById('del-pass-input').value = '';
+        showToast("记忆已抹除"); setSyncStatus('done');
+      } catch(e) { showToast("移除失败"); }
+    } else { showToast("口令错误"); }
   };
 
   db.collection("posts").orderBy("date", "desc").onSnapshot((snap) => {
@@ -291,9 +262,7 @@
       const track = document.createElement('div'); track.className = 'track';
       byYear[year].forEach(p => {
         const d = new Date(p.date); const timeStr = `${d.getFullYear()}.${d.getMonth()+1}.${d.getDate()} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
-        const item = document.createElement('div'); 
-        item.className = 'entry';
-        item.id = `entry-${p.id}`; // 关键修复：确保渲染时 ID 被正确注入
+        const item = document.createElement('div'); item.className = 'entry'; item.id = `entry-${p.id}`;
         item.innerHTML = `<div class="entry-stamp"><div>${timeStr}</div><div class="del-btn" onclick="askDelete('${p.id}')">DELETE</div></div>${p.title ? `<div class="entry-title">${p.title}</div>` : ''}<div class="entry-body">${p.body}</div>`;
         track.appendChild(item);
       });
@@ -304,10 +273,10 @@
 
   const updateTheme = () => { 
     const h = new Date().getHours(); 
-    const isDark = (h < 6 || h >= 18);
-    document.body.className = isDark ? 'dark' : 'light'; 
+    document.body.className = (h < 6 || h >= 18) ? 'dark' : 'light'; 
   };
   updateTheme(); setInterval(updateTheme, 60000);
 </script>
 </body>
 </html>
+
