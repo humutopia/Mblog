@@ -59,7 +59,6 @@
   .entry.highlight-search { border-left: 2px solid var(--accent); background: rgba(200, 169, 110, 0.15); }
   .entry-stamp { font-family: 'DM Mono', monospace; font-size: 0.62rem; color: var(--accent); margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
   
-  /* 恢复删除按钮悬停显现 */
   .del-btn { color: var(--muted); cursor: pointer; opacity: 0; transition: opacity 0.3s; font-size: 0.55rem; padding: 4px 8px; }
   .entry:hover .del-btn { opacity: 1; }
   
@@ -103,7 +102,7 @@
 
 <div class="search-area" id="searchArea">
   <div class="search-box-wrapper">
-    <input id="inline-search" autocomplete="off" spellcheck="false" placeholder="SEARCH...">
+    <input id="inline-search" autocomplete="off" spellcheck="false">
   </div>
   <div id="search-results-panel"></div>
 </div>
@@ -147,7 +146,6 @@
   let allEntries = []; 
   let pendingDeleteId = null;
 
-  // 搜索功能
   const toggleSearch = document.getElementById('toggleSearch');
   const searchArea = document.getElementById('searchArea');
   const searchInput = document.getElementById('inline-search');
@@ -196,7 +194,6 @@
     else if(status === 'done') { bar.style.width = '100%'; setTimeout(() => bar.style.width = '0%', 1000); }
   }
 
-  // 编辑器保存校验
   document.getElementById('inp-pass').oninput = (e) => {
     const btn = document.getElementById('btn-save-action');
     btn.disabled = e.target.value !== MY_PASS;
@@ -206,7 +203,6 @@
   document.getElementById("writeBtnAction").onclick = () => document.getElementById('overlay').classList.add('open');
   document.getElementById("closeEditorAction").onclick = () => document.getElementById('overlay').classList.remove('open');
 
-  // 核心恢复：删除逻辑
   window.askDelete = (id) => {
     pendingDeleteId = id;
     document.getElementById('confirmOverlay').style.display = 'flex';
