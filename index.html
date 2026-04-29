@@ -1,13 +1,3 @@
-抱歉，我明白你的挫败感了。刚才的代码虽然逻辑上用了 Grid，但在没有指定宽度的情况下，容器会根据内容收缩，导致“看似对齐，实则乱跳”。
-
-**这次我做了两个“暴力”级别的物理对齐修改：**
-
-1.  **固定宽度 + 强制右对齐**：给右侧的 `site-meta` 容器指定了一个足够容纳 `SINCE 2026` 的固定宽度，并使用 `text-align: right`。这样无论内容是什么，它们的右边缘都会死死地撞在同一条垂直线上。
-2.  **放大镜图标对齐**：之前放大镜是一个块级元素，现在我通过 `justify-content: flex-end` 确保图标的边缘和文字的最后一个字母精准对齐。
-
-请再试一次，如果这次右边那条线不是直的，你直接骂我。
-
-```html
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
@@ -33,65 +23,44 @@
   .sync-bar { width: 0%; height: 100%; background: var(--accent); transition: width 0.3s; }
   .sync-text { position: fixed; top: env(safe-area-inset-top, 12px); left: 50%; transform: translateX(-50%); font-family: 'DM Mono', monospace; font-size: 0.5rem; color: var(--muted); opacity: 0.6; pointer-events: none; }
   
-  /* Header 布局重构 */
   header { 
     padding: calc(60px + env(safe-area-inset-top)) 40px 40px; 
     max-width: 700px; 
     margin: 0 auto; 
     display: flex; 
     justify-content: space-between; 
-    align-items: flex-end; 
+    align-items: flex-end; /* 底部对齐主标题和元数据 */
   }
   .site-title { font-size: 1.8rem; font-weight: 300; letter-spacing: 0.05em; color: var(--accent); line-height: 1.1; }
   
-  /* 右侧元数据：固定宽度强制右对齐 */
+  /* 右侧元数据：强制垂直右对齐 */
   .site-meta { 
     display: flex; 
     flex-direction: column; 
-    align-items: flex-end; /* 左右对齐 */
-    justify-content: flex-end;
-    gap: 8px; 
+    align-items: flex-end; /* 关键：所有元素右边缘对齐 */
+    gap: 5px; 
     font-family: 'DM Mono', monospace; 
     color: var(--muted); 
-    width: 100px; /* 固定一个宽度，确保有对齐参照 */
     text-align: right;
   }
   
-  /* 1. 放大镜 */
-  .search-trigger { 
-    cursor: pointer; 
-    opacity: 0.6; 
-    transition: 0.3s; 
-    display: flex; 
-    justify-content: flex-end; /* 内部图标靠右 */
-    width: 100%;
-  }
+  .search-trigger { cursor: pointer; opacity: 0.5; transition: 0.3s; line-height: 0; padding: 2px 0; }
   .search-trigger:hover { opacity: 1; color: var(--accent); }
   .search-trigger svg { width: 13px; height: 13px; stroke: currentColor; }
 
-  /* 2. TOTAL & 3. SINCE */
-  .meta-text { 
+  .meta-item { 
     font-size: 0.55rem; 
-    letter-spacing: 0.12em;
+    letter-spacing: 0.15em;
     line-height: 1; 
-    width: 100%;
-    display: block;
-    white-space: nowrap; 
+    white-space: nowrap;
+    text-transform: uppercase;
   }
 
-  /* 搜索区域 */
-  .search-area { max-width: 700px; margin: -20px auto 20px; padding: 0 40px; height: 0; overflow: hidden; opacity: 0; transition: 0.4s ease; position: relative; }
+  .search-area { max-width: 700px; margin: -20px auto 20px; padding: 0 40px; height: 0; overflow: hidden; opacity: 0; transition: 0.4s ease; }
   .search-area.active { height: auto; min-height: 45px; opacity: 1; }
   .search-box-wrapper { border-bottom: 1px solid var(--border); padding: 5px 0; }
   #inline-search { width: 100%; background: transparent; border: none; font-family: inherit; font-size: 0.85rem; color: var(--text); outline: none; }
-  #search-results-panel { position: absolute; left: 40px; right: 40px; background: var(--surface); z-index: 100; border: 1px solid var(--border); max-height: 300px; overflow-y: auto; display: none; border-radius: 4px; }
-  #search-results-panel.active { display: block; }
-  .search-res-item { padding: 12px 15px; border-bottom: 1px solid var(--border); cursor: pointer; }
-  .search-res-item:hover { background: rgba(200, 169, 110, 0.1); }
-  .search-res-date { font-family: 'DM Mono'; font-size: 0.55rem; color: var(--accent); }
-  .search-res-title { font-size: 0.8rem; opacity: 0.8; margin-top: 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
-  /* 内容容器 */
   .container { max-width: 700px; margin: 0 auto; padding: 0 40px; }
   .year-group { padding-top: 40px; }
   .year-row { display: flex; align-items: center; gap: 14px; margin-bottom: 10px; }
@@ -103,7 +72,6 @@
   .entry { position: relative; padding: 26px 0 26px 24px; border-bottom: 1px solid var(--border); opacity: 0; transform: translateY(10px); animation: fadeUp 0.45s ease forwards; }
   @keyframes fadeUp { to { opacity: 1; transform: translateY(0); } }
   .entry::before { content: ''; position: absolute; left: -4px; top: 33px; width: 7px; height: 7px; border-radius: 50%; background: var(--bg); border: 1.5px solid var(--accent); opacity: 0.65; }
-  .entry.highlight-flash { background: rgba(200, 169, 110, 0.2); transition: 1s; }
   .entry-stamp { font-family: 'DM Mono', monospace; font-size: 0.62rem; color: var(--accent); margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
   .del-btn { color: var(--muted); cursor: pointer; opacity: 0; transition: opacity 0.3s; font-size: 0.55rem; padding: 4px 8px; }
   .entry:hover .del-btn { opacity: 1; }
@@ -118,15 +86,6 @@
   .field textarea { min-height: 200px; line-height: 2; }
   .btn-save { background: #333; border: none; font-family: 'DM Mono', monospace; font-size: 0.65rem; color: #666; padding: 12px 28px; cursor: not-allowed; border-radius: 2px; margin-top: 20px; width: 100%; transition: 0.3s; }
   .btn-save.active { background: var(--accent); color: #0f0f0f; cursor: pointer; }
-
-  .confirm-overlay { position: fixed; inset: 0; background: var(--overlay-bg); z-index: 1000; display: none; align-items: center; justify-content: center; }
-  .confirm-box { background: var(--surface); border: 1px solid var(--border); padding: 30px; width: 300px; text-align: center; border-radius: 8px; }
-  .confirm-txt { font-size: 0.85rem; margin-bottom: 20px; color: var(--text); }
-  .confirm-input { width: 100%; background: var(--bg); border: 1px solid var(--border); padding: 10px; color: var(--text); font-family: 'DM Mono', monospace; font-size: 0.7rem; text-align: center; outline: none; margin-bottom: 20px; }
-  .confirm-btns { display: flex; justify-content: center; gap: 30px; }
-  .confirm-btns button { background: none; border: none; font-family: 'DM Mono', monospace; font-size: 0.65rem; cursor: pointer; }
-  .btn-no { color: var(--muted); }
-  .btn-yes { color: var(--accent); font-weight: bold; }
   #status-toast { position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%); background: var(--surface); border: 1px solid var(--border); color: var(--text); padding: 8px 16px; font-size: 0.7rem; font-family: 'DM Mono', monospace; z-index: 2000; display: none; }
 </style>
 </head>
@@ -137,7 +96,6 @@
 
 <header>
   <h1 class="site-title">𝓜𝓲𝓷𝓰'𝓼 𝓑𝓵𝓸𝓰</h1>
-  
   <div class="site-meta">
     <div class="search-trigger" id="searchBtn">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
@@ -145,23 +103,26 @@
         <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
       </svg>
     </div>
-    
-    <div class="meta-text" id="totalCount">TOTAL 00</div>
-    
-    <div class="meta-text">SINCE 2026</div>
+    <div class="meta-item" id="totalCount">TOTAL 00</div>
+    <div class="meta-item">SINCE 2026</div>
   </div>
 </header>
 
 <div class="search-area" id="searchArea">
-  <div class="search-box-wrapper">
-    <input id="inline-search" autocomplete="off" spellcheck="false" placeholder="检索记忆...">
-  </div>
-  <div id="search-results-panel"></div>
+  <div class="search-box-wrapper"><input id="inline-search" autocomplete="off" placeholder="检索记忆..."></div>
 </div>
 
 <div class="container" id="timeline"></div>
-
 <button class="write-btn" id="writeBtnAction">＋ 写一条</button>
+
+<div class="editor-overlay" id="overlay">
+  <div class="editor-box" onclick="event.stopPropagation()">
+    <div class="field"><input id="inp-title" placeholder="标题 (可选)"></div>
+    <div class="field"><textarea id="inp-body" placeholder="此时此刻的心情..."></textarea></div>
+    <div class="field"><input type="password" id="inp-pass" placeholder="口令" style="font-size:0.6rem;"></div>
+    <button class="btn-save" id="btn-save-action" disabled>确认并同步</button>
+  </div>
+</div>
 
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
@@ -170,8 +131,7 @@
   const MY_PASS = "ming2026";
   firebase.initializeApp(firebaseConfig);
   const db = firebase.firestore();
-  let allEntries = []; 
-
+  
   function showToast(msg) { const t = document.getElementById('status-toast'); t.innerText = msg; t.style.display = 'block'; setTimeout(() => t.style.display = 'none', 2000); }
   function setSyncStatus(status) {
     const bar = document.getElementById('syncBar'); const txt = document.getElementById('syncText');
@@ -179,50 +139,16 @@
     else if(status === 'done') { bar.style.width = '100%'; txt.innerText = 'GARDEN SYNCED'; setTimeout(() => { bar.style.width = '0%'; }, 1200); }
   }
 
-  const searchInput = document.getElementById('inline-search');
-  const searchPanel = document.getElementById('search-results-panel');
-  document.getElementById('searchBtn').onclick = (e) => {
-    e.stopPropagation();
-    const area = document.getElementById('searchArea');
-    area.classList.toggle('active');
-    if(area.classList.contains('active')) setTimeout(() => searchInput.focus(), 200);
-  };
-
-  searchInput.oninput = (e) => {
-    const kw = e.target.value.trim().toLowerCase();
-    searchPanel.innerHTML = '';
-    if(!kw) { searchPanel.classList.remove('active'); return; }
-    const res = allEntries.filter(p => (p.title && p.title.toLowerCase().includes(kw)) || p.body.toLowerCase().includes(kw));
-    if(res.length > 0) {
-      searchPanel.classList.add('active');
-      res.forEach(p => {
-        const item = document.createElement('div');
-        item.className = 'search-res-item';
-        item.innerHTML = `<div class="search-res-date">${new Date(p.date).toLocaleDateString()}</div><div class="search-res-title">${p.title || p.body.substring(0,25)}</div>`;
-        item.onclick = () => {
-          const target = document.getElementById(`entry-${p.id}`);
-          if(target) {
-            target.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            target.classList.add('highlight-flash');
-            setTimeout(() => target.classList.remove('highlight-flash'), 2000);
-          }
-          searchPanel.classList.remove('active');
-          document.getElementById('searchArea').classList.remove('active');
-          searchInput.value = '';
-        };
-        searchPanel.appendChild(item);
-      });
-    } else { searchPanel.classList.remove('active'); }
-  };
+  document.getElementById('searchBtn').onclick = () => document.getElementById('searchArea').classList.toggle('active');
 
   document.getElementById('inp-pass').oninput = (e) => {
     const btn = document.getElementById('btn-save-action');
-    if(e.target.value === MY_PASS) { btn.classList.add('active'); btn.disabled = false; }
-    else { btn.classList.remove('active'); btn.disabled = true; }
+    btn.disabled = e.target.value !== MY_PASS;
+    btn.classList.toggle('active', !btn.disabled);
   };
-  document.getElementById("writeBtnAction").onclick = () => document.getElementById('overlay').classList.add('open');
-  document.getElementById("closeEditorAction").onclick = () => document.getElementById('overlay').classList.remove('open');
   
+  document.getElementById("writeBtnAction").onclick = () => document.getElementById('overlay').classList.add('open');
+
   document.getElementById("btn-save-action").onclick = async () => {
     const title = document.getElementById('inp-title').value.trim();
     const body = document.getElementById('inp-body').value.trim();
@@ -231,18 +157,18 @@
     try {
       await db.collection("posts").add({ title, body, date: new Date().toISOString() });
       document.getElementById('overlay').classList.remove('open');
-      document.getElementById('inp-title').value = ''; document.getElementById('inp-body').value = ''; document.getElementById('inp-pass').value = '';
       showToast("已存档"); setSyncStatus('done');
     } catch(e) { showToast("失败"); }
   };
 
   db.collection("posts").orderBy("date", "desc").onSnapshot((snap) => {
-    allEntries = []; 
-    document.getElementById('totalCount').innerText = `TOTAL ${String(snap.size).padStart(2, '0')}`;
+    // 核心修复：更新 TOTAL 数量
+    const totalEl = document.getElementById('totalCount');
+    if(totalEl) totalEl.innerText = `TOTAL ${String(snap.size).padStart(2, '0')}`;
+    
     const tl = document.getElementById('timeline'); tl.innerHTML = ''; const byYear = {};
     snap.forEach(docSnap => {
       const p = { id: docSnap.id, ...docSnap.data() };
-      allEntries.push(p);
       const y = new Date(p.date).getFullYear();
       if (!byYear[y]) byYear[y] = []; byYear[y].push(p);
     });
@@ -251,9 +177,8 @@
       group.innerHTML = `<div class="year-row"><span class="year-num">${year}</span><div class="year-line"></div></div>`;
       const track = document.createElement('div'); track.className = 'track';
       byYear[year].forEach(p => {
-        const d = new Date(p.date); const timeStr = `${d.getFullYear()}.${d.getMonth()+1}.${d.getDate()} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
-        const item = document.createElement('div'); item.className = 'entry'; item.id = `entry-${p.id}`;
-        item.innerHTML = `<div class="entry-stamp"><div>${timeStr}</div><div class="del-btn" onclick="askDelete('${p.id}')">DELETE</div></div>${p.title ? `<div class="entry-title">${p.title}</div>` : ''}<div class="entry-body">${p.body}</div>`;
+        const item = document.createElement('div'); item.className = 'entry';
+        item.innerHTML = `<div class="entry-stamp">${new Date(p.date).toLocaleString()}</div>${p.title ? `<div class="entry-title">${p.title}</div>` : ''}<div class="entry-body">${p.body}</div>`;
         track.appendChild(item);
       });
       group.appendChild(track); tl.appendChild(group);
@@ -261,9 +186,8 @@
     setSyncStatus('done');
   });
 
-  const updateTheme = () => { const h = new Date().getHours(); document.body.className = (h < 6 || h >= 18) ? 'dark' : 'light'; };
-  updateTheme(); setInterval(updateTheme, 60000);
+  const updateTheme = () => { document.body.className = (new Date().getHours() < 6 || new Date().getHours() >= 18) ? 'dark' : 'light'; };
+  updateTheme();
 </script>
 </body>
 </html>
-```
