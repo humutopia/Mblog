@@ -27,16 +27,23 @@
   header { padding: calc(60px + env(safe-area-inset-top)) 40px 40px; max-width: 700px; margin: 0 auto; display: flex; justify-content: space-between; align-items: flex-end; }
   .site-title { font-size: 1.8rem; font-weight: 300; letter-spacing: 0.05em; color: var(--accent); line-height: 1; }
   
-  /* 元数据容器：改为垂直排列 */
   .site-meta { display: flex; flex-direction: column; align-items: flex-end; font-family: 'DM Mono', monospace; color: var(--muted); letter-spacing: 0.15em; }
-  .meta-item { font-size: 0.55rem; line-height: 1.8; opacity: 0.8; }
-  #totalCount { color: var(--accent); opacity: 1; font-weight: 500; }
+  .meta-item { font-size: 0.55rem; line-height: 1.8; position: relative; }
+  #totalCount { color: var(--accent); font-weight: 500; }
   
-  .year-wrapper { position: relative; display: inline-block; }
-  
+  /* 关键修复：放大镜按钮的定位 */
+  .year-wrapper { position: relative; display: inline-block; padding-top: 15px; } /* 增加顶部间距给放大镜腾位 */
   .search-trigger { 
-    position: absolute; bottom: 100%; right: 0; margin-bottom: 4px; 
-    cursor: pointer; color: var(--muted); opacity: 0.4; transition: 0.3s; line-height: 0;
+    position: absolute; 
+    top: -5px; /* 改为相对于 year-wrapper 的顶部 */
+    right: 0;
+    cursor: pointer; 
+    color: var(--muted); 
+    opacity: 0.4; 
+    transition: 0.3s; 
+    line-height: 0;
+    padding: 5px;
+    z-index: 10;
   }
   .search-trigger:hover { color: var(--accent); opacity: 1; }
   .search-trigger svg { width: 13px; height: 13px; }
@@ -107,7 +114,7 @@
         <div class="search-trigger" id="searchBtn">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
             <circle cx="11" cy="11" r="8"></circle>
-            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            <line x1="21" x2="16.65" y2="16.65"></line>
           </svg>
         </div>
         2026
@@ -171,10 +178,13 @@
   // 搜索逻辑
   const searchInput = document.getElementById('inline-search');
   const searchPanel = document.getElementById('search-results-panel');
-  document.getElementById('searchBtn').onclick = (e) => {
+  const searchBtn = document.getElementById('searchBtn');
+  
+  searchBtn.onclick = (e) => {
     e.stopPropagation();
-    const active = document.getElementById('searchArea').classList.toggle('active');
-    if(active) setTimeout(() => searchInput.focus(), 200);
+    const area = document.getElementById('searchArea');
+    area.classList.toggle('active');
+    if(area.classList.contains('active')) setTimeout(() => searchInput.focus(), 200);
   };
 
   searchInput.oninput = (e) => {
@@ -236,12 +246,9 @@
     } else { showToast("口令错误"); }
   };
 
-  // 数据监听与渲染
   db.collection("posts").orderBy("date", "desc").onSnapshot((snap) => {
     allEntries = []; 
-    // 更新总计数量
     document.getElementById('totalCount').innerText = `TOTAL ${String(snap.size).padStart(2, '0')}`;
-    
     const tl = document.getElementById('timeline'); tl.innerHTML = ''; const byYear = {};
     snap.forEach(docSnap => {
       const p = { id: docSnap.id, ...docSnap.data() };
