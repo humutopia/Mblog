@@ -20,23 +20,25 @@
   
   body { background: var(--bg); color: var(--text); font-family: 'Noto Serif SC', serif; min-height: 100vh; padding-bottom: calc(120px + env(safe-area-inset-bottom)); transition: background 0.4s ease; overflow-x: hidden; }
   
+  /* 同步条 */
   .sync-indicator { position: fixed; top: 0; left: 0; width: 100%; height: 2px; z-index: 2000; background: transparent; }
   .sync-bar { width: 0%; height: 100%; background: var(--accent); transition: width 0.3s; }
   .sync-text { position: fixed; top: env(safe-area-inset-top, 12px); left: 50%; transform: translateX(-50%); font-family: 'DM Mono', monospace; font-size: 0.5rem; color: var(--muted); letter-spacing: 0.1em; opacity: 0.6; pointer-events: none; }
   
+  /* Header 布局 */
   header { padding: calc(60px + env(safe-area-inset-top)) 40px 40px; max-width: 700px; margin: 0 auto; display: flex; justify-content: space-between; align-items: flex-end; }
   .site-title { font-size: 1.8rem; font-weight: 300; letter-spacing: 0.05em; color: var(--accent); line-height: 1.1; }
   
-  /* 右侧元数据列：垂直排列，颜色统一 */
-  .site-meta { display: flex; flex-direction: column; align-items: flex-end; gap: 8px; font-family: 'DM Mono', monospace; color: var(--accent); letter-spacing: 0.12em; }
+  /* 元数据列修复：颜色回归 muted，且全部右对齐 */
+  .site-meta { display: flex; flex-direction: column; align-items: flex-end; gap: 6px; font-family: 'DM Mono', monospace; color: var(--muted); letter-spacing: 0.15em; }
   
-  /* 1. 放大镜按钮 (最上方) */
-  .search-trigger { cursor: pointer; opacity: 0.8; transition: 0.3s; padding: 2px; display: flex; align-items: center; justify-content: center; }
-  .search-trigger:hover { opacity: 1; }
-  .search-trigger svg { width: 14px; height: 14px; stroke: var(--accent); }
+  /* 1. 放大镜 (最上，靠右) */
+  .search-trigger { cursor: pointer; opacity: 0.5; transition: 0.3s; padding: 2px 0; display: flex; align-items: center; justify-content: center; }
+  .search-trigger:hover { opacity: 1; color: var(--accent); }
+  .search-trigger svg { width: 13px; height: 13px; stroke: currentColor; }
 
-  /* 2. TOTAL (中间) & 3. SINCE (下面) */
-  .meta-text { font-size: 0.58rem; font-weight: 500; line-height: 1; text-transform: uppercase; }
+  /* 2. TOTAL (中) & 3. SINCE (下) */
+  .meta-text { font-size: 0.55rem; font-weight: 400; line-height: 1.2; text-align: right; white-space: nowrap; }
 
   /* 搜索框区域 */
   .search-area { max-width: 700px; margin: -20px auto 20px; padding: 0 40px; height: 0; overflow: hidden; opacity: 0; transition: all 0.4s ease; position: relative; }
@@ -51,6 +53,7 @@
   .search-res-date { font-family: 'DM Mono'; font-size: 0.55rem; color: var(--accent); }
   .search-res-title { font-size: 0.8rem; opacity: 0.8; margin-top: 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
+  /* 时间轴样式保持不变 */
   .container { max-width: 700px; margin: 0 auto; padding: 0 40px; }
   .year-group { padding-top: 40px; }
   .year-row { display: flex; align-items: center; gap: 14px; margin-bottom: 10px; }
@@ -123,30 +126,6 @@
 
 <button class="write-btn" id="writeBtnAction">＋ 写一条</button>
 
-<div class="editor-overlay" id="overlay">
-  <div class="editor-box" onclick="event.stopPropagation()">
-    <div style="display:flex;justify-content:space-between;margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid var(--border)">
-      <span style="font-family:'DM Mono',monospace;font-size:0.6rem;color:var(--muted)">NEW ENTRY</span>
-      <button id="closeEditorAction" style="background:none;border:none;color:var(--muted);font-size:1.2rem;cursor:pointer;">✕</button>
-    </div>
-    <div class="field"><input id="inp-title" placeholder="标题 (可选)"></div>
-    <div class="field"><textarea id="inp-body" placeholder="此时此刻的心情..."></textarea></div>
-    <div class="field"><input type="password" id="inp-pass" placeholder="输入口令以同步" style="font-size:0.6rem;"></div>
-    <button class="btn-save" id="btn-save-action" disabled>确认并同步</button>
-  </div>
-</div>
-
-<div class="confirm-overlay" id="confirmOverlay">
-  <div class="confirm-box">
-    <div class="confirm-txt">确定抹除这段记忆吗？</div>
-    <input type="password" id="del-pass-input" class="confirm-input" placeholder="输入口令确认">
-    <div class="confirm-btns">
-      <button class="btn-no" id="closeConfirmAction">取消</button>
-      <button class="btn-yes" id="confirmDeleteBtn">确认抹除</button>
-    </div>
-  </div>
-</div>
-
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 <script>
@@ -164,9 +143,9 @@
     else if(status === 'done') { bar.style.width = '100%'; txt.innerText = 'GARDEN SYNCED'; setTimeout(() => { bar.style.width = '0%'; }, 1200); }
   }
 
+  // 搜索相关
   const searchInput = document.getElementById('inline-search');
   const searchPanel = document.getElementById('search-results-panel');
-  
   document.getElementById('searchBtn').onclick = (e) => {
     e.stopPropagation();
     const area = document.getElementById('searchArea');
@@ -235,6 +214,7 @@
 
   db.collection("posts").orderBy("date", "desc").onSnapshot((snap) => {
     allEntries = []; 
+    // 同步更新 TOTAL 数值
     document.getElementById('totalCount').innerText = `TOTAL ${String(snap.size).padStart(2, '0')}`;
     const tl = document.getElementById('timeline'); tl.innerHTML = ''; const byYear = {};
     snap.forEach(docSnap => {
