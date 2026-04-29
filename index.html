@@ -27,16 +27,14 @@
   header { padding: calc(60px + env(safe-area-inset-top)) 40px 40px; max-width: 700px; margin: 0 auto; display: flex; justify-content: space-between; align-items: baseline; }
   .site-title { font-size: 1.8rem; font-weight: 300; letter-spacing: 0.05em; color: var(--accent); }
   
-  .site-meta { font-family: 'DM Mono', monospace; font-size: 0.6rem; color: var(--muted); letter-spacing: 0.2em; display: flex; align-items: baseline; }
+  .site-meta { font-family: 'DM Mono', monospace; font-size: 0.6rem; color: var(--muted); letter-spacing: 0.2em; display: flex; align-items: baseline; gap: 15px; }
   .year-wrapper { position: relative; display: inline-block; }
   
-  /* 修复后的放大镜按钮样式 */
   .search-trigger { 
     position: absolute; bottom: 100%; right: 0; margin-bottom: 5px; 
     cursor: pointer; color: var(--muted); opacity: 0.4; transition: 0.3s; line-height: 0;
   }
   .search-trigger:hover { color: var(--accent); opacity: 1; }
-  /* 确保 SVG 居中且手柄可见 */
   .search-trigger svg { width: 14px; height: 14px; }
 
   .search-area { max-width: 700px; margin: -20px auto 20px; padding: 0 40px; height: 0; overflow: hidden; opacity: 0; transition: all 0.4s ease; position: relative; }
@@ -98,15 +96,17 @@
 <header>
   <h1 class="site-title">𝓜𝓲𝓷𝓰'𝓼 𝓑𝓵𝓸𝓰</h1>
   <div class="site-meta">
-    SINCE&nbsp;
-    <span class="year-wrapper">
-      <div class="search-trigger" id="searchBtn">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-          <circle cx="11" cy="11" r="8"></circle>
-          <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-        </svg>
-      </div>
-      2026
+    <span id="totalCount">TOTAL 00</span>
+    <span>SINCE&nbsp;
+      <span class="year-wrapper">
+        <div class="search-trigger" id="searchBtn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="11" cy="11" r="8"></circle>
+            <line x1="21" x2="16.65" y2="16.65"></line>
+          </svg>
+        </div>
+        2026
+      </span>
     </span>
   </div>
 </header>
@@ -234,6 +234,10 @@
   // 数据同步与渲染
   db.collection("posts").orderBy("date", "desc").onSnapshot((snap) => {
     allEntries = []; 
+    // 更新总数显示
+    const total = snap.size;
+    document.getElementById('totalCount').innerText = `TOTAL ${String(total).padStart(2, '0')}`;
+    
     const tl = document.getElementById('timeline'); tl.innerHTML = ''; const byYear = {};
     snap.forEach(docSnap => {
       const p = { id: docSnap.id, ...docSnap.data() };
