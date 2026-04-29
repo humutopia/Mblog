@@ -27,21 +27,29 @@
   header { padding: calc(60px + env(safe-area-inset-top)) 40px 40px; max-width: 700px; margin: 0 auto; display: flex; justify-content: space-between; align-items: flex-end; }
   .site-title { font-size: 1.8rem; font-weight: 300; letter-spacing: 0.05em; color: var(--accent); }
   
-  /* 元数据右侧垂直对齐布局 */
+  /* 核心修复：实现单词左对齐，数字右对齐 */
   .site-meta { 
     display: flex; 
     flex-direction: column; 
     align-items: flex-end; 
-    gap: 6px; 
+    gap: 4px; 
     font-family: 'DM Mono', monospace; 
     font-size: 0.6rem; 
-    color: var(--muted); 
-    letter-spacing: 0.15em;
+    color: var(--muted);
   }
-  
-  .search-trigger { cursor: pointer; color: var(--muted); opacity: 0.4; transition: 0.3s; line-height: 0; }
+
+  .search-trigger { cursor: pointer; color: var(--muted); opacity: 0.4; transition: 0.3s; line-height: 0; margin-bottom: 2px; padding-right: 1px; }
   .search-trigger:hover { color: var(--accent); opacity: 1; }
   .search-trigger svg { width: 13px; height: 13px; stroke: currentColor; }
+
+  .meta-row {
+    display: grid;
+    grid-template-columns: auto 1fr; /* 单词列根据内容缩放，数字列占据剩余空间 */
+    column-gap: 12px; /* 单词与数字之间的间距 */
+    width: 80px;      /* 整个容器的宽度，确保单词左边缘对齐 */
+    letter-spacing: 0.12em;
+  }
+  .meta-row .val { text-align: right; color: var(--text); } /* 数字部分向右对齐 */
 
   .search-area { max-width: 700px; margin: -20px auto 20px; padding: 0 40px; height: 0; overflow: hidden; opacity: 0; transition: all 0.4s ease; position: relative; }
   .search-area.active { height: auto; min-height: 45px; opacity: 1; overflow: visible; }
@@ -108,8 +116,14 @@
         <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
       </svg>
     </div>
-    <div id="totalCount">TOTAL 00</div>
-    <div>SINCE 2026</div>
+    <div class="meta-row">
+      <span>TOTAL</span>
+      <span class="val" id="totalCount">00</span>
+    </div>
+    <div class="meta-row">
+      <span>SINCE</span>
+      <span class="val">2026</span>
+    </div>
   </div>
 </header>
 
@@ -235,9 +249,9 @@
 
   // 数据同步与渲染
   db.collection("posts").orderBy("date", "desc").onSnapshot((snap) => {
-    // 更新 Total 计数
-    const totalEl = document.getElementById('totalCount');
-    if(totalEl) totalEl.innerText = `TOTAL ${String(snap.size).padStart(2, '0')}`;
+    // 核心修复：仅更新数字部分
+    const totalVal = document.getElementById('totalCount');
+    if(totalVal) totalVal.innerText = String(snap.size).padStart(2, '0');
 
     allEntries = []; 
     const tl = document.getElementById('timeline'); tl.innerHTML = ''; const byYear = {};
