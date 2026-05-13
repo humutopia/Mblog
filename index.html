@@ -22,6 +22,7 @@
   
   body { background: var(--bg); color: var(--text); font-family: 'Noto Serif SC', serif; min-height: 100vh; padding-bottom: calc(120px + env(safe-area-inset-bottom)); transition: background 0.4s ease; overflow-x: hidden; }
   
+  /* 顶部同步指示器 */
   .sync-indicator { position: fixed; top: 0; left: 0; width: 100%; height: 2px; z-index: 2000; background: transparent; }
   .sync-bar { width: 0%; height: 100%; background: var(--accent); transition: width 0.3s; }
   .sync-text { position: fixed; top: env(safe-area-inset-top, 12px); left: 50%; transform: translateX(-50%); font-family: 'DM Mono', monospace; font-size: 0.5rem; color: var(--muted); letter-spacing: 0.1em; opacity: 0.6; pointer-events: none; }
@@ -59,10 +60,8 @@
     flex-shrink: 0;
   }
 
-  /* 搜索触发图标样式：平时暗淡 */
   .search-trigger { cursor: pointer; color: var(--muted); opacity: 0.4; transition: 0.3s; display: flex; align-items: center; margin-bottom: 2px; }
-  /* 仅在激活状态下变亮 */
-  .search-trigger.active { color: var(--accent); opacity: 1; }
+  .search-trigger:hover { color: var(--accent); opacity: 1; }
   .search-trigger svg { width: 14px; height: 14px; stroke: currentColor; stroke-width: 2; }
 
   .meta-row {
@@ -73,10 +72,9 @@
     letter-spacing: 0.12em;
     color: inherit;
   }
-  
   .meta-row .val { text-align: right; color: inherit; } 
 
-  /* 搜索栏限制宽度 */
+  /* 搜索栏区域 */
   .search-area { 
     max-width: 700px; 
     margin: -20px auto 20px; 
@@ -91,7 +89,7 @@
   .search-box-wrapper { border-bottom: 1px solid var(--border); padding: 5px 0; }
   #inline-search { width: 100%; background: transparent; border: none; font-family: inherit; font-size: 0.85rem; color: var(--text); outline: none; }
 
-  /* 搜索建议面板同步宽度 */
+  /* 搜索结果面板 - 针对滚动条进行修正 */
   #search-results-panel { 
     position: absolute; 
     left: 40px; 
@@ -104,13 +102,22 @@
     display: none; 
     box-shadow: 0 20px 40px rgba(0,0,0,0.5); 
     border-radius: 4px; 
+    /* 隐藏 Firefox 滚动条 */
+    scrollbar-width: none; 
+  }
+  /* 隐藏 Webkit 滚动条 (Chrome/Safari) */
+  #search-results-panel::-webkit-scrollbar {
+    width: 0px;
+    background: transparent;
   }
   #search-results-panel.active { display: block; }
+  
   .search-res-item { padding: 12px 15px; border-bottom: 1px solid var(--border); cursor: pointer; }
   .search-res-item:hover { background: rgba(200, 169, 110, 0.1); }
   .search-res-date { font-family: 'DM Mono'; font-size: 0.55rem; color: var(--accent); }
   .search-res-title { font-size: 0.8rem; opacity: 0.8; margin-top: 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
+  /* 时间轴主容器 */
   .container { max-width: 700px; margin: 0 auto; padding: 0 40px; }
   .year-group { padding-top: 40px; }
   .year-row { display: flex; align-items: center; gap: 14px; margin-bottom: 10px; }
@@ -130,6 +137,7 @@
   .entry-title { font-size: 0.96rem; font-weight: 500; margin-bottom: 9px; }
   .entry-body { font-size: 0.86rem; line-height: 2.1; opacity: 0.75; white-space: pre-wrap; text-align: justify; word-break: break-word; }
   
+  /* 悬浮按钮及编辑器 */
   .write-btn { position: fixed; bottom: calc(40px + env(safe-area-inset-bottom)); right: 40px; background: var(--accent); border: none; color: #0f0f0f; font-family: 'DM Mono', monospace; font-size: 0.65rem; padding: 11px 22px; cursor: pointer; border-radius: 2px; z-index: 10; box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
   .editor-overlay { display: none; position: fixed; inset: 0; background: var(--overlay-bg); z-index: 999; align-items: flex-end; justify-content: center; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); }
   .editor-overlay.open { display: flex; }
@@ -139,6 +147,7 @@
   .btn-save { background: #333; border: none; font-family: 'DM Mono', monospace; font-size: 0.65rem; color: #666; padding: 12px 28px; cursor: not-allowed; border-radius: 2px; margin-top: 20px; width: 100%; transition: 0.3s; }
   .btn-save.active { background: var(--accent); color: #0f0f0f; cursor: pointer; }
 
+  /* 确认框 */
   .confirm-overlay { position: fixed; inset: 0; background: var(--overlay-bg); z-index: 1000; display: none; align-items: center; justify-content: center; backdrop-filter: blur(4px); }
   .confirm-box { background: var(--surface); border: 1px solid var(--border); padding: 30px; width: 300px; text-align: center; border-radius: 8px; box-shadow: 0 20px 50px rgba(0,0,0,0.3); }
   .confirm-txt { font-size: 0.85rem; margin-bottom: 20px; color: var(--text); font-weight: 300; }
@@ -227,17 +236,12 @@
     else if(status === 'done') { bar.style.width = '100%'; txt.innerText = 'GARDEN SYNCED'; setTimeout(() => { bar.style.width = '0%'; }, 1200); }
   }
 
-  const searchBtn = document.getElementById('searchBtn');
-  const searchArea = document.getElementById('searchArea');
   const searchInput = document.getElementById('inline-search');
   const searchPanel = document.getElementById('search-results-panel');
-  
-  // 修正：点击逻辑同时控制图标的高亮类名
-  searchBtn.onclick = (e) => {
+  document.getElementById('searchBtn').onclick = (e) => {
     e.stopPropagation();
-    const isActive = searchArea.classList.toggle('active');
-    searchBtn.classList.toggle('active', isActive); // 图标同步亮起/暗淡
-    if(isActive) setTimeout(() => searchInput.focus(), 200);
+    const active = document.getElementById('searchArea').classList.toggle('active');
+    if(active) setTimeout(() => searchInput.focus(), 200);
   };
 
   searchInput.oninput = (e) => {
@@ -259,8 +263,7 @@
             setTimeout(() => target.classList.remove('highlight-flash'), 2000);
           }
           searchPanel.classList.remove('active');
-          searchArea.classList.remove('active');
-          searchBtn.classList.remove('active'); // 关闭搜索后图标恢复暗淡
+          document.getElementById('searchArea').classList.remove('active');
           searchInput.value = '';
         };
         searchPanel.appendChild(item);
