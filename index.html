@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>𝓜𝓲𝓷𝓰'𝓼 𝓑𝓵𝓸𝓰</title>
+<title>Humutopia</title>
 
 <link rel="manifest" href="./manifest.json">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -13,6 +13,12 @@
 
 <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@300;400;500&family=DM+Mono:ital@0;1&display=swap" rel="stylesheet">
 <style>
+  /* 引入 Halimun 字体 */
+  @font-face {
+    font-family: 'Halimun';
+    src: url('https://db.onlinewebfonts.com/t/790757f4955b9e0787d5598696d5e7d2.woff2') format('woff2');
+  }
+
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
   :root { --accent: #c8a96e; --accent2: #7eb8a4; }
   body.dark { --bg: #000000; --surface: #0a0a0a; --border: #1a1a1a; --text: #e2ddd5; --muted: #555; --overlay-bg: rgba(0,0,0,0.9); }
@@ -25,9 +31,17 @@
   .sync-text { position: fixed; top: env(safe-area-inset-top, 12px); left: 50%; transform: translateX(-50%); font-family: 'DM Mono', monospace; font-size: 0.5rem; color: var(--muted); letter-spacing: 0.1em; opacity: 0.6; pointer-events: none; }
   
   header { padding: calc(60px + env(safe-area-inset-top)) 40px 40px; max-width: 700px; margin: 0 auto; display: flex; justify-content: space-between; align-items: flex-end; }
-  .site-title { font-size: 1.8rem; font-weight: 300; letter-spacing: 0.05em; color: var(--accent); }
   
-  /* 元数据布局：单词左对齐，数字右对齐，颜色统一 */
+  /* 更新标题为 Humutopia，采用 Halimun 字体，加粗 */
+  .site-title { 
+    font-family: 'Halimun', cursive; 
+    font-size: 2.4rem; 
+    font-weight: bold; 
+    letter-spacing: 0.02em; 
+    color: var(--accent); 
+    text-transform: none; /* 确保维持代码中的大小写 */
+  }
+  
   .site-meta { 
     display: flex; 
     flex-direction: column; 
@@ -35,25 +49,22 @@
     gap: 4px; 
     font-family: 'DM Mono', monospace; 
     font-size: 0.6rem; 
-    color: var(--muted); /* 统一设定为淡灰色 */
+    color: var(--muted);
   }
 
-  /* 搜索图标：颜色统一 */
   .search-trigger { cursor: pointer; color: var(--muted); opacity: 0.4; transition: 0.3s; line-height: 0; margin-bottom: 2px; padding-right: 1px; }
   .search-trigger:hover { color: var(--accent); opacity: 1; }
   .search-trigger svg { width: 13px; height: 13px; stroke: currentColor; }
 
-  /* Grid 布局确保单词列等宽 */
   .meta-row {
     display: grid;
     grid-template-columns: auto 1fr;
     column-gap: 12px;
-    width: 80px; /* 根据 DM Mono 字体微调，确保单词对齐 */
+    width: 80px; 
     letter-spacing: 0.12em;
-    color: inherit; /* 继承父级 --muted 颜色 */
+    color: inherit;
   }
   
-  /* 数字部分：靠右对齐，颜色统一 */
   .meta-row .val { text-align: right; color: inherit; } 
 
   .search-area { max-width: 700px; margin: -20px auto 20px; padding: 0 40px; height: 0; overflow: hidden; opacity: 0; transition: all 0.4s ease; position: relative; }
@@ -113,12 +124,12 @@
 <div id="status-toast"></div>
 
 <header>
-  <h1 class="site-title">𝓜𝓲𝓷𝓰'𝓼 𝓑𝓵𝓸𝓰</h1>
+  <h1 class="site-title">Humutopia</h1>
   <div class="site-meta">
     <div class="search-trigger" id="searchBtn">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
         <circle cx="11" cy="11" r="8"></circle>
-        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+        <line x1="21" x1="21" x2="16.65" y2="16.65"></line>
       </svg>
     </div>
     <div class="meta-row">
@@ -184,7 +195,6 @@
     else if(status === 'done') { bar.style.width = '100%'; txt.innerText = 'GARDEN SYNCED'; setTimeout(() => { bar.style.width = '0%'; }, 1200); }
   }
 
-  // 搜索功能实现
   const searchInput = document.getElementById('inline-search');
   const searchPanel = document.getElementById('search-results-panel');
   document.getElementById('searchBtn').onclick = (e) => {
@@ -252,9 +262,7 @@
     } else { showToast("口令错误"); }
   };
 
-  // 数据同步与渲染
   db.collection("posts").orderBy("date", "desc").onSnapshot((snap) => {
-    // 核心修复：仅更新数字部分
     const totalVal = document.getElementById('totalCount');
     if(totalVal) totalVal.innerText = String(snap.size).padStart(2, '0');
 
