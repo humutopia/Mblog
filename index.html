@@ -17,8 +17,8 @@
 
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
   :root { --accent: #c8a96e; --accent2: #7eb8a4; }
-  body.dark { --bg: #000000; --surface: #0a0a0a; --border: #1a1a1a; --text: #e2ddd5; --muted: #555; --overlay-bg: rgba(0,0,0,0.9); }
-  body.light { --bg: #ffffff; --surface: #fcfcfc; --border: #eeeeee; --text: #222222; --muted: #999; --overlay-bg: rgba(255,255,255,0.9); }
+  body.dark { --bg: #000000; --surface: #0a0a0a; --border: #1a1a1a; --text: #e2ddd5; --muted: #555; --overlay-bg: rgba(0,0,0,0.9); --scroll-thumb: #333; }
+  body.light { --bg: #ffffff; --surface: #fcfcfc; --border: #eeeeee; --text: #222222; --muted: #999; --overlay-bg: rgba(255,255,255,0.9); --scroll-thumb: #ddd; }
   
   body { background: var(--bg); color: var(--text); font-family: 'Noto Serif SC', serif; min-height: 100vh; padding-bottom: calc(120px + env(safe-area-inset-bottom)); transition: background 0.4s ease; overflow-x: hidden; }
   
@@ -89,7 +89,7 @@
   .search-box-wrapper { border-bottom: 1px solid var(--border); padding: 5px 0; }
   #inline-search { width: 100%; background: transparent; border: none; font-family: inherit; font-size: 0.85rem; color: var(--text); outline: none; }
 
-  /* 搜索结果面板 - 针对滚动条进行修正 */
+  /* 搜索结果面板 - 自定义滚动条样式 */
   #search-results-panel { 
     position: absolute; 
     left: 40px; 
@@ -102,14 +102,27 @@
     display: none; 
     box-shadow: 0 20px 40px rgba(0,0,0,0.5); 
     border-radius: 4px; 
-    /* 隐藏 Firefox 滚动条 */
-    scrollbar-width: none; 
+    /* Firefox 滚动条 */
+    scrollbar-width: thin;
+    scrollbar-color: var(--scroll-thumb) transparent;
   }
-  /* 隐藏 Webkit 滚动条 (Chrome/Safari) */
+  
+  /* Webkit 滚动条美化 (Chrome/Safari) */
   #search-results-panel::-webkit-scrollbar {
-    width: 0px;
+    width: 4px; /* 极细宽度 */
+  }
+  #search-results-panel::-webkit-scrollbar-track {
     background: transparent;
   }
+  #search-results-panel::-webkit-scrollbar-thumb {
+    background: var(--scroll-thumb);
+    border-radius: 10px;
+    transition: background 0.3s;
+  }
+  #search-results-panel::-webkit-scrollbar-thumb:hover {
+    background: var(--accent); /* 悬停时变为主题色 */
+  }
+
   #search-results-panel.active { display: block; }
   
   .search-res-item { padding: 12px 15px; border-bottom: 1px solid var(--border); cursor: pointer; }
