@@ -22,23 +22,12 @@
   body.light { --bg: #ffffff; --surface: #fcfcfc; --border: #eeeeee; --text: #222222; --muted: #999; --overlay-bg: rgba(255,255,255,0.9); }
   
   body { 
-    background: var(--bg); 
-    color: var(--text); 
-    font-family: 'Noto Serif SC', serif; 
-    min-height: 100vh; 
-    padding-bottom: calc(120px + env(safe-area-inset-bottom)); 
-    transition: background 0.4s ease; 
-    overflow-x: hidden; 
-    width: 100vw;
+    background: var(--bg); color: var(--text); font-family: 'Noto Serif SC', serif; 
+    min-height: 100vh; padding-bottom: calc(120px + env(safe-area-inset-bottom)); 
+    transition: background 0.4s ease; overflow-x: hidden; width: 100vw;
   }
   
-  /* 全局宽度控制容器 */
-  .main-wrapper {
-    max-width: var(--max-w);
-    margin: 0 auto;
-    padding: 0 40px;
-    width: 100%;
-  }
+  .main-wrapper { max-width: var(--max-w); margin: 0 auto; padding: 0 40px; width: 100%; }
 
   @media (max-width: 600px) {
     .main-wrapper { padding: 0 25px; }
@@ -49,8 +38,8 @@
     padding-bottom: 40px;
     display: flex; 
     justify-content: space-between; 
-    align-items: flex-end; 
-    gap: 15px; 
+    align-items: flex-end; /* 严格底部对齐 */
+    gap: 20px; 
   }
   
   .site-title { 
@@ -60,13 +49,10 @@
     line-height: 1.1;
     font-style: normal;
     flex: 1;
-    min-width: 0;
-    overflow-wrap: anywhere; 
-    word-break: break-word;
-    /* 物理加粗：描边方案 */
+    min-width: 0; /* 允许收缩防止挤压 */
+    white-space: nowrap; /* 强制单行显示 */
+    /* 仅使用描边加粗，不加阴影 */
     -webkit-text-stroke: 1px var(--accent);
-    font-weight: bold;
-    letter-spacing: -0.01em;
   }
 
   .site-meta { 
@@ -77,68 +63,40 @@
     font-family: 'DM Mono', monospace; 
     font-size: 0.6rem; 
     color: var(--muted);
-    flex-shrink: 0;
-    margin-bottom: 5px;
+    flex-shrink: 0; /* 禁止 Meta 被挤压 */
+    margin-bottom: 4px;
   }
 
-  /* 彻底还原最初的放大镜样式 */
+  /* 彻底修正放大镜：极细线性 SVG */
   .search-trigger { 
-    cursor: pointer; 
-    color: var(--muted); 
-    opacity: 0.5; 
-    transition: 0.3s; 
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 4px;
-    margin-bottom: 2px;
+    cursor: pointer; color: var(--muted); opacity: 0.5; transition: 0.3s; 
+    display: flex; align-items: center; justify-content: center;
+    padding: 2px;
   }
   .search-trigger:hover { color: var(--accent); opacity: 1; }
   .search-trigger svg { 
-    width: 16px; 
-    height: 16px; 
+    width: 15px; height: 15px; 
     stroke: currentColor; 
-    stroke-width: 2.5; /* 稍微加粗一点点，对齐文字视觉 */
+    stroke-width: 1.2; /* 极细笔触 */
     fill: none;
   }
 
-  .meta-row { display: grid; grid-template-columns: auto 1fr; column-gap: 12px; width: 80px; letter-spacing: 0.12em; color: inherit; }
-  .meta-row .val { text-align: right; color: inherit; } 
+  .meta-row { display: grid; grid-template-columns: auto 1fr; column-gap: 12px; width: 85px; letter-spacing: 0.12em; color: inherit; }
+  .meta-row .val { text-align: right; color: var(--text); opacity: 0.8; } 
 
-  /* 搜索栏：确保限制在 700px 且居中 */
   .search-area { 
-    height: 0; 
-    overflow: hidden; 
-    opacity: 0; 
+    height: 0; overflow: hidden; opacity: 0; 
     transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); 
-    position: relative;
-    width: 100%;
+    position: relative; width: 100%;
   }
   .search-area.active { height: auto; margin-bottom: 30px; opacity: 1; overflow: visible; }
   .search-box-wrapper { border-bottom: 1px solid var(--border); padding: 10px 0; }
-  #inline-search { 
-    width: 100%; 
-    background: transparent; 
-    border: none; 
-    font-family: inherit; 
-    font-size: 0.9rem; 
-    color: var(--text); 
-    outline: none; 
-  }
+  #inline-search { width: 100%; background: transparent; border: none; font-family: inherit; font-size: 0.9rem; color: var(--text); outline: none; }
 
   #search-results-panel { 
-    position: absolute; 
-    left: 0; 
-    right: 0; 
-    background: var(--surface); 
-    z-index: 100; 
-    border: 1px solid var(--border); 
-    max-height: 300px; 
-    overflow-y: auto; 
-    display: none; 
-    box-shadow: 0 20px 40px rgba(0,0,0,0.5); 
-    border-radius: 4px;
-    margin-top: 4px;
+    position: absolute; left: 0; right: 0; background: var(--surface); z-index: 100; 
+    border: 1px solid var(--border); max-height: 300px; overflow-y: auto; display: none; 
+    box-shadow: 0 20px 40px rgba(0,0,0,0.5); border-radius: 4px; margin-top: 4px;
   }
   #search-results-panel.active { display: block; }
   
@@ -165,35 +123,22 @@
   .editor-overlay.open { display: flex; }
   .editor-box { background: var(--surface); width: 100%; max-width: 700px; padding: 28px 36px calc(60px + env(safe-area-inset-bottom)); border-top: 1px solid var(--border); border-radius: 12px 12px 0 0; }
   .field input, .field textarea { width: 100%; background: transparent; border: none; border-bottom: 1px solid var(--border); padding: 12px 0; font-family: inherit; font-size: 0.88rem; color: var(--text); outline: none; }
-  .field textarea { min-height: 200px; line-height: 2; }
   
   .sync-indicator { position: fixed; top: 0; left: 0; width: 100%; height: 2px; z-index: 2000; background: transparent; }
   .sync-bar { width: 0%; height: 100%; background: var(--accent); transition: width 0.3s; }
   .sync-text { position: fixed; top: env(safe-area-inset-top, 12px); left: 50%; transform: translateX(-50%); font-family: 'DM Mono', monospace; font-size: 0.5rem; color: var(--muted); letter-spacing: 0.1em; opacity: 0.6; pointer-events: none; }
-  #status-toast { position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%); background: var(--surface); border: 1px solid var(--border); color: var(--text); padding: 8px 16px; font-size: 0.7rem; font-family: 'DM Mono', monospace; z-index: 2000; border-radius: 2px; display: none; }
-  
-  .btn-save { background: #333; border: none; font-family: 'DM Mono', monospace; font-size: 0.65rem; color: #666; padding: 12px 28px; cursor: not-allowed; border-radius: 2px; margin-top: 20px; width: 100%; transition: 0.3s; }
-  .btn-save.active { background: var(--accent); color: #0f0f0f; cursor: pointer; }
-  
-  .confirm-overlay { position: fixed; inset: 0; background: var(--overlay-bg); z-index: 1000; display: none; align-items: center; justify-content: center; backdrop-filter: blur(4px); }
-  .confirm-box { background: var(--surface); border: 1px solid var(--border); padding: 30px; width: 300px; text-align: center; border-radius: 8px; }
-  .confirm-input { width: 100%; background: var(--bg); border: 1px solid var(--border); padding: 10px; color: var(--text); margin: 15px 0; text-align: center; border-radius: 4px; }
-  .confirm-btns { display: flex; justify-content: center; gap: 30px; }
-  .confirm-btns button { background: none; border: none; font-family: 'DM Mono', monospace; font-size: 0.65rem; cursor: pointer; }
 </style>
 </head>
 <body class="dark">
 <div class="sync-indicator"><div class="sync-bar" id="syncBar"></div></div>
 <div class="sync-text" id="syncText">GARDEN INITIALIZING</div>
-<div id="status-toast"></div>
 
-<!-- 全局包裹容器，控制所有内容的宽度 -->
 <div class="main-wrapper">
   <header>
     <h1 class="site-title">Humutopia</h1>
     <div class="site-meta">
       <div class="search-trigger" id="searchBtn">
-        <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+        <svg viewBox="0 0 24 24">
           <circle cx="11" cy="11" r="8"></circle>
           <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
         </svg>
@@ -203,7 +148,6 @@
     </div>
   </header>
 
-  <!-- 搜索栏现在与 Header 和 Timeline 严格同宽 -->
   <div class="search-area" id="searchArea">
     <div class="search-box-wrapper">
       <input id="inline-search" autocomplete="off" spellcheck="false" placeholder="检索记忆...">
@@ -216,6 +160,7 @@
 
 <button class="write-btn" id="writeBtnAction">＋ 写一条</button>
 
+<!-- 保持原有的编辑器和确认弹窗逻辑... -->
 <div class="editor-overlay" id="overlay">
   <div class="editor-box" onclick="event.stopPropagation()">
     <div style="display:flex;justify-content:space-between;margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid var(--border)">
@@ -223,19 +168,19 @@
       <button id="closeEditorAction" style="background:none;border:none;color:var(--muted);font-size:1.2rem;cursor:pointer;">✕</button>
     </div>
     <div class="field"><input id="inp-title" placeholder="标题 (可选)"></div>
-    <div class="field"><textarea id="inp-body" placeholder="此时此刻的心情..."></textarea></div>
+    <div class="field"><textarea id="inp-body" style="min-height:200px" placeholder="此时此刻的心情..."></textarea></div>
     <div class="field"><input type="password" id="inp-pass" placeholder="口令以同步" style="font-size:0.6rem;"></div>
-    <button class="btn-save" id="btn-save-action" disabled>确认并同步</button>
+    <button class="btn-save" id="btn-save-action" style="background: #333; border: none; font-family: 'DM Mono', monospace; font-size: 0.65rem; color: #666; padding: 12px 28px; cursor: not-allowed; border-radius: 2px; margin-top: 20px; width: 100%; transition: 0.3s;" disabled>确认并同步</button>
   </div>
 </div>
 
-<div class="confirm-overlay" id="confirmOverlay">
-  <div class="confirm-box">
+<div class="confirm-overlay" id="confirmOverlay" style="position:fixed;inset:0;background:var(--overlay-bg);z-index:1000;display:none;align-items:center;justify-content:center;backdrop-filter:blur(4px);">
+  <div style="background:var(--surface);border:1px solid var(--border);padding:30px;width:300px;text-align:center;border-radius:8px;">
     <div style="font-size:0.85rem;color:var(--text);margin-bottom:10px">确定抹除这段记忆吗？</div>
-    <input type="password" id="del-pass-input" class="confirm-input" placeholder="输入口令确认">
-    <div class="confirm-btns">
-      <button style="color:var(--muted)" id="closeConfirmAction">取消</button>
-      <button style="color:var(--accent);font-weight:bold" id="confirmDeleteBtn">确认抹除</button>
+    <input type="password" id="del-pass-input" style="width:100%;background:var(--bg);border:1px solid var(--border);padding:10px;color:var(--text);margin:15px 0;text-align:center;border-radius:4px;" placeholder="输入口令确认">
+    <div style="display:flex;justify-content:center;gap:30px;">
+      <button style="background:none;border:none;font-family:'DM Mono',monospace;font-size:0.65rem;cursor:pointer;color:var(--muted)" id="closeConfirmAction">取消</button>
+      <button style="background:none;border:none;font-family:'DM Mono',monospace;font-size:0.65rem;cursor:pointer;color:var(--accent);font-weight:bold" id="confirmDeleteBtn">确认抹除</button>
     </div>
   </div>
 </div>
@@ -250,7 +195,6 @@
   let pendingDeleteId = null;
   let allEntries = []; 
 
-  function showToast(msg) { const t = document.getElementById('status-toast'); t.innerText = msg; t.style.display = 'block'; setTimeout(() => t.style.display = 'none', 2000); }
   function setSyncStatus(status) {
     const bar = document.getElementById('syncBar'); const txt = document.getElementById('syncText');
     if(status === 'syncing') { bar.style.width = '60%'; txt.innerText = 'SYNCING...'; }
@@ -288,8 +232,8 @@
 
   document.getElementById('inp-pass').oninput = (e) => {
     const btn = document.getElementById('btn-save-action');
-    if(e.target.value === MY_PASS) { btn.classList.add('active'); btn.disabled = false; }
-    else { btn.classList.remove('active'); btn.disabled = true; }
+    if(e.target.value === MY_PASS) { btn.style.background = 'var(--accent)'; btn.style.color = '#000'; btn.style.cursor = 'pointer'; btn.disabled = false; }
+    else { btn.style.background = '#333'; btn.style.color = '#666'; btn.style.cursor = 'not-allowed'; btn.disabled = true; }
   };
 
   document.getElementById("writeBtnAction").onclick = () => document.getElementById('overlay').classList.add('open');
@@ -305,8 +249,8 @@
       await db.collection("posts").add({ title, body, date: new Date().toISOString() });
       document.getElementById('overlay').classList.remove('open');
       document.getElementById('inp-title').value = ''; document.getElementById('inp-body').value = ''; document.getElementById('inp-pass').value = '';
-      showToast("已存档"); setSyncStatus('done');
-    } catch(e) { showToast("失败"); }
+      setSyncStatus('done');
+    } catch(e) { console.error(e); }
   };
 
   window.askDelete = (id) => { pendingDeleteId = id; document.getElementById('confirmOverlay').style.display = 'flex'; };
@@ -315,8 +259,7 @@
       await db.collection("posts").doc(pendingDeleteId).delete();
       document.getElementById('confirmOverlay').style.display = 'none';
       document.getElementById('del-pass-input').value = '';
-      showToast("抹除成功");
-    } else { showToast("口令错误"); }
+    }
   };
 
   db.collection("posts").orderBy("date", "desc").onSnapshot((snap) => {
