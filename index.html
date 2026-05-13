@@ -59,9 +59,10 @@
     flex-shrink: 0;
   }
 
+  /* 搜索触发图标样式：平时暗淡 */
   .search-trigger { cursor: pointer; color: var(--muted); opacity: 0.4; transition: 0.3s; display: flex; align-items: center; margin-bottom: 2px; }
-  .search-trigger:hover { color: var(--accent); opacity: 1; }
-  /* 恢复简单的放大镜图标样式 */
+  /* 仅在激活状态下变亮 */
+  .search-trigger.active { color: var(--accent); opacity: 1; }
   .search-trigger svg { width: 14px; height: 14px; stroke: currentColor; stroke-width: 2; }
 
   .meta-row {
@@ -226,12 +227,17 @@
     else if(status === 'done') { bar.style.width = '100%'; txt.innerText = 'GARDEN SYNCED'; setTimeout(() => { bar.style.width = '0%'; }, 1200); }
   }
 
+  const searchBtn = document.getElementById('searchBtn');
+  const searchArea = document.getElementById('searchArea');
   const searchInput = document.getElementById('inline-search');
   const searchPanel = document.getElementById('search-results-panel');
-  document.getElementById('searchBtn').onclick = (e) => {
+  
+  // 修正：点击逻辑同时控制图标的高亮类名
+  searchBtn.onclick = (e) => {
     e.stopPropagation();
-    const active = document.getElementById('searchArea').classList.toggle('active');
-    if(active) setTimeout(() => searchInput.focus(), 200);
+    const isActive = searchArea.classList.toggle('active');
+    searchBtn.classList.toggle('active', isActive); // 图标同步亮起/暗淡
+    if(isActive) setTimeout(() => searchInput.focus(), 200);
   };
 
   searchInput.oninput = (e) => {
@@ -253,7 +259,8 @@
             setTimeout(() => target.classList.remove('highlight-flash'), 2000);
           }
           searchPanel.classList.remove('active');
-          document.getElementById('searchArea').classList.remove('active');
+          searchArea.classList.remove('active');
+          searchBtn.classList.remove('active'); // 关闭搜索后图标恢复暗淡
           searchInput.value = '';
         };
         searchPanel.appendChild(item);
