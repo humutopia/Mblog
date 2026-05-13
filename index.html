@@ -16,85 +16,120 @@
   @import url('https://fonts.cdnfonts.com/css/halimun');
 
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-  :root { --accent: #c8a96e; --accent2: #7eb8a4; }
+  
+  :root { --accent: #c8a96e; --accent2: #7eb8a4; --max-w: 700px; }
   body.dark { --bg: #000000; --surface: #0a0a0a; --border: #1a1a1a; --text: #e2ddd5; --muted: #555; --overlay-bg: rgba(0,0,0,0.9); }
   body.light { --bg: #ffffff; --surface: #fcfcfc; --border: #eeeeee; --text: #222222; --muted: #999; --overlay-bg: rgba(255,255,255,0.9); }
   
-  body { background: var(--bg); color: var(--text); font-family: 'Noto Serif SC', serif; min-height: 100vh; padding-bottom: calc(120px + env(safe-area-inset-bottom)); transition: background 0.4s ease; overflow-x: hidden; }
+  body { 
+    background: var(--bg); 
+    color: var(--text); 
+    font-family: 'Noto Serif SC', serif; 
+    min-height: 100vh; 
+    padding-bottom: calc(120px + env(safe-area-inset-bottom)); 
+    transition: background 0.4s ease; 
+    overflow-x: hidden; 
+    width: 100vw;
+  }
   
-  .sync-indicator { position: fixed; top: 0; left: 0; width: 100%; height: 2px; z-index: 2000; background: transparent; }
-  .sync-bar { width: 0%; height: 100%; background: var(--accent); transition: width 0.3s; }
-  .sync-text { position: fixed; top: env(safe-area-inset-top, 12px); left: 50%; transform: translateX(-50%); font-family: 'DM Mono', monospace; font-size: 0.5rem; color: var(--muted); letter-spacing: 0.1em; opacity: 0.6; pointer-events: none; }
-  
-  header { padding: calc(60px + env(safe-area-inset-top)) 40px 40px; max-width: 700px; margin: 0 auto; display: flex; justify-content: space-between; align-items: flex-end; gap: 20px; }
-  
-  .site-title { 
-    font-family: 'Halimun', 'Brush Script MT', cursive; 
-    font-size: 2.5rem; 
-    font-weight: bold; 
-    color: var(--accent); 
-    line-height: 1.1;
-    text-transform: none;
-    font-style: normal;
-    word-break: break-all;
-    flex: 1;
-    min-width: 0;
+  /* 全局宽度控制容器 */
+  .main-wrapper {
+    max-width: var(--max-w);
+    margin: 0 auto;
+    padding: 0 40px;
+    width: 100%;
   }
 
   @media (max-width: 600px) {
-    header { padding: calc(50px + env(safe-area-inset-top)) 25px 30px; }
-    .site-title { font-size: 1.8rem; }
-    .container { padding: 0 25px; }
-    .search-area { padding: 0 25px !important; }
+    .main-wrapper { padding: 0 25px; }
+  }
+
+  header { 
+    padding-top: calc(60px + env(safe-area-inset-top)); 
+    padding-bottom: 40px;
+    display: flex; 
+    justify-content: space-between; 
+    align-items: flex-end; 
+    gap: 15px; 
   }
   
+  .site-title { 
+    font-family: 'Halimun', 'Brush Script MT', cursive; 
+    font-size: clamp(1.8rem, 8vw, 2.6rem);
+    color: var(--accent); 
+    line-height: 1.1;
+    font-style: normal;
+    flex: 1;
+    min-width: 0;
+    overflow-wrap: anywhere; 
+    word-break: break-word;
+    /* 物理加粗：描边方案 */
+    -webkit-text-stroke: 1px var(--accent);
+    font-weight: bold;
+    letter-spacing: -0.01em;
+  }
+
   .site-meta { 
     display: flex; 
     flex-direction: column; 
     align-items: flex-end; 
-    gap: 4px; 
+    gap: 6px; 
     font-family: 'DM Mono', monospace; 
     font-size: 0.6rem; 
     color: var(--muted);
     flex-shrink: 0;
+    margin-bottom: 5px;
   }
 
-  .search-trigger { cursor: pointer; color: var(--muted); opacity: 0.4; transition: 0.3s; display: flex; align-items: center; margin-bottom: 2px; }
+  /* 彻底还原最初的放大镜样式 */
+  .search-trigger { 
+    cursor: pointer; 
+    color: var(--muted); 
+    opacity: 0.5; 
+    transition: 0.3s; 
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 4px;
+    margin-bottom: 2px;
+  }
   .search-trigger:hover { color: var(--accent); opacity: 1; }
-  /* 恢复简单的放大镜图标样式 */
-  .search-trigger svg { width: 14px; height: 14px; stroke: currentColor; stroke-width: 2; }
-
-  .meta-row {
-    display: grid;
-    grid-template-columns: auto 1fr;
-    column-gap: 12px;
-    width: 80px; 
-    letter-spacing: 0.12em;
-    color: inherit;
+  .search-trigger svg { 
+    width: 16px; 
+    height: 16px; 
+    stroke: currentColor; 
+    stroke-width: 2.5; /* 稍微加粗一点点，对齐文字视觉 */
+    fill: none;
   }
-  
+
+  .meta-row { display: grid; grid-template-columns: auto 1fr; column-gap: 12px; width: 80px; letter-spacing: 0.12em; color: inherit; }
   .meta-row .val { text-align: right; color: inherit; } 
 
-  /* 搜索栏限制宽度 */
+  /* 搜索栏：确保限制在 700px 且居中 */
   .search-area { 
-    max-width: 700px; 
-    margin: -20px auto 20px; 
-    padding: 0 40px;
     height: 0; 
     overflow: hidden; 
     opacity: 0; 
-    transition: all 0.4s ease; 
-    position: relative; 
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); 
+    position: relative;
+    width: 100%;
   }
-  .search-area.active { height: auto; min-height: 45px; opacity: 1; overflow: visible; }
-  .search-box-wrapper { border-bottom: 1px solid var(--border); padding: 5px 0; }
-  #inline-search { width: 100%; background: transparent; border: none; font-family: inherit; font-size: 0.85rem; color: var(--text); outline: none; }
+  .search-area.active { height: auto; margin-bottom: 30px; opacity: 1; overflow: visible; }
+  .search-box-wrapper { border-bottom: 1px solid var(--border); padding: 10px 0; }
+  #inline-search { 
+    width: 100%; 
+    background: transparent; 
+    border: none; 
+    font-family: inherit; 
+    font-size: 0.9rem; 
+    color: var(--text); 
+    outline: none; 
+  }
 
-  /* 搜索建议面板同步宽度 */
   #search-results-panel { 
     position: absolute; 
-    left: 40px; 
-    right: 40px; 
+    left: 0; 
+    right: 0; 
     background: var(--surface); 
     z-index: 100; 
     border: 1px solid var(--border); 
@@ -102,16 +137,12 @@
     overflow-y: auto; 
     display: none; 
     box-shadow: 0 20px 40px rgba(0,0,0,0.5); 
-    border-radius: 4px; 
+    border-radius: 4px;
+    margin-top: 4px;
   }
   #search-results-panel.active { display: block; }
-  .search-res-item { padding: 12px 15px; border-bottom: 1px solid var(--border); cursor: pointer; }
-  .search-res-item:hover { background: rgba(200, 169, 110, 0.1); }
-  .search-res-date { font-family: 'DM Mono'; font-size: 0.55rem; color: var(--accent); }
-  .search-res-title { font-size: 0.8rem; opacity: 0.8; margin-top: 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-
-  .container { max-width: 700px; margin: 0 auto; padding: 0 40px; }
-  .year-group { padding-top: 40px; }
+  
+  .year-group { padding-top: 20px; }
   .year-row { display: flex; align-items: center; gap: 14px; margin-bottom: 10px; }
   .year-num { font-family: 'DM Mono', monospace; font-size: 0.6rem; color: var(--muted); letter-spacing: 0.18em; }
   .year-line { flex: 1; height: 1px; background: var(--border); }
@@ -130,23 +161,25 @@
   .entry-body { font-size: 0.86rem; line-height: 2.1; opacity: 0.75; white-space: pre-wrap; text-align: justify; word-break: break-word; }
   
   .write-btn { position: fixed; bottom: calc(40px + env(safe-area-inset-bottom)); right: 40px; background: var(--accent); border: none; color: #0f0f0f; font-family: 'DM Mono', monospace; font-size: 0.65rem; padding: 11px 22px; cursor: pointer; border-radius: 2px; z-index: 10; box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
-  .editor-overlay { display: none; position: fixed; inset: 0; background: var(--overlay-bg); z-index: 999; align-items: flex-end; justify-content: center; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); }
+  .editor-overlay { display: none; position: fixed; inset: 0; background: var(--overlay-bg); z-index: 999; align-items: flex-end; justify-content: center; backdrop-filter: blur(8px); }
   .editor-overlay.open { display: flex; }
   .editor-box { background: var(--surface); width: 100%; max-width: 700px; padding: 28px 36px calc(60px + env(safe-area-inset-bottom)); border-top: 1px solid var(--border); border-radius: 12px 12px 0 0; }
   .field input, .field textarea { width: 100%; background: transparent; border: none; border-bottom: 1px solid var(--border); padding: 12px 0; font-family: inherit; font-size: 0.88rem; color: var(--text); outline: none; }
   .field textarea { min-height: 200px; line-height: 2; }
+  
+  .sync-indicator { position: fixed; top: 0; left: 0; width: 100%; height: 2px; z-index: 2000; background: transparent; }
+  .sync-bar { width: 0%; height: 100%; background: var(--accent); transition: width 0.3s; }
+  .sync-text { position: fixed; top: env(safe-area-inset-top, 12px); left: 50%; transform: translateX(-50%); font-family: 'DM Mono', monospace; font-size: 0.5rem; color: var(--muted); letter-spacing: 0.1em; opacity: 0.6; pointer-events: none; }
+  #status-toast { position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%); background: var(--surface); border: 1px solid var(--border); color: var(--text); padding: 8px 16px; font-size: 0.7rem; font-family: 'DM Mono', monospace; z-index: 2000; border-radius: 2px; display: none; }
+  
   .btn-save { background: #333; border: none; font-family: 'DM Mono', monospace; font-size: 0.65rem; color: #666; padding: 12px 28px; cursor: not-allowed; border-radius: 2px; margin-top: 20px; width: 100%; transition: 0.3s; }
   .btn-save.active { background: var(--accent); color: #0f0f0f; cursor: pointer; }
-
+  
   .confirm-overlay { position: fixed; inset: 0; background: var(--overlay-bg); z-index: 1000; display: none; align-items: center; justify-content: center; backdrop-filter: blur(4px); }
-  .confirm-box { background: var(--surface); border: 1px solid var(--border); padding: 30px; width: 300px; text-align: center; border-radius: 8px; box-shadow: 0 20px 50px rgba(0,0,0,0.3); }
-  .confirm-txt { font-size: 0.85rem; margin-bottom: 20px; color: var(--text); font-weight: 300; }
-  .confirm-input { width: 100%; background: var(--bg); border: 1px solid var(--border); padding: 10px; color: var(--text); font-family: 'DM Mono', monospace; font-size: 0.7rem; text-align: center; outline: none; margin-bottom: 20px; border-radius: 4px; }
+  .confirm-box { background: var(--surface); border: 1px solid var(--border); padding: 30px; width: 300px; text-align: center; border-radius: 8px; }
+  .confirm-input { width: 100%; background: var(--bg); border: 1px solid var(--border); padding: 10px; color: var(--text); margin: 15px 0; text-align: center; border-radius: 4px; }
   .confirm-btns { display: flex; justify-content: center; gap: 30px; }
-  .confirm-btns button { background: none; border: none; font-family: 'DM Mono', monospace; font-size: 0.65rem; cursor: pointer; letter-spacing: 1px; }
-  .btn-no { color: var(--muted); }
-  .btn-yes { color: var(--accent); font-weight: bold; }
-  #status-toast { position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%); background: var(--surface); border: 1px solid var(--border); color: var(--text); padding: 8px 16px; font-size: 0.7rem; font-family: 'DM Mono', monospace; z-index: 2000; border-radius: 2px; display: none; }
+  .confirm-btns button { background: none; border: none; font-family: 'DM Mono', monospace; font-size: 0.65rem; cursor: pointer; }
 </style>
 </head>
 <body class="dark">
@@ -154,34 +187,32 @@
 <div class="sync-text" id="syncText">GARDEN INITIALIZING</div>
 <div id="status-toast"></div>
 
-<header>
-  <h1 class="site-title">Humutopia</h1>
-  <div class="site-meta">
-    <div class="search-trigger" id="searchBtn">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
-        <circle cx="11" cy="11" r="8"></circle>
-        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-      </svg>
+<!-- 全局包裹容器，控制所有内容的宽度 -->
+<div class="main-wrapper">
+  <header>
+    <h1 class="site-title">Humutopia</h1>
+    <div class="site-meta">
+      <div class="search-trigger" id="searchBtn">
+        <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="11" cy="11" r="8"></circle>
+          <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+        </svg>
+      </div>
+      <div class="meta-row"><span>TOTAL</span><span class="val" id="totalCount">00</span></div>
+      <div class="meta-row"><span>SINCE</span><span class="val">2026</span></div>
     </div>
-    <div class="meta-row">
-      <span>TOTAL</span>
-      <span class="val" id="totalCount">00</span>
-    </div>
-    <div class="meta-row">
-      <span>SINCE</span>
-      <span class="val">2026</span>
-    </div>
-  </div>
-</header>
+  </header>
 
-<div class="search-area" id="searchArea">
-  <div class="search-box-wrapper">
-    <input id="inline-search" autocomplete="off" spellcheck="false" placeholder="检索记忆...">
+  <!-- 搜索栏现在与 Header 和 Timeline 严格同宽 -->
+  <div class="search-area" id="searchArea">
+    <div class="search-box-wrapper">
+      <input id="inline-search" autocomplete="off" spellcheck="false" placeholder="检索记忆...">
+    </div>
+    <div id="search-results-panel"></div>
   </div>
-  <div id="search-results-panel"></div>
+
+  <div id="timeline"></div>
 </div>
-
-<div class="container" id="timeline"></div>
 
 <button class="write-btn" id="writeBtnAction">＋ 写一条</button>
 
@@ -200,11 +231,11 @@
 
 <div class="confirm-overlay" id="confirmOverlay">
   <div class="confirm-box">
-    <div class="confirm-txt">确定抹除这段记忆吗？</div>
+    <div style="font-size:0.85rem;color:var(--text);margin-bottom:10px">确定抹除这段记忆吗？</div>
     <input type="password" id="del-pass-input" class="confirm-input" placeholder="输入口令确认">
     <div class="confirm-btns">
-      <button class="btn-no" id="closeConfirmAction">取消</button>
-      <button class="btn-yes" id="confirmDeleteBtn">确认抹除</button>
+      <button style="color:var(--muted)" id="closeConfirmAction">取消</button>
+      <button style="color:var(--accent);font-weight:bold" id="confirmDeleteBtn">确认抹除</button>
     </div>
   </div>
 </div>
@@ -243,18 +274,12 @@
       searchPanel.classList.add('active');
       res.forEach(p => {
         const item = document.createElement('div');
-        item.className = 'search-res-item';
-        item.innerHTML = `<div class="search-res-date">${new Date(p.date).toLocaleDateString()}</div><div class="search-res-title">${p.title || p.body.substring(0,25)}</div>`;
+        item.style.padding = '12px 15px'; item.style.borderBottom = '1px solid var(--border)'; item.style.cursor = 'pointer';
+        item.innerHTML = `<div style="font-family:'DM Mono';font-size:0.55rem;color:var(--accent)">${new Date(p.date).toLocaleDateString()}</div><div style="font-size:0.8rem;opacity:0.8;margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${p.title || p.body.substring(0,25)}</div>`;
         item.onclick = () => {
           const target = document.getElementById(`entry-${p.id}`);
-          if(target) {
-            target.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            target.classList.add('highlight-flash');
-            setTimeout(() => target.classList.remove('highlight-flash'), 2000);
-          }
-          searchPanel.classList.remove('active');
-          document.getElementById('searchArea').classList.remove('active');
-          searchInput.value = '';
+          if(target) { target.scrollIntoView({ behavior: 'smooth', block: 'center' }); target.classList.add('highlight-flash'); setTimeout(() => target.classList.remove('highlight-flash'), 2000); }
+          searchPanel.classList.remove('active'); document.getElementById('searchArea').classList.remove('active'); searchInput.value = '';
         };
         searchPanel.appendChild(item);
       });
@@ -266,6 +291,7 @@
     if(e.target.value === MY_PASS) { btn.classList.add('active'); btn.disabled = false; }
     else { btn.classList.remove('active'); btn.disabled = true; }
   };
+
   document.getElementById("writeBtnAction").onclick = () => document.getElementById('overlay').classList.add('open');
   document.getElementById("closeEditorAction").onclick = () => document.getElementById('overlay').classList.remove('open');
   document.getElementById("closeConfirmAction").onclick = () => { document.getElementById('confirmOverlay').style.display = 'none'; pendingDeleteId = null; };
@@ -294,9 +320,7 @@
   };
 
   db.collection("posts").orderBy("date", "desc").onSnapshot((snap) => {
-    const totalVal = document.getElementById('totalCount');
-    if(totalVal) totalVal.innerText = String(snap.size).padStart(2, '0');
-
+    document.getElementById('totalCount').innerText = String(snap.size).padStart(2, '0');
     allEntries = []; 
     const tl = document.getElementById('timeline'); tl.innerHTML = ''; const byYear = {};
     snap.forEach(docSnap => {
