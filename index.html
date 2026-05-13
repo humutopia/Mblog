@@ -13,7 +13,7 @@
 
 <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@300;400;500&family=DM+Mono:ital@0;1&display=swap" rel="stylesheet">
 <style>
-  /* 显式引入 Halimun 字体库 */
+  /* 引入 Halimun 字体库 */
   @import url('https://fonts.cdnfonts.com/css/halimun');
 
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -27,18 +27,30 @@
   .sync-bar { width: 0%; height: 100%; background: var(--accent); transition: width 0.3s; }
   .sync-text { position: fixed; top: env(safe-area-inset-top, 12px); left: 50%; transform: translateX(-50%); font-family: 'DM Mono', monospace; font-size: 0.5rem; color: var(--muted); letter-spacing: 0.1em; opacity: 0.6; pointer-events: none; }
   
-  header { padding: calc(60px + env(safe-area-inset-top)) 40px 40px; max-width: 700px; margin: 0 auto; display: flex; justify-content: space-between; align-items: flex-end; }
+  header { padding: calc(60px + env(safe-area-inset-top)) 40px 40px; max-width: 700px; margin: 0 auto; display: flex; justify-content: space-between; align-items: flex-end; gap: 20px; }
   
-  /* 核心修改：确保字体名称正确并增加 fallback 选项 */
+  /* 优化响应式标题：解决手机端溢出问题 */
   .site-title { 
     font-family: 'Halimun', 'Brush Script MT', cursive; 
-    font-size: 2.8rem; 
+    font-size: 2.5rem; /* PC端默认字号 */
     font-weight: bold; 
-    letter-spacing: 0; 
     color: var(--accent); 
-    line-height: 1;
+    line-height: 1.1;
     text-transform: none;
     font-style: normal;
+    word-break: break-all; /* 极端情况下允许换行 */
+    flex: 1; /* 占据可用空间 */
+    min-width: 0; /* 防止伸缩布局溢出 */
+  }
+
+  /* 移动端适配 */
+  @media (max-width: 600px) {
+    header { padding: calc(50px + env(safe-area-inset-top)) 25px 30px; }
+    .site-title { 
+      font-size: 1.8rem; /* 缩小手机端标题字号 */
+    }
+    .container { padding: 0 25px; }
+    .search-area { padding: 0 25px; }
   }
   
   .site-meta { 
@@ -49,6 +61,7 @@
     font-family: 'DM Mono', monospace; 
     font-size: 0.6rem; 
     color: var(--muted);
+    flex-shrink: 0; /* 禁止元数据区域收缩 */
   }
 
   .search-trigger { cursor: pointer; color: var(--muted); opacity: 0.4; transition: 0.3s; line-height: 0; margin-bottom: 2px; padding-right: 1px; }
@@ -66,12 +79,12 @@
   
   .meta-row .val { text-align: right; color: inherit; } 
 
-  .search-area { max-width: 700px; margin: -20px auto 20px; padding: 0 40px; height: 0; overflow: hidden; opacity: 0; transition: all 0.4s ease; position: relative; }
+  .search-area { max-width: 700px; margin: -20px auto 20px; height: 0; overflow: hidden; opacity: 0; transition: all 0.4s ease; position: relative; }
   .search-area.active { height: auto; min-height: 45px; opacity: 1; overflow: visible; }
   .search-box-wrapper { border-bottom: 1px solid var(--border); padding: 5px 0; }
   #inline-search { width: 100%; background: transparent; border: none; font-family: inherit; font-size: 0.85rem; color: var(--text); outline: none; }
 
-  #search-results-panel { position: absolute; left: 40px; right: 40px; background: var(--surface); z-index: 100; border: 1px solid var(--border); max-height: 300px; overflow-y: auto; display: none; box-shadow: 0 20px 40px rgba(0,0,0,0.5); border-radius: 4px; }
+  #search-results-panel { position: absolute; left: 0; right: 0; background: var(--surface); z-index: 100; border: 1px solid var(--border); max-height: 300px; overflow-y: auto; display: none; box-shadow: 0 20px 40px rgba(0,0,0,0.5); border-radius: 4px; }
   #search-results-panel.active { display: block; }
   .search-res-item { padding: 12px 15px; border-bottom: 1px solid var(--border); cursor: pointer; }
   .search-res-item:hover { background: rgba(200, 169, 110, 0.1); }
