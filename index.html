@@ -22,7 +22,7 @@
   
   body { background: var(--bg); color: var(--text); font-family: 'Noto Serif SC', serif; min-height: 100vh; padding-bottom: calc(120px + env(safe-area-inset-bottom)); transition: background 0.4s ease; overflow-x: hidden; }
   
-  /* 顶部同步指示器 */
+  /* 同步指示器 */
   .sync-indicator { position: fixed; top: 0; left: 0; width: 100%; height: 2px; z-index: 2000; background: transparent; }
   .sync-bar { width: 0%; height: 100%; background: var(--accent); transition: width 0.3s; }
   .sync-text { position: fixed; top: env(safe-area-inset-top, 12px); left: 50%; transform: translateX(-50%); font-family: 'DM Mono', monospace; font-size: 0.5rem; color: var(--muted); letter-spacing: 0.1em; opacity: 0.6; pointer-events: none; }
@@ -53,22 +53,34 @@
     display: flex; 
     flex-direction: column; 
     align-items: flex-end; 
-    gap: 4px; 
+    gap: 4px;
     font-family: 'DM Mono', monospace; 
     font-size: 0.6rem; 
     color: var(--muted);
     flex-shrink: 0;
   }
 
-  .search-trigger { cursor: pointer; color: var(--muted); opacity: 0.4; transition: 0.3s; display: flex; align-items: center; margin-bottom: 2px; }
+  .search-trigger { 
+    cursor: pointer; 
+    color: var(--muted); 
+    opacity: 0.4; 
+    transition: 0.3s; 
+    display: flex; 
+    align-items: center; 
+    justify-content: flex-end;
+    height: 0.8rem;
+    width: 100%;
+  }
   .search-trigger:hover { color: var(--accent); opacity: 1; }
-  .search-trigger svg { width: 14px; height: 14px; stroke: currentColor; stroke-width: 2; }
+  .search-trigger svg { width: 13px; height: 13px; stroke: currentColor; stroke-width: 2.2; }
 
   .meta-row {
     display: grid;
     grid-template-columns: auto 1fr;
     column-gap: 12px;
     width: 80px; 
+    height: 0.8rem;
+    align-items: center;
     letter-spacing: 0.12em;
     color: inherit;
   }
@@ -89,7 +101,7 @@
   .search-box-wrapper { border-bottom: 1px solid var(--border); padding: 5px 0; }
   #inline-search { width: 100%; background: transparent; border: none; font-family: inherit; font-size: 0.85rem; color: var(--text); outline: none; }
 
-  /* 搜索结果面板 - 自定义滚动条样式 */
+  /* 搜索结果面板 */
   #search-results-panel { 
     position: absolute; 
     left: 40px; 
@@ -102,27 +114,12 @@
     display: none; 
     box-shadow: 0 20px 40px rgba(0,0,0,0.5); 
     border-radius: 4px; 
-    /* Firefox 滚动条 */
     scrollbar-width: thin;
     scrollbar-color: var(--scroll-thumb) transparent;
   }
-  
-  /* Webkit 滚动条美化 (Chrome/Safari) */
-  #search-results-panel::-webkit-scrollbar {
-    width: 4px; /* 极细宽度 */
-  }
-  #search-results-panel::-webkit-scrollbar-track {
-    background: transparent;
-  }
-  #search-results-panel::-webkit-scrollbar-thumb {
-    background: var(--scroll-thumb);
-    border-radius: 10px;
-    transition: background 0.3s;
-  }
-  #search-results-panel::-webkit-scrollbar-thumb:hover {
-    background: var(--accent); /* 悬停时变为主题色 */
-  }
-
+  #search-results-panel::-webkit-scrollbar { width: 4px; }
+  #search-results-panel::-webkit-scrollbar-track { background: transparent; }
+  #search-results-panel::-webkit-scrollbar-thumb { background: var(--scroll-thumb); border-radius: 10px; }
   #search-results-panel.active { display: block; }
   
   .search-res-item { padding: 12px 15px; border-bottom: 1px solid var(--border); cursor: pointer; }
@@ -130,7 +127,7 @@
   .search-res-date { font-family: 'DM Mono'; font-size: 0.55rem; color: var(--accent); }
   .search-res-title { font-size: 0.8rem; opacity: 0.8; margin-top: 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
-  /* 时间轴主容器 */
+  /* 内容区 */
   .container { max-width: 700px; margin: 0 auto; padding: 0 40px; }
   .year-group { padding-top: 40px; }
   .year-row { display: flex; align-items: center; gap: 14px; margin-bottom: 10px; }
@@ -166,9 +163,8 @@
   .confirm-txt { font-size: 0.85rem; margin-bottom: 20px; color: var(--text); font-weight: 300; }
   .confirm-input { width: 100%; background: var(--bg); border: 1px solid var(--border); padding: 10px; color: var(--text); font-family: 'DM Mono', monospace; font-size: 0.7rem; text-align: center; outline: none; margin-bottom: 20px; border-radius: 4px; }
   .confirm-btns { display: flex; justify-content: center; gap: 30px; }
-  .confirm-btns button { background: none; border: none; font-family: 'DM Mono', monospace; font-size: 0.65rem; cursor: pointer; letter-spacing: 1px; }
-  .btn-no { color: var(--muted); }
-  .btn-yes { color: var(--accent); font-weight: bold; }
+  .btn-no { color: var(--muted); background:none; border:none; cursor:pointer; font-family:'DM Mono'; font-size:0.65rem;}
+  .btn-yes { color: var(--accent); background:none; border:none; cursor:pointer; font-family:'DM Mono'; font-size:0.65rem; font-weight:bold; }
   #status-toast { position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%); background: var(--surface); border: 1px solid var(--border); color: var(--text); padding: 8px 16px; font-size: 0.7rem; font-family: 'DM Mono', monospace; z-index: 2000; border-radius: 2px; display: none; }
 </style>
 </head>
@@ -209,7 +205,7 @@
 <button class="write-btn" id="writeBtnAction">＋ 写一条</button>
 
 <div class="editor-overlay" id="overlay">
-  <div class="editor-box" onclick="event.stopPropagation()">
+  <div class="editor-box" id="editorContainer">
     <div style="display:flex;justify-content:space-between;margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid var(--border)">
       <span style="font-family:'DM Mono',monospace;font-size:0.6rem;color:var(--muted)">NEW ENTRY</span>
       <button id="closeEditorAction" style="background:none;border:none;color:var(--muted);font-size:1.2rem;cursor:pointer;">✕</button>
@@ -249,13 +245,29 @@
     else if(status === 'done') { bar.style.width = '100%'; txt.innerText = 'GARDEN SYNCED'; setTimeout(() => { bar.style.width = '0%'; }, 1200); }
   }
 
+  const searchArea = document.getElementById('searchArea');
   const searchInput = document.getElementById('inline-search');
   const searchPanel = document.getElementById('search-results-panel');
-  document.getElementById('searchBtn').onclick = (e) => {
+  const searchBtn = document.getElementById('searchBtn');
+
+  // 搜索切换
+  searchBtn.onclick = (e) => {
     e.stopPropagation();
-    const active = document.getElementById('searchArea').classList.toggle('active');
+    const active = searchArea.classList.toggle('active');
     if(active) setTimeout(() => searchInput.focus(), 200);
   };
+
+  // 核心：点击外部关闭搜索栏
+  document.addEventListener('click', (e) => {
+    if (searchArea.classList.contains('active')) {
+      // 如果点击的不是搜索区域本身，也不是搜索按钮，则关闭
+      if (!searchArea.contains(e.target) && !searchBtn.contains(e.target)) {
+        searchArea.classList.remove('active');
+        searchPanel.classList.remove('active');
+        searchInput.value = '';
+      }
+    }
+  });
 
   searchInput.oninput = (e) => {
     const kw = e.target.value.trim().toLowerCase();
@@ -268,7 +280,8 @@
         const item = document.createElement('div');
         item.className = 'search-res-item';
         item.innerHTML = `<div class="search-res-date">${new Date(p.date).toLocaleDateString()}</div><div class="search-res-title">${p.title || p.body.substring(0,25)}</div>`;
-        item.onclick = () => {
+        item.onclick = (e) => {
+          e.stopPropagation(); // 防止冒泡触发 document 的关闭逻辑
           const target = document.getElementById(`entry-${p.id}`);
           if(target) {
             target.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -276,7 +289,7 @@
             setTimeout(() => target.classList.remove('highlight-flash'), 2000);
           }
           searchPanel.classList.remove('active');
-          document.getElementById('searchArea').classList.remove('active');
+          searchArea.classList.remove('active');
           searchInput.value = '';
         };
         searchPanel.appendChild(item);
@@ -284,6 +297,7 @@
     } else { searchPanel.classList.remove('active'); }
   };
 
+  // 编辑器逻辑
   document.getElementById('inp-pass').oninput = (e) => {
     const btn = document.getElementById('btn-save-action');
     if(e.target.value === MY_PASS) { btn.classList.add('active'); btn.disabled = false; }
@@ -291,7 +305,8 @@
   };
   document.getElementById("writeBtnAction").onclick = () => document.getElementById('overlay').classList.add('open');
   document.getElementById("closeEditorAction").onclick = () => document.getElementById('overlay').classList.remove('open');
-  document.getElementById("closeConfirmAction").onclick = () => { document.getElementById('confirmOverlay').style.display = 'none'; pendingDeleteId = null; };
+  document.getElementById("overlay").onclick = () => document.getElementById('overlay').classList.remove('open');
+  document.getElementById("editorContainer").onclick = (e) => e.stopPropagation();
 
   document.getElementById("btn-save-action").onclick = async () => {
     const title = document.getElementById('inp-title').value.trim();
@@ -306,7 +321,9 @@
     } catch(e) { showToast("失败"); }
   };
 
+  // 删除逻辑
   window.askDelete = (id) => { pendingDeleteId = id; document.getElementById('confirmOverlay').style.display = 'flex'; };
+  document.getElementById('closeConfirmAction').onclick = () => { document.getElementById('confirmOverlay').style.display = 'none'; pendingDeleteId = null; };
   document.getElementById('confirmDeleteBtn').onclick = async () => {
     if (document.getElementById('del-pass-input').value === MY_PASS) {
       await db.collection("posts").doc(pendingDeleteId).delete();
@@ -316,6 +333,7 @@
     } else { showToast("口令错误"); }
   };
 
+  // 数据渲染
   db.collection("posts").orderBy("date", "desc").onSnapshot((snap) => {
     const totalVal = document.getElementById('totalCount');
     if(totalVal) totalVal.innerText = String(snap.size).padStart(2, '0');
