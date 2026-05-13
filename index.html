@@ -13,11 +13,8 @@
 
 <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@300;400;500&family=DM+Mono:ital@0;1&display=swap" rel="stylesheet">
 <style>
-  /* 引入 Halimun 字体 */
-  @font-face {
-    font-family: 'Halimun';
-    src: url('https://db.onlinewebfonts.com/t/790757f4955b9e0787d5598696d5e7d2.woff2') format('woff2');
-  }
+  /* 显式引入 Halimun 字体库 */
+  @import url('https://fonts.cdnfonts.com/css/halimun');
 
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
   :root { --accent: #c8a96e; --accent2: #7eb8a4; }
@@ -32,14 +29,16 @@
   
   header { padding: calc(60px + env(safe-area-inset-top)) 40px 40px; max-width: 700px; margin: 0 auto; display: flex; justify-content: space-between; align-items: flex-end; }
   
-  /* 更新标题为 Humutopia，采用 Halimun 字体，加粗 */
+  /* 核心修改：确保字体名称正确并增加 fallback 选项 */
   .site-title { 
-    font-family: 'Halimun', cursive; 
-    font-size: 2.4rem; 
+    font-family: 'Halimun', 'Brush Script MT', cursive; 
+    font-size: 2.8rem; 
     font-weight: bold; 
-    letter-spacing: 0.02em; 
+    letter-spacing: 0; 
     color: var(--accent); 
-    text-transform: none; /* 确保维持代码中的大小写 */
+    line-height: 1;
+    text-transform: none;
+    font-style: normal;
   }
   
   .site-meta { 
