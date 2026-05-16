@@ -45,7 +45,7 @@
     header { padding: calc(50px + env(safe-area-inset-top)) 25px 30px; }
     .site-title { font-size: 1.8rem; }
     .container { padding: 0 25px; }
-    .search-area { padding: 0 25px !important; }
+    .search-area, .pinned-area { padding: 0 25px !important; }
   }
   
   .site-meta { 
@@ -59,21 +59,41 @@
     flex-shrink: 0;
   }
 
-  .search-trigger { cursor: pointer; color: var(--muted); opacity: 0.4; transition: 0.3s; display: flex; align-items: center; margin-bottom: 2px; }
-  .search-trigger:hover { color: var(--accent); opacity: 1; }
-  .search-trigger svg { width: 14px; height: 14px; stroke: currentColor; stroke-width: 2; }
+  /* 核心修改：使用网格布局对齐图标与下方文字 */
+  .meta-icons {
+    display: grid;
+    grid-template-columns: 1fr 1fr; /* 分为两列，对应下方的 Label 和 Value */
+    width: 80px; /* 与下方的 .meta-row 宽度保持一致 */
+    margin-bottom: 6px;
+    align-items: center;
+  }
+
+  .meta-trigger { 
+    cursor: pointer; 
+    color: var(--muted); 
+    opacity: 0.4; 
+    transition: 0.3s; 
+    display: flex; 
+    align-items: center;
+  }
+  /* 置顶图标在第一列右对齐，恰好在 TOTAL 的 AL 上方 */
+  .meta-trigger:first-child { justify-self: end; margin-right: 2px; }
+  /* 搜索图标在第二列右对齐，与数字末尾对齐 */
+  .meta-trigger:last-child { justify-self: end; }
+
+  .meta-trigger:hover { color: var(--accent); opacity: 1; }
+  .meta-trigger svg { width: 14px; height: 14px; stroke: currentColor; stroke-width: 1.8; fill: none; }
 
   .meta-row {
     display: grid;
-    grid-template-columns: auto 1fr;
-    column-gap: 12px;
+    grid-template-columns: 1fr 1fr; /* 保持一致的对齐基准 */
     width: 80px; 
     letter-spacing: 0.12em;
     color: inherit;
   }
   .meta-row .val { text-align: right; color: inherit; } 
 
-  .search-area { 
+  .search-area, .pinned-area { 
     max-width: 700px; 
     margin: -20px auto 20px; 
     padding: 0 40px;
@@ -83,11 +103,14 @@
     transition: all 0.4s ease; 
     position: relative; 
   }
-  .search-area.active { height: auto; min-height: 45px; opacity: 1; overflow: visible; }
-  .search-box-wrapper { border-bottom: 1px solid var(--border); padding: 5px 0; }
+  .search-area.active, .pinned-area.active { height: auto; min-height: 45px; opacity: 1; overflow: visible; }
+  
+  .panel-box-wrapper { border-bottom: 1px solid var(--border); padding: 5px 0; display: flex; align-items: center; justify-content: space-between; }
+  .panel-label { font-family: 'DM Mono'; font-size: 0.55rem; color: var(--accent); letter-spacing: 0.1em; }
+  
   #inline-search { width: 100%; background: transparent; border: none; font-family: inherit; font-size: 0.85rem; color: var(--text); outline: none; }
 
-  #search-results-panel { 
+  .results-dropdown { 
     position: absolute; 
     left: 40px; 
     right: 40px; 
@@ -102,15 +125,16 @@
     scrollbar-width: thin;
     scrollbar-color: var(--scroll-thumb) transparent;
   }
-  #search-results-panel::-webkit-scrollbar { width: 4px; }
-  #search-results-panel::-webkit-scrollbar-track { background: transparent; }
-  #search-results-panel::-webkit-scrollbar-thumb { background: var(--scroll-thumb); border-radius: 10px; }
-  #search-results-panel.active { display: block; }
+  @media (max-width: 600px) { .results-dropdown { left: 25px; right: 25px; } }
+  .results-dropdown::-webkit-scrollbar { width: 4px; }
+  .results-dropdown::-webkit-scrollbar-track { background: transparent; }
+  .results-dropdown::-webkit-scrollbar-thumb { background: var(--scroll-thumb); border-radius: 10px; }
+  .results-dropdown.active { display: block; }
   
-  .search-res-item { padding: 12px 15px; border-bottom: 1px solid var(--border); cursor: pointer; }
-  .search-res-item:hover { background: rgba(200, 169, 110, 0.1); }
-  .search-res-date { font-family: 'DM Mono'; font-size: 0.55rem; color: var(--accent); }
-  .search-res-title { font-size: 0.8rem; opacity: 0.8; margin-top: 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .res-item { padding: 12px 15px; border-bottom: 1px solid var(--border); cursor: pointer; transition: background 0.2s; }
+  .res-item:hover { background: rgba(200, 169, 110, 0.1); }
+  .res-date { font-family: 'DM Mono'; font-size: 0.55rem; color: var(--accent); }
+  .res-title { font-size: 0.8rem; opacity: 0.8; margin-top: 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
   .container { max-width: 700px; margin: 0 auto; padding: 0 40px; }
   .year-group { padding-top: 40px; }
@@ -124,17 +148,23 @@
   @keyframes fadeUp { to { opacity: 1; transform: translateY(0); } }
   .entry::before { content: ''; position: absolute; left: -4px; top: 33px; width: 7px; height: 7px; border-radius: 50%; background: var(--bg); border: 1.5px solid var(--accent); opacity: 0.65; }
   .entry.highlight-flash { background: rgba(200, 169, 110, 0.2); }
+  .entry.is-pinned::after { content: 'PINNED'; position: absolute; right: 0; top: 12px; font-family: 'DM Mono'; font-size: 0.45rem; color: var(--accent); letter-spacing: 0.1em; opacity: 0.5; }
 
   .entry-stamp { font-family: 'DM Mono', monospace; font-size: 0.62rem; color: var(--accent); margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
-  .del-btn { color: var(--muted); cursor: pointer; opacity: 0; transition: opacity 0.3s; font-size: 0.55rem; padding: 4px 8px; }
-  .entry:hover .del-btn { opacity: 1; }
+  .entry-actions { display: flex; gap: 12px; align-items: center; opacity: 0; transition: opacity 0.3s; }
+  .entry:hover .entry-actions { opacity: 1; }
+  .action-btn { color: var(--muted); cursor: pointer; font-size: 0.55rem; padding: 4px 0; }
+  .action-btn:hover { color: var(--accent); }
+  
   .entry-title { font-size: 0.96rem; font-weight: 500; margin-bottom: 9px; }
   .entry-body { font-size: 0.86rem; line-height: 2.1; opacity: 0.75; white-space: pre-wrap; text-align: justify; word-break: break-word; }
   
   .write-btn { position: fixed; bottom: calc(40px + env(safe-area-inset-bottom)); right: 40px; background: var(--accent); border: none; color: #0f0f0f; font-family: 'DM Mono', monospace; font-size: 0.65rem; padding: 11px 22px; cursor: pointer; border-radius: 2px; z-index: 10; box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
   .editor-overlay { display: none; position: fixed; inset: 0; background: var(--overlay-bg); z-index: 999; align-items: flex-end; justify-content: center; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); }
   .editor-overlay.open { display: flex; }
+  
   .editor-box { background: var(--surface); width: 100%; max-width: 700px; padding: 28px 36px calc(60px + env(safe-area-inset-bottom)); border-top: 1px solid var(--border); border-radius: 12px 12px 0 0; }
+  
   .field input, .field textarea { width: 100%; background: transparent; border: none; border-bottom: 1px solid var(--border); padding: 12px 0; font-family: inherit; font-size: 0.88rem; color: var(--text); outline: none; }
   .field textarea { min-height: 200px; line-height: 2; }
   .btn-save { background: #333; border: none; font-family: 'DM Mono', monospace; font-size: 0.65rem; color: #666; padding: 12px 28px; cursor: not-allowed; border-radius: 2px; margin-top: 20px; width: 100%; transition: 0.3s; }
@@ -158,11 +188,20 @@
 <header>
   <h1 class="site-title">Humutopia</h1>
   <div class="site-meta">
-    <div class="search-trigger" id="searchBtn">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
-        <circle cx="11" cy="11" r="8"></circle>
-        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-      </svg>
+    <div class="meta-icons">
+      <!-- 置顶图标：对齐在第一列末尾 -->
+      <div class="meta-trigger" id="pinBtn" title="查看置顶">
+        <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 17v5M9 10.76a2 2 0 0 1-1.11 1.79l-1.78.9A.5.5 0 0 0 6.36 14L12 14l5.64 0a.5.5 0 0 0 .25-.55l-1.78-.9A2 2 0 0 1 15 10.76V6a3 3 0 0 0-6 0v4.76ZM15 5h-6"></path>
+        </svg>
+      </div>
+      <!-- 搜索图标：对齐在第二列末尾 -->
+      <div class="meta-trigger" id="searchBtn" title="检索记忆">
+        <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="11" cy="11" r="8"></circle>
+          <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+        </svg>
+      </div>
     </div>
     <div class="meta-row">
       <span>TOTAL</span>
@@ -176,10 +215,17 @@
 </header>
 
 <div class="search-area" id="searchArea">
-  <div class="search-box-wrapper">
+  <div class="panel-box-wrapper">
     <input id="inline-search" autocomplete="off" spellcheck="false" placeholder="检索记忆...">
   </div>
-  <div id="search-results-panel"></div>
+  <div id="search-results-panel" class="results-dropdown"></div>
+</div>
+
+<div class="pinned-area" id="pinnedArea">
+  <div class="panel-box-wrapper">
+    <span class="panel-label">PINNED MEMORIES</span>
+  </div>
+  <div id="pinned-results-panel" class="results-dropdown active" style="position:relative; left:0; right:0; box-shadow:none; border-top:none;"></div>
 </div>
 
 <div class="container" id="timeline"></div>
@@ -201,11 +247,11 @@
 
 <div class="confirm-overlay" id="confirmOverlay">
   <div class="confirm-box">
-    <div class="confirm-txt">确定抹除这段记忆吗？</div>
-    <input type="password" id="del-pass-input" class="confirm-input" placeholder="输入口令确认">
+    <div class="confirm-txt" id="confirmTxt">确定执行此操作吗？</div>
+    <input type="password" id="confirm-pass-input" class="confirm-input" placeholder="输入口令确认">
     <div class="confirm-btns">
       <button class="btn-no" id="closeConfirmAction">取消</button>
-      <button class="btn-yes" id="confirmDeleteBtn">确认抹除</button>
+      <button class="btn-yes" id="confirmActionBtn">确认</button>
     </div>
   </div>
 </div>
@@ -217,7 +263,8 @@
   const MY_PASS = "ming2026";
   firebase.initializeApp(firebaseConfig);
   const db = firebase.firestore();
-  let pendingDeleteId = null;
+  let currentActionId = null;
+  let currentActionType = null; 
   let allEntries = []; 
 
   function showToast(msg) { const t = document.getElementById('status-toast'); t.innerText = msg; t.style.display = 'block'; setTimeout(() => t.style.display = 'none', 2000); }
@@ -228,27 +275,47 @@
   }
 
   const searchArea = document.getElementById('searchArea');
+  const pinnedArea = document.getElementById('pinnedArea');
+  const searchBtn = document.getElementById('searchBtn');
+  const pinBtn = document.getElementById('pinBtn');
   const searchInput = document.getElementById('inline-search');
   const searchPanel = document.getElementById('search-results-panel');
-  const searchBtn = document.getElementById('searchBtn');
+  const pinnedPanel = document.getElementById('pinned-results-panel');
 
-  // 搜索切换
   searchBtn.onclick = (e) => {
     e.stopPropagation();
+    pinnedArea.classList.remove('active');
     const active = searchArea.classList.toggle('active');
     if(active) setTimeout(() => searchInput.focus(), 200);
   };
 
-  // 核心：点击外部关闭搜索栏
+  pinBtn.onclick = (e) => {
+    e.stopPropagation();
+    searchArea.classList.remove('active');
+    const active = pinnedArea.classList.toggle('active');
+    if(active) renderPinnedInline();
+  };
+
   document.addEventListener('click', (e) => {
-    if (searchArea.classList.contains('active')) {
-      if (!searchArea.contains(e.target) && !searchBtn.contains(e.target)) {
-        searchArea.classList.remove('active');
-        searchPanel.classList.remove('active');
-        searchInput.value = '';
-      }
+    if (!searchArea.contains(e.target) && !searchBtn.contains(e.target)) {
+      searchArea.classList.remove('active');
+      searchPanel.classList.remove('active');
+    }
+    if (!pinnedArea.contains(e.target) && !pinBtn.contains(e.target)) {
+      pinnedArea.classList.remove('active');
     }
   });
+
+  const jumpToEntry = (id) => {
+    const target = document.getElementById(`entry-${id}`);
+    if(target) {
+      target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      target.classList.add('highlight-flash');
+      setTimeout(() => target.classList.remove('highlight-flash'), 2000);
+      searchArea.classList.remove('active');
+      pinnedArea.classList.remove('active');
+    }
+  };
 
   searchInput.oninput = (e) => {
     const kw = e.target.value.trim().toLowerCase();
@@ -259,24 +326,29 @@
       searchPanel.classList.add('active');
       res.forEach(p => {
         const item = document.createElement('div');
-        item.className = 'search-res-item';
-        item.innerHTML = `<div class="search-res-date">${new Date(p.date).toLocaleDateString()}</div><div class="search-res-title">${p.title || p.body.substring(0,25)}</div>`;
-        item.onclick = (e) => {
-          e.stopPropagation(); 
-          const target = document.getElementById(`entry-${p.id}`);
-          if(target) {
-            target.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            target.classList.add('highlight-flash');
-            setTimeout(() => target.classList.remove('highlight-flash'), 2000);
-          }
-          searchPanel.classList.remove('active');
-          searchArea.classList.remove('active');
-          searchInput.value = '';
-        };
+        item.className = 'res-item';
+        item.innerHTML = `<div class="res-date">${new Date(p.date).toLocaleDateString()}</div><div class="res-title">${p.title || p.body.substring(0,25)}</div>`;
+        item.onclick = () => jumpToEntry(p.id);
         searchPanel.appendChild(item);
       });
     } else { searchPanel.classList.remove('active'); }
   };
+
+  function renderPinnedInline() {
+    pinnedPanel.innerHTML = '';
+    const pinned = allEntries.filter(p => p.pinned);
+    if(pinned.length === 0) {
+      pinnedPanel.innerHTML = '<div style="padding:20px; font-size:0.6rem; color:var(--muted); text-align:center; font-family:\'DM Mono\'">VOID_</div>';
+      return;
+    }
+    pinned.forEach(p => {
+      const item = document.createElement('div');
+      item.className = 'res-item';
+      item.innerHTML = `<div class="res-date">${new Date(p.date).toLocaleDateString()}</div><div class="res-title">${p.title || p.body.substring(0,25)}</div>`;
+      item.onclick = () => jumpToEntry(p.id);
+      pinnedPanel.appendChild(item);
+    });
+  }
 
   document.getElementById('inp-pass').oninput = (e) => {
     const btn = document.getElementById('btn-save-action');
@@ -285,7 +357,6 @@
   };
   document.getElementById("writeBtnAction").onclick = () => document.getElementById('overlay').classList.add('open');
   document.getElementById("closeEditorAction").onclick = () => document.getElementById('overlay').classList.remove('open');
-  document.getElementById("overlay").onclick = () => document.getElementById('overlay').classList.remove('open');
 
   document.getElementById("btn-save-action").onclick = async () => {
     const title = document.getElementById('inp-title').value.trim();
@@ -293,21 +364,35 @@
     if (!body) return;
     setSyncStatus('syncing');
     try {
-      await db.collection("posts").add({ title, body, date: new Date().toISOString() });
+      await db.collection("posts").add({ title, body, date: new Date().toISOString(), pinned: false });
       document.getElementById('overlay').classList.remove('open');
       document.getElementById('inp-title').value = ''; document.getElementById('inp-body').value = ''; document.getElementById('inp-pass').value = '';
       showToast("已存档"); setSyncStatus('done');
     } catch(e) { showToast("失败"); }
   };
 
-  window.askDelete = (id) => { pendingDeleteId = id; document.getElementById('confirmOverlay').style.display = 'flex'; };
-  document.getElementById('closeConfirmAction').onclick = () => { document.getElementById('confirmOverlay').style.display = 'none'; pendingDeleteId = null; };
-  document.getElementById('confirmDeleteBtn').onclick = async () => {
-    if (document.getElementById('del-pass-input').value === MY_PASS) {
-      await db.collection("posts").doc(pendingDeleteId).delete();
+  window.askAction = (id, type, currentPinned = false) => { 
+    currentActionId = id; 
+    currentActionType = type;
+    const txt = type === 'delete' ? "确定抹除这段记忆吗？" : (currentPinned ? "取消置顶此记忆？" : "确定置顶此记忆吗？");
+    document.getElementById('confirmTxt').innerText = txt;
+    document.getElementById('confirmOverlay').style.display = 'flex'; 
+  };
+  
+  document.getElementById('closeConfirmAction').onclick = () => { document.getElementById('confirmOverlay').style.display = 'none'; currentActionId = null; };
+  
+  document.getElementById('confirmActionBtn').onclick = async () => {
+    if (document.getElementById('confirm-pass-input').value === MY_PASS) {
+      if(currentActionType === 'delete') {
+        await db.collection("posts").doc(currentActionId).delete();
+        showToast("抹除成功");
+      } else if(currentActionType === 'pin') {
+        const post = allEntries.find(e => e.id === currentActionId);
+        await db.collection("posts").doc(currentActionId).update({ pinned: !post.pinned });
+        showToast("操作成功");
+      }
       document.getElementById('confirmOverlay').style.display = 'none';
-      document.getElementById('del-pass-input').value = '';
-      showToast("抹除成功");
+      document.getElementById('confirm-pass-input').value = '';
     } else { showToast("口令错误"); }
   };
 
@@ -322,19 +407,33 @@
       const y = new Date(p.date).getFullYear();
       if (!byYear[y]) byYear[y] = []; byYear[y].push(p);
     });
+    
     Object.keys(byYear).sort((a,b)=>b-a).forEach(year => {
       const group = document.createElement('div'); group.className = 'year-group';
       group.innerHTML = `<div class="year-row"><span class="year-num">${year}</span><div class="year-line"></div></div>`;
       const track = document.createElement('div'); track.className = 'track';
       byYear[year].forEach(p => {
         const d = new Date(p.date); const timeStr = `${d.getFullYear()}.${d.getMonth()+1}.${d.getDate()} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
-        const item = document.createElement('div'); item.className = 'entry'; item.id = `entry-${p.id}`;
-        item.innerHTML = `<div class="entry-stamp"><div>${timeStr}</div><div class="del-btn" onclick="askDelete('${p.id}')">DELETE</div></div>${p.title ? `<div class="entry-title">${p.title}</div>` : ''}<div class="entry-body">${p.body}</div>`;
+        const item = document.createElement('div'); 
+        item.className = `entry ${p.pinned ? 'is-pinned' : ''}`; 
+        item.id = `entry-${p.id}`;
+        item.innerHTML = `
+          <div class="entry-stamp">
+            <div>${timeStr}</div>
+            <div class="entry-actions">
+              <div class="action-btn" onclick="askAction('${p.id}', 'pin', ${p.pinned})">${p.pinned ? 'UNPIN' : 'PIN'}</div>
+              <div class="action-btn" onclick="askAction('${p.id}', 'delete')">DELETE</div>
+            </div>
+          </div>
+          ${p.title ? `<div class="entry-title">${p.title}</div>` : ''}
+          <div class="entry-body">${p.body}</div>
+        `;
         track.appendChild(item);
       });
       group.appendChild(track); tl.appendChild(group);
     });
     setSyncStatus('done');
+    if(pinnedArea.classList.contains('active')) renderPinnedInline();
   });
 
   const updateTheme = () => { const h = new Date().getHours(); document.body.className = (h < 6 || h >= 18) ? 'dark' : 'light'; };
