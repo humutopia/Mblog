@@ -280,35 +280,65 @@
     }
   }
 
-  // 异步加载并处理上传的 Threads 原始 JSON
+  // 异步加载并处理上传的 Threads 原始 JSON（全格式像素级去漏版）
   async function loadThreadsData() {
     try {
       const response = await fetch('./threads_and_replies.json');
       if (!response.ok) return;
       const data = await response.json();
+      
       const postsList = data.text_post_app_text_posts || [];
+      const repliesList = data.text_post_app_replies || [];
+      const allRawItems = [...postsList, ...repliesList];
       
       threadsEntries = [];
-      postsList.forEach(item => {
-        (item.media || []).forEach(media => {
-          const rawTitle = media.title || "";
-          if (!rawTitle) return;
+      
+      allRawItems.forEach((item, index) => {
+        // 1. 全方位提取文本（只要有一处有字就抓下来）
+        const topTitle = item.title || "";
+        let coreText = topTitle;
+        
+        // 检查媒体数组里的所有项，拼接或者查找隐藏的文字
+        if (item.media && item.media.length > 0) {
+          for (let m = 0; m < item.media.length; m++) {
+            if (item.media[m].title && !coreText.includes(item.media[m].title)) {
+              if (coreText) {
+                coreText = item.media[m].title;
+              } else {
+                coreText = item.media[m].title;
+              }
+            }
+          }
+        }
+        
+        // 2. 精准定位时间戳
+        let bestTimestamp = item.creation_timestamp || 0;
+        if (!bestTimestamp && item.media && item.media[0]) {
+          bestTimestamp = item.media[0].creation_timestamp || 0;
+        }
+        
+        // 3. 只要拿到文字和时间戳，就强制生成动态，防止被误杀
+        if (coreText && bestTimestamp) {
+          const cleanText = decodeMetaText(coreText);
+          const timestamp = bestTimestamp * 1000;
           
-          const cleanText = decodeMetaText(rawTitle);
-          const timestamp = media.creation_timestamp * 1000; // 秒级时间戳转为毫秒
+          // 放宽去重检测的时间跨度
+          const isDuplicate = threadsEntries.some(e => e.body === cleanText && Math.abs(new Date(e.date).getTime() - timestamp) < 15000);
           
-          threadsEntries.push({
-            id: 'threads-' + media.creation_timestamp,
-            title: '',
-            body: cleanText,
-            date: new Date(timestamp).toISOString(),
-            pinned: false,
-            isThreads: true // 标记来自 Threads，不显示删除和置顶按钮
-          });
-        });
+          if (!isDuplicate) {
+            threadsEntries.push({
+              id: `threads-ultimate-${bestTimestamp}-${index}`,
+              title: '',
+              body: cleanText,
+              date: new Date(timestamp).toISOString(),
+              pinned: false,
+              isThreads: true
+            });
+          }
+        }
       });
     } catch (e) {
-      console.log("未检测到 Threads 备份或解析失败，仅展示云端数据。");
+      console.log("解析失败：", e);
     }
   }
 
