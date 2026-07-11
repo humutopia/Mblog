@@ -136,24 +136,22 @@
   .container { max-width: 700px; margin: 0 auto; padding: 0 40px; }
   .year-group { padding-top: 40px; }
   
-  /* 折叠交互新增样式：支持点击与悬浮反馈 */
   .year-row { display: flex; align-items: center; gap: 14px; margin-bottom: 10px; cursor: pointer; user-select: none; }
   .year-row:hover .year-num { color: var(--accent); }
   .year-row:hover .year-line { background: var(--accent); opacity: 0.5; }
   
   .year-num { font-family: 'DM Mono', monospace; font-size: 0.6rem; color: var(--muted); letter-spacing: 0.18em; transition: color 0.3s; display: flex; align-items: center; gap: 6px; }
-  /* 为折叠状态增加状态小箭头 */
-  .year-num::after { content: '▼'; font-size: 0.45rem; opacity: 0.5; transition: transform 0.3s; display: inline-block; }
-  .year-group.is-collapsed .year-num::after { transform: rotate(-90deg); color: var(--accent2); }
-  .year-group.is-collapsed .year-num { color: var(--accent2); }
+  .year-num::after { content: '▼'; font-size: 0.45rem; opacity: 0.5; transition: transform 0.3s, color 0.3s; display: inline-block; }
+  
+  /* 已折叠状态：保持与右上角相同的 var(--muted) 浅灰色调 */
+  .year-group.is-collapsed .year-num::after { transform: rotate(-90deg); color: var(--muted); }
+  .year-group.is-collapsed .year-num { color: var(--muted); }
 
   .year-line { flex: 1; height: 1px; background: var(--border); transition: background 0.3s, opacity 0.3s; }
   
-  /* 控制轨迹区域折叠与动画过渡 */
   .track { position: relative; padding-left: 32px; max-height: 20000px; opacity: 1; transition: max-height 0.5s cubic-bezier(0, 1, 0, 1), opacity 0.4s ease, padding 0.4s; overflow: hidden; }
   .track::before { content: ''; position: absolute; left: 0; top: 24px; bottom: 0; width: 1.5px; background: linear-gradient(180deg, var(--accent) 0%, var(--accent2) 60%, transparent 100%); opacity: 0.35; }
   
-  /* 折叠激活状态 */
   .year-group.is-collapsed .track { max-height: 0 !important; opacity: 0; padding-top: 0; padding-bottom: 0; pointer-events: none; }
   
   .entry { position: relative; padding: 26px 0 26px 24px; border-bottom: 1px solid var(--border); opacity: 0; transform: translateY(10px); animation: fadeUp 0.45s ease forwards; scroll-margin-top: 100px; transition: background 0.6s; }
@@ -390,7 +388,6 @@
   });
 
   const jumpToEntry = (id) => {
-    // 自动定位时，如果该年份已被折叠，先将其展开以便精准跳转
     const target = document.getElementById(`entry-${id}`);
     if(target) {
       const parentGroup = target.closest('.year-group');
@@ -531,7 +528,6 @@
     
     const tl = document.getElementById('timeline'); 
     
-    // 升级核心：记录并保持当前已被折叠的年份，防止数据流监听更新时重置折叠状态
     const collapsedYears = new Set();
     document.querySelectorAll('.year-group.is-collapsed').forEach(el => {
       const yr = el.getAttribute('data-year');
@@ -552,7 +548,6 @@
       group.className = 'year-group';
       group.setAttribute('data-year', year);
       
-      // 如果之前就是折叠状态，维持原样
       if(collapsedYears.has(String(year))) {
         group.classList.add('is-collapsed');
       }
