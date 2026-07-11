@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-title" content="Ming">
 <link rel="apple-touch-icon" href="logo.png">
 
-<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@300;400;500&family=DM+Mono:ital@0;1&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght=300;400;500&family=DM+Mono:ital@0;1&display=swap" rel="stylesheet">
 <style>
   @import url('https://fonts.cdnfonts.com/css/halimun');
 
@@ -59,11 +59,10 @@
     flex-shrink: 0;
   }
 
-  /* 核心修改：使用网格布局对齐图标与下方文字 */
   .meta-icons {
     display: grid;
-    grid-template-columns: 1fr 1fr; /* 分为两列，对应下方的 Label 和 Value */
-    width: 80px; /* 与下方的 .meta-row 宽度保持一致 */
+    grid-template-columns: 1fr 1fr; 
+    width: 80px; 
     margin-bottom: 6px;
     align-items: center;
   }
@@ -76,9 +75,7 @@
     display: flex; 
     align-items: center;
   }
-  /* 置顶图标在第一列右对齐，恰好在 TOTAL 的 AL 上方 */
   .meta-trigger:first-child { justify-self: end; margin-right: 2px; }
-  /* 搜索图标在第二列右对齐，与数字末尾对齐 */
   .meta-trigger:last-child { justify-self: end; }
 
   .meta-trigger:hover { color: var(--accent); opacity: 1; }
@@ -86,7 +83,7 @@
 
   .meta-row {
     display: grid;
-    grid-template-columns: 1fr 1fr; /* 保持一致的对齐基准 */
+    grid-template-columns: 1fr 1fr; 
     width: 80px; 
     letter-spacing: 0.12em;
     color: inherit;
@@ -189,13 +186,11 @@
   <h1 class="site-title">Humutopia</h1>
   <div class="site-meta">
     <div class="meta-icons">
-      <!-- 置顶图标：对齐在第一列末尾 -->
       <div class="meta-trigger" id="pinBtn" title="查看置顶">
         <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
           <path d="M12 17v5M9 10.76a2 2 0 0 1-1.11 1.79l-1.78.9A.5.5 0 0 0 6.36 14L12 14l5.64 0a.5.5 0 0 0 .25-.55l-1.78-.9A2 2 0 0 1 15 10.76V6a3 3 0 0 0-6 0v4.76ZM15 5h-6"></path>
         </svg>
       </div>
-      <!-- 搜索图标：对齐在第二列末尾 -->
       <div class="meta-trigger" id="searchBtn" title="检索记忆">
         <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
           <circle cx="11" cy="11" r="8"></circle>
@@ -266,12 +261,55 @@
   let currentActionId = null;
   let currentActionType = null; 
   let allEntries = []; 
+  let firebaseEntries = [];
+  let threadsEntries = [];
 
   function showToast(msg) { const t = document.getElementById('status-toast'); t.innerText = msg; t.style.display = 'block'; setTimeout(() => t.style.display = 'none', 2000); }
   function setSyncStatus(status) {
     const bar = document.getElementById('syncBar'); const txt = document.getElementById('syncText');
     if(status === 'syncing') { bar.style.width = '60%'; txt.innerText = 'SYNCING...'; }
     else if(status === 'done') { bar.style.width = '100%'; txt.innerText = 'GARDEN SYNCED'; setTimeout(() => { bar.style.width = '0%'; }, 1200); }
+  }
+
+  // 修复 Meta 乱码（Latin1 转码为 UTF-8 中文）
+  function decodeMetaText(str) {
+    try {
+      return decodeURIComponent(escape(str));
+    } catch (e) {
+      return str;
+    }
+  }
+
+  // 异步加载并处理上传的 Threads 原始 JSON
+  async function loadThreadsData() {
+    try {
+      const response = await fetch('./threads_and_replies.json');
+      if (!response.ok) return;
+      const data = await response.json();
+      const postsList = data.text_post_app_text_posts || [];
+      
+      threadsEntries = [];
+      postsList.forEach(item => {
+        (item.media || []).forEach(media => {
+          const rawTitle = media.title || "";
+          if (!rawTitle) return;
+          
+          const cleanText = decodeMetaText(rawTitle);
+          const timestamp = media.creation_timestamp * 1000; // 秒级时间戳转为毫秒
+          
+          threadsEntries.push({
+            id: 'threads-' + media.creation_timestamp,
+            title: '',
+            body: cleanText,
+            date: new Date(timestamp).toISOString(),
+            pinned: false,
+            isThreads: true // 标记来自 Threads，不显示删除和置顶按钮
+          });
+        });
+      });
+    } catch (e) {
+      console.log("未检测到 Threads 备份或解析失败，仅展示云端数据。");
+    }
   }
 
   const searchArea = document.getElementById('searchArea');
@@ -396,16 +434,24 @@
     } else { showToast("口令错误"); }
   };
 
-  db.collection("posts").orderBy("date", "desc").onSnapshot((snap) => {
+  // 融合并重新渲染整个时间轴
+  function renderCombinedTimeline() {
+    // 聚合 Firebase 数据与 Threads 数据
+    allEntries = [...firebaseEntries, ...threadsEntries];
+    // 统一按时间从新到旧排序
+    allEntries.sort((a, b) => new Date(b.date) - new Date(a.date));
+
     const totalVal = document.getElementById('totalCount');
-    if(totalVal) totalVal.innerText = String(snap.size).padStart(2, '0');
-    allEntries = []; 
-    const tl = document.getElementById('timeline'); tl.innerHTML = ''; const byYear = {};
-    snap.forEach(docSnap => {
-      const p = { id: docSnap.id, ...docSnap.data() };
-      allEntries.push(p);
+    if(totalVal) totalVal.innerText = String(allEntries.length).padStart(2, '0');
+    
+    const tl = document.getElementById('timeline'); 
+    tl.innerHTML = ''; 
+    const byYear = {};
+    
+    allEntries.forEach(p => {
       const y = new Date(p.date).getFullYear();
-      if (!byYear[y]) byYear[y] = []; byYear[y].push(p);
+      if (!byYear[y]) byYear[y] = []; 
+      byYear[y].push(p);
     });
     
     Object.keys(byYear).sort((a,b)=>b-a).forEach(year => {
@@ -417,13 +463,21 @@
         const item = document.createElement('div'); 
         item.className = `entry ${p.pinned ? 'is-pinned' : ''}`; 
         item.id = `entry-${p.id}`;
+        
+        // 核心修改：如果是 Threads 导入的数据，隐藏修改、置顶和删除等互动操作，仅供归档展示
+        const actionHtml = p.isThreads ? `
+          <div class="entry-actions"><div class="action-btn" style="opacity:0.4;cursor:default;">THREADS</div></div>
+        ` : `
+          <div class="entry-actions">
+            <div class="action-btn" onclick="askAction('${p.id}', 'pin', ${p.pinned})">${p.pinned ? 'UNPIN' : 'PIN'}</div>
+            <div class="action-btn" onclick="askAction('${p.id}', 'delete')">DELETE</div>
+          </div>
+        `;
+
         item.innerHTML = `
           <div class="entry-stamp">
             <div>${timeStr}</div>
-            <div class="entry-actions">
-              <div class="action-btn" onclick="askAction('${p.id}', 'pin', ${p.pinned})">${p.pinned ? 'UNPIN' : 'PIN'}</div>
-              <div class="action-btn" onclick="askAction('${p.id}', 'delete')">DELETE</div>
-            </div>
+            ${actionHtml}
           </div>
           ${p.title ? `<div class="entry-title">${p.title}</div>` : ''}
           <div class="entry-body">${p.body}</div>
@@ -434,7 +488,23 @@
     });
     setSyncStatus('done');
     if(pinnedArea.classList.contains('active')) renderPinnedInline();
-  });
+  }
+
+  // 初始化触发加载
+  async function init() {
+    await loadThreadsData(); // 先加载本地 Threads 离线包数据
+    
+    // 监听云端数据库变更，并触发融合渲染
+    db.collection("posts").orderBy("date", "desc").onSnapshot((snap) => {
+      firebaseEntries = [];
+      snap.forEach(docSnap => {
+        firebaseEntries.push({ id: docSnap.id, ...docSnap.data() });
+      });
+      renderCombinedTimeline();
+    });
+  }
+
+  init();
 
   const updateTheme = () => { const h = new Date().getHours(); document.body.className = (h < 6 || h >= 18) ? 'dark' : 'light'; };
   updateTheme(); setInterval(updateTheme, 60000);
