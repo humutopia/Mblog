@@ -135,11 +135,26 @@
 
   .container { max-width: 700px; margin: 0 auto; padding: 0 40px; }
   .year-group { padding-top: 40px; }
-  .year-row { display: flex; align-items: center; gap: 14px; margin-bottom: 10px; }
-  .year-num { font-family: 'DM Mono', monospace; font-size: 0.6rem; color: var(--muted); letter-spacing: 0.18em; }
-  .year-line { flex: 1; height: 1px; background: var(--border); }
-  .track { position: relative; padding-left: 32px; }
+  
+  /* 折叠交互新增样式：支持点击与悬浮反馈 */
+  .year-row { display: flex; align-items: center; gap: 14px; margin-bottom: 10px; cursor: pointer; user-select: none; }
+  .year-row:hover .year-num { color: var(--accent); }
+  .year-row:hover .year-line { background: var(--accent); opacity: 0.5; }
+  
+  .year-num { font-family: 'DM Mono', monospace; font-size: 0.6rem; color: var(--muted); letter-spacing: 0.18em; transition: color 0.3s; display: flex; align-items: center; gap: 6px; }
+  /* 为折叠状态增加状态小箭头 */
+  .year-num::after { content: '▼'; font-size: 0.45rem; opacity: 0.5; transition: transform 0.3s; display: inline-block; }
+  .year-group.is-collapsed .year-num::after { transform: rotate(-90deg); color: var(--accent2); }
+  .year-group.is-collapsed .year-num { color: var(--accent2); }
+
+  .year-line { flex: 1; height: 1px; background: var(--border); transition: background 0.3s, opacity 0.3s; }
+  
+  /* 控制轨迹区域折叠与动画过渡 */
+  .track { position: relative; padding-left: 32px; max-height: 20000px; opacity: 1; transition: max-height 0.5s cubic-bezier(0, 1, 0, 1), opacity 0.4s ease, padding 0.4s; overflow: hidden; }
   .track::before { content: ''; position: absolute; left: 0; top: 24px; bottom: 0; width: 1.5px; background: linear-gradient(180deg, var(--accent) 0%, var(--accent2) 60%, transparent 100%); opacity: 0.35; }
+  
+  /* 折叠激活状态 */
+  .year-group.is-collapsed .track { max-height: 0 !important; opacity: 0; padding-top: 0; padding-bottom: 0; pointer-events: none; }
   
   .entry { position: relative; padding: 26px 0 26px 24px; border-bottom: 1px solid var(--border); opacity: 0; transform: translateY(10px); animation: fadeUp 0.45s ease forwards; scroll-margin-top: 100px; transition: background 0.6s; }
   @keyframes fadeUp { to { opacity: 1; transform: translateY(0); } }
@@ -271,7 +286,6 @@
     else if(status === 'done') { bar.style.width = '100%'; txt.innerText = 'GARDEN SYNCED'; setTimeout(() => { bar.style.width = '0%'; }, 1200); }
   }
 
-  // 修复 Meta 乱码（Latin1 转码为 UTF-8 中文）
   function decodeMetaText(str) {
     try {
       return decodeURIComponent(escape(str));
@@ -280,7 +294,6 @@
     }
   }
 
-  // 异步加载并处理上传的 Threads 原始 JSON（支持 Firestore 云端同步置顶版）
   async function loadThreadsData() {
     try {
       const response = await fetch('./threads_and_replies.json');
@@ -293,7 +306,6 @@
       
       threadsEntries = [];
       
-      // 1. 先去 Firestore 云端拉取被置顶的 Threads ID 列表
       let cloudPinnedIds = [];
       try {
         const pinDoc = await db.collection("pinned_threads").doc("list").get();
@@ -334,7 +346,6 @@
               title: '',
               body: cleanText,
               date: new Date(timestamp).toISOString(),
-              // 2. 如果存在于云端置顶列表中，则置顶
               pinned: cloudPinnedIds.includes(currentId), 
               isThreads: true
             });
@@ -379,11 +390,18 @@
   });
 
   const jumpToEntry = (id) => {
+    // 自动定位时，如果该年份已被折叠，先将其展开以便精准跳转
     const target = document.getElementById(`entry-${id}`);
     if(target) {
-      target.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      target.classList.add('highlight-flash');
-      setTimeout(() => target.classList.remove('highlight-flash'), 2000);
+      const parentGroup = target.closest('.year-group');
+      if (parentGroup && parentGroup.classList.contains('is-collapsed')) {
+        parentGroup.classList.remove('is-collapsed');
+      }
+      setTimeout(() => {
+        target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        target.classList.add('highlight-flash');
+        setTimeout(() => target.classList.remove('highlight-flash'), 2000);
+      }, 100);
       searchArea.classList.remove('active');
       pinnedArea.classList.remove('active');
     }
@@ -457,7 +475,6 @@
     if (document.getElementById('confirm-pass-input').value === MY_PASS) {
       setSyncStatus('syncing');
       
-      // 渠道 A：如果操作的是 Threads 迁移过来的历史数据
       if (currentActionId && currentActionId.startsWith('threads-')) {
         if (currentActionType === 'pin') {
           try {
@@ -471,18 +488,14 @@
             }
             
             if (post.pinned) {
-              // 取消置顶：从数组中移除 ID
               currentIds = currentIds.filter(id => id !== currentActionId);
             } else {
-              // 设为置顶：加入数组
               if (!currentIds.includes(currentActionId)) currentIds.push(currentActionId);
             }
             
-            // 写入 Firestore 数据库
             await pinDocRef.set({ ids: currentIds });
             showToast("操作成功");
             
-            // 重新刷新数据并渲染
             await loadThreadsData();
             renderCombinedTimeline();
           } catch(e) {
@@ -496,7 +509,6 @@
         return;
       }
 
-      // 渠道 B：如果是原生的 Firebase 动态，保持原本逻辑不变
       if(currentActionType === 'delete') {
         await db.collection("posts").doc(currentActionId).delete();
         showToast("抹除成功");
@@ -510,17 +522,22 @@
     } else { showToast("口令错误"); }
   };
 
-  // 融合并重新渲染整个时间轴
   function renderCombinedTimeline() {
-    // 聚合 Firebase 数据与 Threads 数据
     allEntries = [...firebaseEntries, ...threadsEntries];
-    // 统一按时间从新到旧排序
     allEntries.sort((a, b) => new Date(b.date) - new Date(a.date));
 
     const totalVal = document.getElementById('totalCount');
     if(totalVal) totalVal.innerText = String(allEntries.length).padStart(2, '0');
     
     const tl = document.getElementById('timeline'); 
+    
+    // 升级核心：记录并保持当前已被折叠的年份，防止数据流监听更新时重置折叠状态
+    const collapsedYears = new Set();
+    document.querySelectorAll('.year-group.is-collapsed').forEach(el => {
+      const yr = el.getAttribute('data-year');
+      if(yr) collapsedYears.add(yr);
+    });
+
     tl.innerHTML = ''; 
     const byYear = {};
     
@@ -531,25 +548,35 @@
     });
     
     Object.keys(byYear).sort((a,b)=>b-a).forEach(year => {
-      const group = document.createElement('div'); group.className = 'year-group';
-      group.innerHTML = `<div class="year-row"><span class="year-num">${year}</span><div class="year-line"></div></div>`;
-      const track = document.createElement('div'); track.className = 'track';
+      const group = document.createElement('div'); 
+      group.className = 'year-group';
+      group.setAttribute('data-year', year);
+      
+      // 如果之前就是折叠状态，维持原样
+      if(collapsedYears.has(String(year))) {
+        group.classList.add('is-collapsed');
+      }
+
+      group.innerHTML = `<div class="year-row" onclick="this.parentElement.classList.toggle('is-collapsed')"><span class="year-num">${year}</span><div class="year-line"></div></div>`;
+      
+      const track = document.createElement('div'); 
+      track.className = 'track';
+      
       byYear[year].forEach(p => {
         const d = new Date(p.date); const timeStr = `${d.getFullYear()}.${d.getMonth()+1}.${d.getDate()} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
         const item = document.createElement('div'); 
         item.className = `entry ${p.pinned ? 'is-pinned' : ''}`; 
         item.id = `entry-${p.id}`;
         
-        // 升级后：允许 Threads 动态进行置顶操作，仅隐藏删除按钮
         const actionHtml = p.isThreads ? `
           <div class="entry-actions">
-            <div class="action-btn" onclick="askAction('${p.id}', 'pin', ${p.pinned})">${p.pinned ? 'UNPIN' : 'PIN'}</div>
-            <div class="action-btn" style="opacity:0.3;cursor:default;">THREADS</div>
+            <div class="action-btn" onclick="event.stopPropagation(); askAction('${p.id}', 'pin', ${p.pinned})">${p.pinned ? 'UNPIN' : 'PIN'}</div>
+            <div class="action-btn" style="opacity:0.3;cursor:default;" onclick="event.stopPropagation()">THREADS</div>
           </div>
         ` : `
           <div class="entry-actions">
-            <div class="action-btn" onclick="askAction('${p.id}', 'pin', ${p.pinned})">${p.pinned ? 'UNPIN' : 'PIN'}</div>
-            <div class="action-btn" onclick="askAction('${p.id}', 'delete')">DELETE</div>
+            <div class="action-btn" onclick="event.stopPropagation(); askAction('${p.id}', 'pin', ${p.pinned})">${p.pinned ? 'UNPIN' : 'PIN'}</div>
+            <div class="action-btn" onclick="event.stopPropagation(); askAction('${p.id}', 'delete')">DELETE</div>
           </div>
         `;
 
@@ -563,17 +590,16 @@
         `;
         track.appendChild(item);
       });
-      group.appendChild(track); tl.appendChild(group);
+      group.appendChild(track); 
+      tl.appendChild(group);
     });
     setSyncStatus('done');
     if(pinnedArea.classList.contains('active')) renderPinnedInline();
   }
 
-  // 初始化触发加载
   async function init() {
-    await loadThreadsData(); // 先加载本地 Threads 离线包数据
+    await loadThreadsData(); 
     
-    // 监听云端数据库变更，并触发融合渲染
     db.collection("posts").orderBy("date", "desc").onSnapshot((snap) => {
       firebaseEntries = [];
       snap.forEach(docSnap => {
